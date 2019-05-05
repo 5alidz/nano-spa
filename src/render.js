@@ -6,7 +6,8 @@ export default htm.bind(function create_element(type, props, ...children) {
   const node = {type, props, children}
   node.props = node.props || {}
   function handle_custom_element(_node) {
-    const new_node = _node.type(_node.props)()
+    const render = _node.type(_node.props)
+    const new_node = typeof render === 'function' ? render() : render
     return create_element(
       new_node.type,
       new_node.props,

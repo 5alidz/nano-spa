@@ -9,7 +9,8 @@ var nano_spa = (function () {
     const node = {type, props, children};
     node.props = node.props || {};
     function handle_custom_element(_node) {
-      const new_node = _node.type(_node.props)();
+      const render = _node.type(_node.props);
+      const new_node = typeof render === 'function' ? render() : render;
       return create_element(
         new_node.type,
         new_node.props,
@@ -19,6 +20,21 @@ var nano_spa = (function () {
     if(node.props.style) node.props.style = minify_style(node.props.style);
     return typeof type === 'function' ? handle_custom_element(node) : node
   });
+
+  var _head = (() => {
+    const dom = document.getElementsByTagName('head')[0];
+    let _head = [];
+    return {
+      set: (arr) => {
+        const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _);
+        _head.map(el => dom.removeChild(el));
+        clean.map(node => dom.appendChild(node));
+        _head = clean;
+      }
+    }
+  })();
+
+  // TODO Link and Head.
 
   function create_dom_nodes(node) {
     let {type, props, children} = node;
@@ -46,24 +62,36 @@ var nano_spa = (function () {
     return element
   }
 
-  function render_route(container, routes, path) {
+  function render_route(container, head, routes, path) {
     const route_component = routes[path] ? routes[path]() : routes['*']();
+    const head_component = typeof head[path] === 'function'
+      ? head[path]()
+      : [];
+    _head.set(Array.isArray(head_component)
+      ? head_component.map(vnode => create_dom_nodes(vnode))
+      : create_dom_nodes(head_component)
+    );
     container.innerHTML = '';
     container.appendChild(create_dom_nodes(route_component));
   }
+
   function router(_container, config) {
     const {_config, ...routes} = config;
-    const initial_nav_elements = Array.from(document.querySelectorAll('.spa-nav'));
-    const nav_onclick = dom_element => dom_element.onclick = e => {
-      e.preventDefault();
-      window.history.pushState({}, '', dom_element.href);
-      render_route(_container, routes, window.location.pathname);
+    const { plugins, head } = _config;
+    // handle initial nav elements
+    Array.from(document.querySelectorAll('.spa-nav')).map(element => {
+      element.onclick = e => {
+        e.preventDefault();
+        window.history.pushState({}, '', element.href);
+        render_route(_container, head, routes, window.location.pathname);
+      };
+    });
+    // renders initial route.
+    render_route(_container, head, routes, window.location.pathname);
+    // this only handles back and forward history.
+    window.onpopstate = () => {
+      render_route(_container, head, routes, window.location.pathname);
     };
-    initial_nav_elements.map(nav_onclick);
-    render_route(_container, routes, window.location.pathname);
-    window.onpopstate = () =>
-      // handle back and forward history.
-      render_route(_container, routes, window.location.pathname);
   }
 
   var index = Object.freeze({render, router});
