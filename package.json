@@ -6,6 +6,6 @@
   "license": "MIT",
   "scripts": {
     "build": "rollup --config && uglifyjs --compress --mangle -o dist/bundle.min.js -- dist/bundle.js && ls -la dist",
-    "dev": "serve -l 3000 --single --no-clipboard"
+    "dev": "cd ./dev serve -l 3000 --single --no-clipboard"
   }
 }
