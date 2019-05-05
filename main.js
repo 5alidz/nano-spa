@@ -1,11 +1,12 @@
-import lib from '../src/index.js'
+import lib from './src/index.js'
 
 const { render, router } = lib
 
 router(document.getElementById('app'), {
-  '/': () => render`<${Home} />`,
+  '/': () => render`<${Home} h1='Hello World'/>`,
   '/about': () => render`<${About} />`,
   '/contact': () => render`<${Contact} />`,
+  '*': () => render`<${NotFound} />`,
   _config: {
     head: {
       '/': () => render`<title>Home</title>`,
@@ -16,6 +17,8 @@ router(document.getElementById('app'), {
   }
 })
 
-function Home() {return () => render`<div>Home</div>`}
+function Home(props) {return () => render`<div>Home<h1>-${props.h1}</h1></div>`}
 function About() {return () => render`<div>About</div>`}
 function Contact() {return () => render`<div>Contact</div>`}
+function NotFound() {return () => render`<div>404</div>`}
+

@@ -1,15 +1,22 @@
 import create_dom_nodes from './dom.js'
 
-export default function router(_container, routes = {}) {
-  const {_config, ...actual_routes} = routes
-  Object.keys(actual_routes).map(id => {console.log(id)})
-  Array.from(document.querySelectorAll('.spa-nav'))
-    .map(el => {
-      el.onclick = e => {
-        e.preventDefault()
-        // push history state and replace container.
-      }
-    })
-  // read first window.location.href and render the route.
-  window.onpopstate = () => ({}) // handle back and forward history.
+function render_route(container, routes, path) {
+  const route_component = routes[path] ? routes[path]() : routes['*']()
+  container.innerHTML = ''
+  container.appendChild(create_dom_nodes(route_component))
+}
+export default function router(_container, config) {
+  const {_config, ...routes} = config
+  const { plugins, head } = _config
+  const initial_nav_elements = Array.from(document.querySelectorAll('.spa-nav'))
+  const nav_onclick = dom_element => dom_element.onclick = e => {
+    e.preventDefault()
+    window.history.pushState({}, '', dom_element.href)
+    render_route(_container, routes, window.location.pathname)
+  }
+  initial_nav_elements.map(nav_onclick)
+  render_route(_container, routes, window.location.pathname)
+  window.onpopstate = () =>
+    // handle back and forward history.
+    render_route(_container, routes, window.location.pathname)
 }
