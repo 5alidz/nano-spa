@@ -2,31 +2,20 @@ import _head from './head.js'
 import parse_query from './parse_query.js'
 // TODO Link and Head.
 const get_pathname = () => window.location.pathname
-
+const render_initial = (render_route) => () => {
+  Array.from(document.querySelectorAll('.spa-nav')).map(element => {
+    element.onclick = e => {
+      e.preventDefault()
+      if(get_pathname() === element.getAttribute('href')) {return}
+      window.history.pushState({}, '', element.href)
+      render_route(get_pathname())
+    }
+  })
+}
 export default function router(_container, config) {
   const {_config, ...routes} = config
   const { plugins, head } = _config
-  // how to create dom nodes TODO refactor
-  function create_dom_nodes(node) {
-    let {type, props, children} = node
-    if(type === 'Link') {
-      const node = children[0]
-      const element = document.createElement(node.type)
-      // handle edge cases > not anchor.
-      element.href = props.as ? props.as : props.href
-      element.appendChild(document.createTextNode(node.children[0]))
-      const base = props.href.split('?')[0]
-      const query = parse_query(props.href)
-      element.onclick = e => {
-        e.preventDefault()
-        window.history.pushState({query}, '', props.as || props.href)
-        routes[props.as] = routes[base].bind(null, {query})
-        head[props.as] = head[base].bind(null, {query})
-        render_route(_container, head, routes, base, {query})
-      }
-      return element
-    }
-    const element = document.createElement(type)
+  function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
       if (key.startsWith('on') && key.toLowerCase() === key) {
         element[key] = value
@@ -34,6 +23,8 @@ export default function router(_container, config) {
         element.setAttribute(key, value)
       }
     })
+  }
+  function handle_children(children, element) {
     children.forEach(child => {
       if (child === undefined || child === null) {
         return
@@ -47,41 +38,46 @@ export default function router(_container, config) {
         element.appendChild(create_dom_nodes({...child}))
       }
     })
+  }
+  function create_dom_nodes(node) {
+    let {type, props, children} = node
+    if(type == 'Link') {
+      const node = children[0]
+      const element = document.createElement(node.type)
+      if(node.type == 'a') {
+        element.href = props.as ? props.as : props.href
+      }
+      const base = props.href.split('?')[0]
+      const query = parse_query(props.href)
+      if(query) {
+        routes[props.as] = routes[base].bind(null, {query})
+        head[props.as] = head[base].bind(null, {query})
+      }
+      element.onclick = e => {
+        e.preventDefault()
+        window.history.pushState({query}, '', props.as || props.href)
+        render_route(props.as || props.href, {query})
+      }
+      handle_props(node.props, element)
+      handle_children(node.children, element)
+      return element
+    }
+    const element = document.createElement(type)
+    handle_props(props, element)
+    handle_children(children, element)
     return element
   }
-  // how to render a route
-  function render_route(container, head, routes, path, ctx={}) {
-    console.log(ctx)
+  function render_route(path, ctx={}) {
     const route_component = routes[path] ? routes[path](ctx) : routes['*']()
-    const head_component = typeof head[path] === 'function'
-      ? head[path](ctx)
-      : []
+    const head_component = head[path] ? head[path](ctx): []
     _head.set(Array.isArray(head_component)
       ? head_component.map(vnode => create_dom_nodes(vnode))
       : create_dom_nodes(head_component)
     )
-    container.innerHTML = ''
-    container.appendChild(create_dom_nodes(route_component))
+    _container.innerHTML = ''
+    _container.appendChild(create_dom_nodes(route_component))
   }
-  // handle initial nav elements
-  Array.from(document.querySelectorAll('.spa-nav')).map(element => {
-    element.onclick = e => {
-      e.preventDefault()
-      window.history.pushState({}, '', element.href)
-      render_route(_container, head, routes, get_pathname())
-    }
-  })
-  // renders initial route.
-  render_route(_container, head, routes, get_pathname())
-  // this only handles back and forward history.
-  window.onpopstate = (e) => {
-    console.log(e.state)
-    render_route(
-      _container,
-      head,
-      routes,
-      get_pathname(),
-      e.state
-    )
-  }
+  render_initial(render_route)()
+  render_route(get_pathname())
+  window.onpopstate = () => {render_route(get_pathname())}
 }

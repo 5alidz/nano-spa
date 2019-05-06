@@ -16,24 +16,35 @@ router(document.getElementById('app'), {
         <meta name='description' content='our home page'/>
       `,
       '/about': () => render`<title>About</title>`,
-      '/post': ({ query }) => render`<title>${query.name}</title>`,
+      '/post': ({query}) => render`<title>${query.title}-${query.num}</title>`,
     },
-    plugins: [{name: 'my-plugin'}]
+    plugins: []
   }
 })
 
 function Post({ query }) {
   return render`
     <div>
-      <p>Post by <strong>${query.name}</strong></p>
-      <h1>${query.age}</h1>
+      <h3>${query.num}</h3>
+      <p>${query.title}</p>
     </div>
   `
 }
 function Posts() {
   return render`
     <div>
-      all the posts you want
+      <h1>all the posts you want</h1>
+      <Link href='/post?num=100&title=img' as='/posts/product'>
+        <img src="https://via.placeholder.com/150" />
+      </Link>
+      ${[...Array(20).keys()].map(n => render`
+        <div>
+          <h3>i'm post number-${n}</h3>
+          <Link href=${`/post?num=${n}&title=hiiiii`} as=${`/posts/${n}`}>
+            <a>Read More</a>
+          </Link>
+        </div>
+      `)}
     </div>
   `
 }
@@ -44,10 +55,6 @@ function Home({ content }) {
       <p>${content}</p>
       <Link href='/posts'>
         <a>all posts</a>
-      </Link>
-      <br />
-      <Link href='/post?name=khaled&age=42' as='/posts/khaled'>
-        <a>Post</a>
       </Link>
     </div>
   `
