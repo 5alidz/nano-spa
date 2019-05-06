@@ -46,6 +46,7 @@ var nano_spa = (function () {
   }
 
   const get_pathname = () => window.location.pathname;
+
   const render_initial = (render_route) => () => {
     Array.from(document.querySelectorAll('.spa-nav')).map(element => {
       element.onclick = e => {
@@ -56,9 +57,11 @@ var nano_spa = (function () {
       };
     });
   };
+
   function router(_container, config) {
     const {_config, ...routes} = config;
     const { plugins, head } = _config;
+
     function handle_props(props, element) {
       Object.entries(props).forEach(([key, value]) => {
         if (key.startsWith('on') && key.toLowerCase() === key) {
@@ -68,6 +71,7 @@ var nano_spa = (function () {
         }
       });
     }
+
     function handle_children(children, element) {
       children.forEach(child => {
         if (child === undefined || child === null) {
@@ -83,6 +87,7 @@ var nano_spa = (function () {
         }
       });
     }
+
     function create_dom_nodes(node) {
       let {type, props, children} = node;
       if(type == 'Link') {
@@ -110,6 +115,7 @@ var nano_spa = (function () {
         return element
       }
     }
+
     function render_route(path, ctx={}) {
       const route_component = routes[path] ? routes[path](ctx) : routes['*']();
       const head_component = head[path] ? head[path](ctx): [];
@@ -120,6 +126,7 @@ var nano_spa = (function () {
       _container.innerHTML = '';
       _container.appendChild(create_dom_nodes(route_component));
     }
+
     render_initial(render_route)();
     render_route(get_pathname());
     window.onpopstate = () => {render_route(get_pathname());};

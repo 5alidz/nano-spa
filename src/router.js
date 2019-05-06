@@ -1,6 +1,8 @@
 import _head from './head.js'
 import parse_query from './parse_query.js'
+
 const get_pathname = () => window.location.pathname
+
 const render_initial = (render_route) => () => {
   Array.from(document.querySelectorAll('.spa-nav')).map(element => {
     element.onclick = e => {
@@ -11,9 +13,11 @@ const render_initial = (render_route) => () => {
     }
   })
 }
+
 export default function router(_container, config) {
   const {_config, ...routes} = config
   const { plugins, head } = _config
+
   function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
       if (key.startsWith('on') && key.toLowerCase() === key) {
@@ -23,6 +27,7 @@ export default function router(_container, config) {
       }
     })
   }
+
   function handle_children(children, element) {
     children.forEach(child => {
       if (child === undefined || child === null) {
@@ -38,6 +43,7 @@ export default function router(_container, config) {
       }
     })
   }
+
   function create_dom_nodes(node) {
     let {type, props, children} = node
     if(type == 'Link') {
@@ -65,6 +71,7 @@ export default function router(_container, config) {
       return element
     }
   }
+
   function render_route(path, ctx={}) {
     const route_component = routes[path] ? routes[path](ctx) : routes['*']()
     const head_component = head[path] ? head[path](ctx): []
@@ -75,6 +82,7 @@ export default function router(_container, config) {
     _container.innerHTML = ''
     _container.appendChild(create_dom_nodes(route_component))
   }
+
   render_initial(render_route)()
   render_route(get_pathname())
   window.onpopstate = () => {render_route(get_pathname())}
