@@ -57,7 +57,6 @@ var nano_spa = (function () {
       };
     });
   };
-
   function router(_container, config) {
     const {_config, ...routes} = config;
     const { plugins, head } = _config;

@@ -13,7 +13,6 @@ const render_initial = (render_route) => () => {
     }
   })
 }
-
 export default function router(_container, config) {
   const {_config, ...routes} = config
   const { plugins, head } = _config
