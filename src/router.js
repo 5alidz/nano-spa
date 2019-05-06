@@ -1,6 +1,5 @@
 import _head from './head.js'
 import parse_query from './parse_query.js'
-// TODO Link and Head.
 const get_pathname = () => window.location.pathname
 const render_initial = (render_route) => () => {
   Array.from(document.querySelectorAll('.spa-nav')).map(element => {
@@ -44,9 +43,7 @@ export default function router(_container, config) {
     if(type == 'Link') {
       const node = children[0]
       const element = document.createElement(node.type)
-      if(node.type == 'a') {
-        element.href = props.as ? props.as : props.href
-      }
+      if(node.type == 'a') {element.href = props.as ? props.as : props.href}
       const base = props.href.split('?')[0]
       const query = parse_query(props.href)
       if(query) {
@@ -61,11 +58,12 @@ export default function router(_container, config) {
       handle_props(node.props, element)
       handle_children(node.children, element)
       return element
+    } else {
+      const element = document.createElement(type)
+      handle_props(props, element)
+      handle_children(children, element)
+      return element
     }
-    const element = document.createElement(type)
-    handle_props(props, element)
-    handle_children(children, element)
-    return element
   }
   function render_route(path, ctx={}) {
     const route_component = routes[path] ? routes[path](ctx) : routes['*']()
