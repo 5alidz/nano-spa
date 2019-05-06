@@ -16,6 +16,7 @@ router(document.getElementById('app'), {
         <meta name='description' content='our home page'/>
       `,
       '/about': () => render`<title>About</title>`,
+      '/post': ({ query }) => render`<title>${query.name}</title>`,
     },
     plugins: [{name: 'my-plugin'}]
   }

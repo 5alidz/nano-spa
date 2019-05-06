@@ -21,6 +21,7 @@ export default function router(_container, config) {
         e.preventDefault()
         window.history.pushState({query}, '', props.as || props.href)
         routes[props.as] = routes[base].bind(null, {query})
+        head[props.as] = head[base].bind(null, {query})
         render_route(_container, head, routes, base, {query})
       }
       return element
@@ -50,6 +51,7 @@ export default function router(_container, config) {
   }
   // how to render a route
   function render_route(container, head, routes, path, ctx={}) {
+    console.log(ctx)
     const route_component = routes[path] ? routes[path](ctx) : routes['*']()
     const head_component = typeof head[path] === 'function'
       ? head[path](ctx)
@@ -73,6 +75,7 @@ export default function router(_container, config) {
   render_route(_container, head, routes, get_pathname())
   // this only handles back and forward history.
   window.onpopstate = (e) => {
+    console.log(e.state)
     render_route(
       _container,
       head,
