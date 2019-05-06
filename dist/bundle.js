@@ -46,6 +46,7 @@ var nano_spa = (function () {
   }
 
   // TODO Link and Head.
+  const get_pathname = () => window.location.pathname;
 
   function router(_container, config) {
     const {_config, ...routes} = config;
@@ -110,18 +111,18 @@ var nano_spa = (function () {
       element.onclick = e => {
         e.preventDefault();
         window.history.pushState({}, '', element.href);
-        render_route(_container, head, routes, window.location.pathname);
+        render_route(_container, head, routes, get_pathname());
       };
     });
     // renders initial route.
-    render_route(_container, head, routes, window.location.pathname);
+    render_route(_container, head, routes, get_pathname());
     // this only handles back and forward history.
     window.onpopstate = (e) => {
       render_route(
         _container,
         head,
         routes,
-        window.location.pathname,
+        get_pathname(),
         e.state
       );
     };

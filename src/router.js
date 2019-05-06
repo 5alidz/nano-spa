@@ -1,6 +1,7 @@
 import _head from './head.js'
 import parse_query from './parse_query.js'
 // TODO Link and Head.
+const get_pathname = () => window.location.pathname
 
 export default function router(_container, config) {
   const {_config, ...routes} = config
@@ -65,18 +66,18 @@ export default function router(_container, config) {
     element.onclick = e => {
       e.preventDefault()
       window.history.pushState({}, '', element.href)
-      render_route(_container, head, routes, window.location.pathname)
+      render_route(_container, head, routes, get_pathname())
     }
   })
   // renders initial route.
-  render_route(_container, head, routes, window.location.pathname)
+  render_route(_container, head, routes, get_pathname())
   // this only handles back and forward history.
   window.onpopstate = (e) => {
     render_route(
       _container,
       head,
       routes,
-      window.location.pathname,
+      get_pathname(),
       e.state
     )
   }
