@@ -3,7 +3,7 @@ import parse_query from './parse_query.js'
 
 const get_pathname = () => window.location.pathname
 
-const render_initial = (render_route) => () => {
+const bind_initial_nav = (render_route) => () => {
   Array.from(document.querySelectorAll('.spa-nav')).map(element => {
     element.onclick = e => {
       e.preventDefault()
@@ -13,6 +13,7 @@ const render_initial = (render_route) => () => {
     }
   })
 }
+
 export default function router(_container, config) {
   const {_config, ...routes} = config
   const { plugins, head } = _config
@@ -82,7 +83,7 @@ export default function router(_container, config) {
     _container.appendChild(create_dom_nodes(route_component))
   }
 
-  render_initial(render_route)()
+  bind_initial_nav(render_route)()
   render_route(get_pathname())
   window.onpopstate = () => {render_route(get_pathname())}
 }
