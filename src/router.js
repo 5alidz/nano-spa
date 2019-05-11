@@ -16,7 +16,8 @@ const bind_initial_nav = (render_route) => () => {
 
 export default function router(_container, config) {
   const {_config, ...routes} = config
-  const { plugins, head } = _config
+  const head = _config.head || {}
+  const plugins = _config.plugins || []
 
   function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
