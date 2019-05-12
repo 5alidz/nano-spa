@@ -3,13 +3,16 @@ import parse_query from './parse_query.js'
 
 const get_pathname = () => window.location.pathname
 
-const bind_initial_nav = (render_route) => () => {
+const bind_initial_nav = (render_route, on_route_change) => () => {
   Array.from(document.querySelectorAll('.spa-nav')).map(element => {
     element.onclick = e => {
       e.preventDefault()
       if(get_pathname() === element.getAttribute('href')) {return}
       window.history.pushState({}, '', element.href)
       render_route(get_pathname())
+      if(on_route_change) {
+        on_route_change(get_pathname())
+      }
     }
   })
 }
@@ -17,7 +20,8 @@ const bind_initial_nav = (render_route) => () => {
 export default function router(_container, config) {
   const {_config, ...routes} = config
   const head = _config.head || {}
-  const plugins = _config.plugins || []
+  //const plugins = _config.plugins || []
+  const on_route_change = _config.on_route_change || undefined
 
   function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
@@ -61,6 +65,7 @@ export default function router(_container, config) {
         e.preventDefault()
         window.history.pushState({query}, '', props.as || props.href)
         render_route(props.as || props.href, {query})
+        if(on_route_change) {on_route_change(props.href)}
       }
       handle_props(node.props, element)
       handle_children(node.children, element)
@@ -84,7 +89,7 @@ export default function router(_container, config) {
     _container.appendChild(create_dom_nodes(route_component))
   }
 
-  bind_initial_nav(render_route)()
+  bind_initial_nav(render_route, on_route_change)()
   render_route(get_pathname())
   window.onpopstate = () => {render_route(get_pathname())}
 }

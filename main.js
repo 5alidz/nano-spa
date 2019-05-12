@@ -17,6 +17,9 @@ router(document.getElementById('app'), {
       `,
       '/about': () => render`<title>About</title>`,
       '/post': ({query}) => render`<title>${query.title}-${query.num}</title>`,
+    },
+    on_route_change: (current) => {
+      console.log(current)
     }
   }
 })
