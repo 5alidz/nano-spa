@@ -54,11 +54,30 @@ function Posts() {
     </div>
   `
 }
+
+async function test_async({ timer }) {
+  const msg = await new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve('hello')
+    }, timer)
+  })
+  return render`
+    <div>${msg}</div>
+  `
+}
+
+function spinner() {
+  return render`
+    <p>...</p>
+  `
+}
+
 function Home({ content }) {
   return () => render`
     <div>
       <h1>Home</h1>
       <p>${content}</p>
+      <${test_async} timer=${400} placeholder=${() => render`<${spinner} />`} />
       <Link href='/posts'>
         <a>all posts</a>
       </Link>

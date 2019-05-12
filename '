@@ -15,7 +15,10 @@ export default htm.bind(function create_element(type, props, ...children) {
   node.props = node.props || {}
   function handle_custom_element(_node) {
     if(_node.type.constructor.name === 'AsyncFunction'){
-      return create_element('__PROMISE__', {promise: _node}, [])
+      const render = _node.type(_node.props)
+      const new_node = typeof render === 'function' ? render() : render
+      console.log(new_node)
+      return create_element('div', {promise: new_node, ...new_node.props, id: '__PROMISE__'}, '...')
     }
     const render = _node.type(_node.props)
     const new_node = typeof render === 'function' ? render() : render

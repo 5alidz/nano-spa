@@ -70,6 +70,15 @@ export default function router(_container, config) {
       handle_props(node.props, element)
       handle_children(node.children, element)
       return element
+    } else if(type === '__PROMISE__') {
+      const { placeholder, ..._props } = props.promise.props
+      const new_node = props.promise.type(_props)
+      const _placeholder = placeholder()
+      const element = create_dom_nodes(_placeholder)
+      new_node.then(_node => {
+        element.parentNode.replaceChild(create_dom_nodes(_node), element)
+      })
+      return element
     } else {
       const element = document.createElement(type)
       handle_props(props, element)
