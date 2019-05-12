@@ -22,18 +22,17 @@ var nano_spa = (function () {
 
   var _head = (() => {
     const dom = document.getElementsByTagName('head')[0];
+    const _clean = maybe_arr => Array.isArray(maybe_arr) ? maybe_arr : [maybe_arr].filter(_ => _);
+    const append = arr => arr.map(node => dom.appendChild(node));
     let _head = [];
     return {
       set: (arr) => {
-        const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _);
+        const clean = _clean(arr);
         _head.map(el => dom.removeChild(el));
-        clean.map(node => dom.appendChild(node));
+        append(clean);
         _head = clean;
       },
-      default: (arr) => {
-        const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _);
-        clean.map(node => dom.appendChild(node));
-      }
+      default: (arr) => { append(_clean(arr)); }
     }
   })();
 
@@ -64,6 +63,8 @@ var nano_spa = (function () {
       };
     });
   };
+
+
 
   function router(_container, config) {
     const {_config, ...routes} = config;
@@ -127,13 +128,14 @@ var nano_spa = (function () {
       }
     }
 
+    const maybe_node_arr = (arr) => Array.isArray(arr)
+      ? arr.map((vnode => create_dom_nodes(vnode)))
+      : create_dom_nodes(arr);
+
     function render_route(path, ctx={}) {
       const route_component = routes[path] ? routes[path](ctx) : routes['*']();
       const head_component = head[path] ? head[path](ctx): [];
-      _head.set(Array.isArray(head_component)
-        ? head_component.map(vnode => create_dom_nodes(vnode))
-        : create_dom_nodes(head_component)
-      );
+      _head.set(maybe_node_arr(head_component));
       _container.innerHTML = '';
       _container.appendChild(create_dom_nodes(route_component));
     }
@@ -141,10 +143,7 @@ var nano_spa = (function () {
     if(initial_head) {
       const head_component = typeof  initial_head === 'function' ? initial_head() : undefined;
       if(!head_component) { return }
-      _head.default(Array.isArray(head_component)
-        ? head_component.map((vnode => create_dom_nodes(vnode)))
-        : create_dom_nodes(head_component)
-      );
+      _head.default(maybe_node_arr(head_component));
     }
     bind_initial_nav(render_route, on_route_change)();
     render_route(get_pathname());

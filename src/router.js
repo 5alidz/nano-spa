@@ -17,6 +17,8 @@ const bind_initial_nav = (render_route, on_route_change) => () => {
   })
 }
 
+
+
 export default function router(_container, config) {
   const {_config, ...routes} = config
   const head = _config.head || {}
@@ -79,13 +81,14 @@ export default function router(_container, config) {
     }
   }
 
+  const maybe_node_arr = (arr) => Array.isArray(arr)
+    ? arr.map((vnode => create_dom_nodes(vnode)))
+    : create_dom_nodes(arr)
+
   function render_route(path, ctx={}) {
     const route_component = routes[path] ? routes[path](ctx) : routes['*']()
     const head_component = head[path] ? head[path](ctx): []
-    _head.set(Array.isArray(head_component)
-      ? head_component.map(vnode => create_dom_nodes(vnode))
-      : create_dom_nodes(head_component)
-    )
+    _head.set(maybe_node_arr(head_component))
     _container.innerHTML = ''
     _container.appendChild(create_dom_nodes(route_component))
   }
@@ -93,10 +96,7 @@ export default function router(_container, config) {
   if(initial_head) {
     const head_component = typeof  initial_head === 'function' ? initial_head() : undefined
     if(!head_component) { return }
-    _head.default(Array.isArray(head_component)
-      ? head_component.map((vnode => create_dom_nodes(vnode)))
-      : create_dom_nodes(head_component)
-    )
+    _head.default(maybe_node_arr(head_component))
   }
   bind_initial_nav(render_route, on_route_change)()
   render_route(get_pathname())
