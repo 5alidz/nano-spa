@@ -84,7 +84,7 @@ export default function router(_container, config) {
 
   function render_route(path, ctx={}) {
     const route_component = routes[path] ? routes[path](ctx) : routes['*']()
-    const head_component = head[path] ? head[path](ctx): []
+    const head_component = head[path] && path !== '*' ? head[path](ctx): []
     _head.set(maybe_node_arr(head_component))
     _container.innerHTML = ''
     _container.appendChild(create_dom_nodes(route_component))
