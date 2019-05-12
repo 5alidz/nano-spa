@@ -4,12 +4,13 @@ export default (() => {
   const append = arr => arr.map(node => dom.appendChild(node))
   let _head = []
   return {
-    set: (arr) => {
+    set: (arr, presis) => {
       const clean = _clean(arr)
-      _head.map(el => dom.removeChild(el))
+      if(!presis) {
+        _head.map(el => dom.removeChild(el))
+        _head = clean
+      }
       append(clean)
-      _head = clean
-    },
-    default: (arr) => { append(_clean(arr)) }
+    }
   }
 })()

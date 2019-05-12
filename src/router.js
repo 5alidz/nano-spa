@@ -17,14 +17,11 @@ const bind_initial_nav = (render_route, on_route_change) => () => {
   })
 }
 
-
-
 export default function router(_container, config) {
   const {_config, ...routes} = config
   const head = _config.head || {}
   //const plugins = _config.plugins || []
   const on_route_change = _config.on_route_change || undefined
-  const initial_head = head['*'] ? head['*'] : undefined
 
   function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
@@ -93,10 +90,10 @@ export default function router(_container, config) {
     _container.appendChild(create_dom_nodes(route_component))
   }
 
-  if(initial_head) {
-    const head_component = typeof  initial_head === 'function' ? initial_head() : undefined
+  if(head['*']) {
+    const head_component = typeof  head['*'] === 'function' ? head['*']() : undefined
     if(!head_component) { return }
-    _head.default(maybe_node_arr(head_component))
+    _head.set(maybe_node_arr(head_component), true)
   }
   bind_initial_nav(render_route, on_route_change)()
   render_route(get_pathname())
