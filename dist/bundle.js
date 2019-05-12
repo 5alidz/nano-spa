@@ -4,10 +4,22 @@ var nano_spa = (function () {
   var n = function(t,r,u,e){for(var p=1;p<r.length;p++){var s=r[p++],a="number"==typeof s?u[s]:s;1===r[p]?e[0]=a:2===r[p]?(e[1]=e[1]||{})[r[++p]]=a:3===r[p]?e[1]=Object.assign(e[1]||{},a):e.push(r[p]?t.apply(null,n(t,a,u,["",null])):a);}return e},t=function(n){for(var t,r,u=1,e="",p="",s=[0],a=function(n){1===u&&(n||(e=e.replace(/^\s*\n\s*|\s*\n\s*$/g,"")))?s.push(n||e,0):3===u&&(n||e)?(s.push(n||e,1),u=2):2===u&&"..."===e&&n?s.push(n,3):2===u&&e&&!n?s.push(!0,2,e):4===u&&r&&(s.push(n||e,2,r),r=""),e="";},f=0;f<n.length;f++){f&&(1===u&&a(),a(f));for(var h=0;h<n[f].length;h++)t=n[f][h],1===u?"<"===t?(a(),s=[s],u=3):e+=t:p?t===p?p="":e+=t:'"'===t||"'"===t?p=t:">"===t?(a(),u=1):u&&("="===t?(u=4,r=e,e=""):"/"===t?(a(),3===u&&(s=s[0]),u=s,(s=s[0]).push(u,4),u=0):" "===t||"\t"===t||"\n"===t||"\r"===t?(a(),u=2):e+=t);}return a(),s},r="function"==typeof Map,u=r?new Map:{},e=r?function(n){var r=u.get(n);return r||u.set(n,r=t(n)),r}:function(n){for(var r="",e=0;e<n.length;e++)r+=n[e].length+"-"+n[e];return u[r]||(u[r]=t(n))};function htm(t){var r=n(this,e(t),arguments,[]);return r.length>1?r:r[0]}
 
   const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('');
+
+  /*
+  const typeOf = o => Object.prototype.toString
+    .call(o)
+    .replace(/[[\]]/g, '')
+    .split(' ')[1]
+    .toLowerCase()
+  */
+
   var render = htm.bind(function create_element(type, props, ...children) {
     const node = {type, props, children};
     node.props = node.props || {};
     function handle_custom_element(_node) {
+      if(_node.type.constructor.name === 'AsyncFunction'){
+        return create_element('__PROMISE__', {promise: _node}, [])
+      }
       const render = _node.type(_node.props);
       const new_node = typeof render === 'function' ? render() : render;
       return create_element(
@@ -117,6 +129,15 @@ var nano_spa = (function () {
         };
         handle_props(node.props, element);
         handle_children(node.children, element);
+        return element
+      } else if(type === '__PROMISE__') {
+        const { placeholder, ..._props } = props.promise.props;
+        const new_node = props.promise.type(_props);
+        const _placeholder = placeholder();
+        const element = create_dom_nodes(_placeholder);
+        new_node.then(_node => {
+          element.parentNode.replaceChild(create_dom_nodes(_node), element);
+        });
         return element
       } else {
         const element = document.createElement(type);
