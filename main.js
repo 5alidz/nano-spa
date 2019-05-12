@@ -36,6 +36,7 @@ function Post({ query }) {
     </div>
   `
 }
+
 function Posts() {
   return render`
     <div>
@@ -66,9 +67,28 @@ async function test_async({ timer }) {
   `
 }
 
+async function with_data({ id }) {
+  const data = await fetch('https://jsonplaceholder.typicode.com/todos/' + id)
+  const json = await data.json()
+  return render`
+    <div>
+      <h3>${json.title}</h3>
+      <p>${json.completed ? 'completed' : 'progress'}</p>
+    </div>
+  `
+}
+
 function spinner() {
   return render`
     <p>...</p>
+  `
+}
+
+function todo({ id }) {
+  return render`
+    <${with_data}
+      id=${id}
+      placeholder=${ () => render`<${spinner} />` }/>
   `
 }
 
@@ -77,7 +97,12 @@ function Home({ content }) {
     <div>
       <h1>Home</h1>
       <p>${content}</p>
-      <${test_async} timer=${400} placeholder=${() => render`<${spinner} />`} />
+      <${todo} id=1 />
+      <${todo} id=2 />
+      <${todo} id=3 />
+      <${test_async}
+        timer=${500}
+        placeholder=${() => render`<${spinner} />`} />
       <Link href='/posts'>
         <a>all posts</a>
       </Link>
