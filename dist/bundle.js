@@ -29,6 +29,10 @@ var nano_spa = (function () {
         _head.map(el => dom.removeChild(el));
         clean.map(node => dom.appendChild(node));
         _head = clean;
+      },
+      default: (arr) => {
+        const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _);
+        clean.map(node => dom.appendChild(node));
       }
     }
   })();
@@ -66,6 +70,7 @@ var nano_spa = (function () {
     const head = _config.head || {};
     //const plugins = _config.plugins || []
     const on_route_change = _config.on_route_change || undefined;
+    const initial_head = head['*'] ? head['*'] : undefined;
 
     function handle_props(props, element) {
       Object.entries(props).forEach(([key, value]) => {
@@ -133,6 +138,14 @@ var nano_spa = (function () {
       _container.appendChild(create_dom_nodes(route_component));
     }
 
+    if(initial_head) {
+      const head_component = typeof  initial_head === 'function' ? initial_head() : undefined;
+      if(!head_component) { return }
+      _head.default(Array.isArray(head_component)
+        ? head_component.map((vnode => create_dom_nodes(vnode)))
+        : create_dom_nodes(head_component)
+      );
+    }
     bind_initial_nav(render_route, on_route_change)();
     render_route(get_pathname());
     window.onpopstate = () => {render_route(get_pathname());};

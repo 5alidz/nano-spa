@@ -17,6 +17,10 @@ router(document.getElementById('app'), {
       `,
       '/about': () => render`<title>About</title>`,
       '/post': ({query}) => render`<title>${query.title}-${query.num}</title>`,
+      '*': () => render`
+        <meta name='author' content='5alidz' />
+        <meta name='author' content='5alidz' />
+      `
     },
     on_route_change: (current) => {
       console.log(current)

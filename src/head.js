@@ -7,6 +7,10 @@ export default (() => {
       _head.map(el => dom.removeChild(el))
       clean.map(node => dom.appendChild(node))
       _head = clean
+    },
+    default: (arr) => {
+      const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _)
+      clean.map(node => dom.appendChild(node))
     }
   }
 })()
