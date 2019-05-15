@@ -1,5 +1,4 @@
-import lib from './src/index.js'
-
+import lib from '../src/index.js'
 const { render, router } = lib
 
 router(document.getElementById('app'), {

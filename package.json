@@ -5,7 +5,7 @@
   "author": "5alidz <kzack-dev@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "build-src": "rollup --config && uglifyjs --compress --mangle -o dist/bundle.min.js -- dist/bundle.js && echo 'module.exports=nano_spa' >> dist/bundle.min.js && ls -la dist && git add . && git commit -m 'new-build'",
+    "build-src": "rollup --config && uglifyjs --compress --mangle -o dist/bundle.min.js -- dist/bundle.js && cp dist/bundle.min.js dist/bundle.min.npm.js && echo 'module.exports=nano_spa' >> dist/bundle.min.npm.js && ls -la dist && git add . && git commit -m 'new-build'",
     "dev": "cd ./dev && yarn start"
   }
 }

@@ -1,0 +1,18 @@
+{
+  "name": "dev",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "parcel-bundler": "^1.12.3",
+    "parcel-plugin-copy": "^1.0.2",
+    "parcel-plugin-inline-source": "^1.0.0"
+  },
+  "scripts": {
+    "start": "parcel index.html"
+  },
+  "staticPath": {
+    "source": "/static",
+    "target": "/dist/static"
+  }
+}
