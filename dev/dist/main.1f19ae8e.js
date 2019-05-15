@@ -125,7 +125,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 
-var n = function n(t, r, u, e) {
+var n = function (t, r, u, e) {
   for (var p = 1; p < r.length; p++) {
     var s = r[p++],
         a = "number" == typeof s ? u[s] : s;
@@ -134,15 +134,13 @@ var n = function n(t, r, u, e) {
 
   return e;
 },
-    t = function t(n) {
-  for (var t, r, u = 1, e = "", p = "", s = [0], a = function a(n) {
+    t = function (n) {
+  for (var t, r, u = 1, e = "", p = "", s = [0], a = function (n) {
     1 === u && (n || (e = e.replace(/^\s*\n\s*|\s*\n\s*$/g, ""))) ? s.push(n || e, 0) : 3 === u && (n || e) ? (s.push(n || e, 1), u = 2) : 2 === u && "..." === e && n ? s.push(n, 3) : 2 === u && e && !n ? s.push(!0, 2, e) : 4 === u && r && (s.push(n || e, 2, r), r = ""), e = "";
   }, f = 0; f < n.length; f++) {
     f && (1 === u && a(), a(f));
 
-    for (var h = 0; h < n[f].length; h++) {
-      t = n[f][h], 1 === u ? "<" === t ? (a(), s = [s], u = 3) : e += t : p ? t === p ? p = "" : e += t : '"' === t || "'" === t ? p = t : ">" === t ? (a(), u = 1) : u && ("=" === t ? (u = 4, r = e, e = "") : "/" === t ? (a(), 3 === u && (s = s[0]), u = s, (s = s[0]).push(u, 4), u = 0) : " " === t || "\t" === t || "\n" === t || "\r" === t ? (a(), u = 2) : e += t);
-    }
+    for (var h = 0; h < n[f].length; h++) t = n[f][h], 1 === u ? "<" === t ? (a(), s = [s], u = 3) : e += t : p ? t === p ? p = "" : e += t : '"' === t || "'" === t ? p = t : ">" === t ? (a(), u = 1) : u && ("=" === t ? (u = 4, r = e, e = "") : "/" === t ? (a(), 3 === u && (s = s[0]), u = s, (s = s[0]).push(u, 4), u = 0) : " " === t || "\t" === t || "\n" === t || "\r" === t ? (a(), u = 2) : e += t);
   }
 
   return a(), s;
@@ -153,9 +151,7 @@ var n = function n(t, r, u, e) {
   var r = u.get(n);
   return r || u.set(n, r = t(n)), r;
 } : function (n) {
-  for (var r = "", e = 0; e < n.length; e++) {
-    r += n[e].length + "-" + n[e];
-  }
+  for (var r = "", e = 0; e < n.length; e++) r += n[e].length + "-" + n[e];
 
   return u[r] || (u[r] = t(n));
 };
@@ -178,19 +174,7 @@ var _htmMin = _interopRequireDefault(require("./htm.min.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
-var minify_style = function minify_style(s) {
-  return s.trim().split('\n').map(function (s) {
-    return s.trim();
-  }).join('');
-};
+const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('');
 /*
 const typeOf = o => Object.prototype.toString
   .call(o)
@@ -200,15 +184,11 @@ const typeOf = o => Object.prototype.toString
 */
 
 
-var _default = _htmMin.default.bind(function create_element(type, props) {
-  for (var _len = arguments.length, children = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-    children[_key - 2] = arguments[_key];
-  }
-
-  var node = {
-    type: type,
-    props: props,
-    children: children
+var _default = _htmMin.default.bind(function create_element(type, props, ...children) {
+  const node = {
+    type,
+    props,
+    children
   };
   node.props = node.props || {};
 
@@ -219,10 +199,10 @@ var _default = _htmMin.default.bind(function create_element(type, props) {
       }, []);
     }
 
-    var render = _node.type(_node.props);
+    const render = _node.type(_node.props);
 
-    var new_node = typeof render === 'function' ? render() : render;
-    return create_element.apply(void 0, [new_node.type, new_node.props].concat(_toConsumableArray(new_node.children.concat(_node.children))));
+    const new_node = typeof render === 'function' ? render() : render;
+    return create_element(new_node.type, new_node.props, ...new_node.children.concat(_node.children));
   }
 
   if (node.props.style) node.props.style = minify_style(node.props.style);
@@ -238,30 +218,20 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _default = function () {
-  var dom = document.getElementsByTagName('head')[0];
+var _default = (() => {
+  const dom = document.getElementsByTagName('head')[0];
 
-  var _clean = function _clean(maybe_arr) {
-    return Array.isArray(maybe_arr) ? maybe_arr : [maybe_arr].filter(function (_) {
-      return _;
-    });
-  };
+  const _clean = maybe_arr => Array.isArray(maybe_arr) ? maybe_arr : [maybe_arr].filter(_ => _);
 
-  var append = function append(arr) {
-    return arr.map(function (node) {
-      return dom.appendChild(node);
-    });
-  };
+  const append = arr => arr.map(node => dom.appendChild(node));
 
-  var _head = [];
+  let _head = [];
   return {
-    set: function set(arr, presis) {
-      var clean = _clean(arr);
+    set: (arr, presis) => {
+      const clean = _clean(arr);
 
       if (!presis) {
-        _head.map(function (el) {
-          return dom.removeChild(el);
-        });
+        _head.map(el => dom.removeChild(el));
 
         _head = clean;
       }
@@ -269,7 +239,7 @@ var _default = function () {
       append(clean);
     }
   };
-}();
+})();
 
 exports.default = _default;
 },{}],"../src/parse_query.js":[function(require,module,exports) {
@@ -280,31 +250,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = _default;
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-var reducer = function reducer(acc, _ref) {
-  var _ref2 = _slicedToArray(_ref, 2),
-      key = _ref2[0],
-      value = _ref2[1];
-
+const reducer = (acc, [key, value]) => {
   Object.defineProperty(acc, key, {
-    value: value
+    value
   });
   return acc;
 };
 
 function _default(path) {
-  var arr = path.split('?');
-  var q = arr[1] ? arr[1].split('&') : undefined;
-  return q ? q.map(function (str) {
-    return str.split('=');
-  }).reduce(reducer, {}) : undefined;
+  const arr = path.split('?');
+  const q = arr[1] ? arr[1].split('&') : undefined;
+  return q ? q.map(str => str.split('=')).reduce(reducer, {}) : undefined;
 }
 },{}],"../src/router.js":[function(require,module,exports) {
 "use strict";
@@ -320,61 +276,38 @@ var _parse_query = _interopRequireDefault(require("./parse_query.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+const get_pathname = () => window.location.pathname;
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+const bind_initial_nav = (render_route, on_route_change) => () => {
+  Array.from(document.querySelectorAll('.spa-nav')).map(element => {
+    element.onclick = e => {
+      e.preventDefault();
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+      if (get_pathname() === element.getAttribute('href')) {
+        return;
+      }
 
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+      window.history.pushState({}, '', element.href);
+      render_route(get_pathname());
 
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-var get_pathname = function get_pathname() {
-  return window.location.pathname;
-};
-
-var bind_initial_nav = function bind_initial_nav(render_route, on_route_change) {
-  return function () {
-    Array.from(document.querySelectorAll('.spa-nav')).map(function (element) {
-      element.onclick = function (e) {
-        e.preventDefault();
-
-        if (get_pathname() === element.getAttribute('href')) {
-          return;
-        }
-
-        window.history.pushState({}, '', element.href);
-        render_route(get_pathname());
-
-        if (on_route_change) {
-          on_route_change(get_pathname());
-        }
-      };
-    });
-  };
+      if (on_route_change) {
+        on_route_change(get_pathname());
+      }
+    };
+  });
 };
 
 function router(_container, config) {
-  var _config = config._config,
-      routes = _objectWithoutProperties(config, ["_config"]);
+  const {
+    _config,
+    ...routes
+  } = config;
+  const head = _config.head || {}; //const plugins = _config.plugins || []
 
-  var head = _config.head || {}; //const plugins = _config.plugins || []
-
-  var on_route_change = _config.on_route_change || undefined;
+  const on_route_change = _config.on_route_change || undefined;
 
   function handle_props(props, element) {
-    Object.entries(props).forEach(function (_ref) {
-      var _ref2 = _slicedToArray(_ref, 2),
-          key = _ref2[0],
-          value = _ref2[1];
-
+    Object.entries(props).forEach(([key, value]) => {
       if (key.startsWith('on') && key.toLowerCase() === key) {
         element[key] = value;
       } else {
@@ -384,60 +317,64 @@ function router(_container, config) {
   }
 
   function handle_children(children, element) {
-    children.forEach(function (child) {
+    children.forEach(child => {
       if (child === undefined || child === null) {
         return;
       } else if (typeof child === 'string' || typeof child === 'number') {
         element.appendChild(document.createTextNode(child));
       } else if (Array.isArray(child)) {
-        child.map(function (_ref3) {
-          var type = _ref3.type,
-              props = _ref3.props,
-              children = _ref3.children;
+        child.map(({
+          type,
+          props,
+          children
+        }) => {
           element.appendChild(create_dom_nodes({
-            type: type,
-            props: props,
-            children: children
+            type,
+            props,
+            children
           }));
         });
       } else {
-        element.appendChild(create_dom_nodes(_objectSpread({}, child)));
+        element.appendChild(create_dom_nodes({ ...child
+        }));
       }
     });
   }
 
   function create_dom_nodes(node) {
-    var type = node.type,
-        props = node.props,
-        children = node.children;
+    let {
+      type,
+      props,
+      children
+    } = node;
 
     if (type == 'Link') {
-      var _node2 = children[0];
-      var element = document.createElement(_node2.type);
+      const node = children[0];
+      const element = document.createElement(node.type);
 
-      if (_node2.type == 'a') {
+      if (node.type == 'a') {
         element.href = props.as ? props.as : props.href;
       }
 
-      var base = props.href.split('?')[0];
-      var query = (0, _parse_query.default)(props.href);
+      const base = props.href.split('?')[0];
+      const query = (0, _parse_query.default)(props.href);
 
       if (query) {
         routes[props.as] = routes[base].bind(null, {
-          query: query
+          query
         });
         head[props.as] = head[base].bind(null, {
-          query: query
+          query
         });
       }
 
-      element.onclick = function (e) {
+      element.onclick = e => {
         e.preventDefault();
         window.history.pushState({
-          query: query
+          query
         }, '', props.as || props.href);
         render_route(props.as || props.href, {
-          query: query
+          query
         });
 
         if (on_route_change) {
@@ -445,43 +382,36 @@ function router(_container, config) {
         }
       };
 
-      handle_props(_node2.props, element);
-      handle_children(_node2.children, element);
+      handle_props(node.props, element);
+      handle_children(node.children, element);
       return element;
     } else if (type === '__PROMISE__') {
-      var _props$promise$props = props.promise.props,
-          placeholder = _props$promise$props.placeholder,
-          _props = _objectWithoutProperties(_props$promise$props, ["placeholder"]);
+      const {
+        placeholder,
+        ..._props
+      } = props.promise.props;
+      const new_node = props.promise.type(_props);
 
-      var new_node = props.promise.type(_props);
+      const _placeholder = placeholder();
 
-      var _placeholder = placeholder();
-
-      var _element = create_dom_nodes(_placeholder);
-
-      new_node.then(function (_node) {
-        _element.parentNode.replaceChild(create_dom_nodes(_node), _element);
+      const element = create_dom_nodes(_placeholder);
+      new_node.then(_node => {
+        element.parentNode.replaceChild(create_dom_nodes(_node), element);
       });
-      return _element;
+      return element;
     } else {
-      var _element2 = document.createElement(type);
-
-      handle_props(props, _element2);
-      handle_children(children, _element2);
-      return _element2;
+      const element = document.createElement(type);
+      handle_props(props, element);
+      handle_children(children, element);
+      return element;
     }
   }
 
-  var maybe_node_arr = function maybe_node_arr(arr) {
-    return Array.isArray(arr) ? arr.map(function (vnode) {
-      return create_dom_nodes(vnode);
-    }) : create_dom_nodes(arr);
-  };
+  const maybe_node_arr = arr => Array.isArray(arr) ? arr.map(vnode => create_dom_nodes(vnode)) : create_dom_nodes(arr);
 
-  function render_route(path) {
-    var ctx = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    var route_component = routes[path] ? routes[path](ctx) : routes['*']();
-    var head_component = head[path] && path !== '*' ? head[path](ctx) : [];
+  function render_route(path, ctx = {}) {
+    const route_component = routes[path] ? routes[path](ctx) : routes['*']();
+    const head_component = head[path] && path !== '*' ? head[path](ctx) : [];
 
     _head2.default.set(maybe_node_arr(head_component));
 
@@ -491,7 +421,7 @@ function router(_container, config) {
   }
 
   if (head['*']) {
-    var head_component = typeof head['*'] === 'function' ? head['*']() : undefined;
+    const head_component = typeof head['*'] === 'function' ? head['*']() : undefined;
 
     if (!head_component) {
       return;
@@ -503,7 +433,7 @@ function router(_container, config) {
   bind_initial_nav(render_route, on_route_change)();
   render_route(get_pathname());
 
-  window.onpopstate = function () {
+  window.onpopstate = () => {
     render_route(get_pathname());
   };
 }
@@ -534,410 +464,152 @@ var _index = _interopRequireDefault(require("../src/index.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _templateObject23() {
-  var data = _taggedTemplateLiteral(["\n    <div>\n      <h3>", "</h3>\n      <p>", "</p>\n    </div>\n  "]);
-
-  _templateObject23 = function _templateObject23() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject22() {
-  var data = _taggedTemplateLiteral(["\n    <div>", "</div>\n  "]);
-
-  _templateObject22 = function _templateObject22() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject21() {
-  var data = _taggedTemplateLiteral(["\n    <h1 style='margin: 0 auto;'>404</h1>\n  "]);
-
-  _templateObject21 = function _templateObject21() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject20() {
-  var data = _taggedTemplateLiteral(["\n    <div>\n      <h1>Contact</h1>\n    </div>\n  "]);
-
-  _templateObject20 = function _templateObject20() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject19() {
-  var data = _taggedTemplateLiteral(["\n    <div>\n      <h1>About</h1>\n    </div>\n  "]);
-
-  _templateObject19 = function _templateObject19() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject18() {
-  var data = _taggedTemplateLiteral(["<", " />"]);
-
-  _templateObject18 = function _templateObject18() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject17() {
-  var data = _taggedTemplateLiteral(["\n    <div>\n      <h1>Home</h1>\n      <p>", "</p>\n      <", " id=1 />\n      <", " id=2 />\n      <", " id=3 />\n      <", "\n        timer=", "\n        placeholder=", " />\n      <Link href='/posts'>\n        <a>all posts</a>\n      </Link>\n    </div>\n  "]);
-
-  _templateObject17 = function _templateObject17() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject16() {
-  var data = _taggedTemplateLiteral(["<", " />"]);
-
-  _templateObject16 = function _templateObject16() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject15() {
-  var data = _taggedTemplateLiteral(["\n    <", "\n      id=", "\n      placeholder=", "/>\n  "]);
-
-  _templateObject15 = function _templateObject15() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject14() {
-  var data = _taggedTemplateLiteral(["\n    <p>...</p>\n  "]);
-
-  _templateObject14 = function _templateObject14() {
-    return data;
-  };
-
-  return data;
-}
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _templateObject13() {
-  var data = _taggedTemplateLiteral(["\n        <div>\n          <h3>i'm post number-", "</h3>\n          <Link href=", " as=", ">\n            <a>Read More</a>\n          </Link>\n        </div>\n      "]);
-
-  _templateObject13 = function _templateObject13() {
-    return data;
-  };
-
-  return data;
-}
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
-function _templateObject12() {
-  var data = _taggedTemplateLiteral(["\n    <div>\n      <h1>all the posts you want</h1>\n      <Link href='/post?num=100&title=img' as='/posts/product'>\n        <img src=\"https://via.placeholder.com/150\" />\n      </Link>\n      ", "\n    </div>\n  "]);
-
-  _templateObject12 = function _templateObject12() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject11() {
-  var data = _taggedTemplateLiteral(["\n    <div>\n      <h3>", "</h3>\n      <p>", "</p>\n    </div>\n  "]);
-
-  _templateObject11 = function _templateObject11() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject10() {
-  var data = _taggedTemplateLiteral(["\n        <meta name='author' content='5alidz' />\n        <meta name='author' content='5alidz' />\n      "]);
-
-  _templateObject10 = function _templateObject10() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject9() {
-  var data = _taggedTemplateLiteral(["<title>", "-", "</title>"]);
-
-  _templateObject9 = function _templateObject9() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject8() {
-  var data = _taggedTemplateLiteral(["<title>About</title>"]);
-
-  _templateObject8 = function _templateObject8() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject7() {
-  var data = _taggedTemplateLiteral(["\n        <title>Home</title>\n        <meta name='description' content='our home page'/>\n      "]);
-
-  _templateObject7 = function _templateObject7() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject6() {
-  var data = _taggedTemplateLiteral(["<", " />"]);
-
-  _templateObject6 = function _templateObject6() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject5() {
-  var data = _taggedTemplateLiteral(["<", " />"]);
-
-  _templateObject5 = function _templateObject5() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject4() {
-  var data = _taggedTemplateLiteral(["<", " query=", "/>"]);
-
-  _templateObject4 = function _templateObject4() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject3() {
-  var data = _taggedTemplateLiteral(["<", " />"]);
-
-  _templateObject3 = function _templateObject3() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject2() {
-  var data = _taggedTemplateLiteral(["<", " />"]);
-
-  _templateObject2 = function _templateObject2() {
-    return data;
-  };
-
-  return data;
-}
-
-function _templateObject() {
-  var data = _taggedTemplateLiteral(["<", " content='Hello World'/>"]);
-
-  _templateObject = function _templateObject() {
-    return data;
-  };
-
-  return data;
-}
-
-function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-var render = _index.default.render,
-    router = _index.default.router;
+const {
+  render,
+  router
+} = _index.default;
 router(document.getElementById('app'), {
-  '/': function _() {
-    return render(_templateObject(), Home);
-  },
-  '/about': function about() {
-    return render(_templateObject2(), About);
-  },
-  '/contact': function contact() {
-    return render(_templateObject3(), Contact);
-  },
-  '/post': function post(_ref) {
-    var query = _ref.query;
-    return render(_templateObject4(), Post, query);
-  },
-  '/posts': function posts() {
-    return render(_templateObject5(), Posts);
-  },
-  '*': function _() {
-    return render(_templateObject6(), NotFound);
-  },
+  '/': () => render`<${Home} content='Hello World'/>`,
+  '/about': () => render`<${About} />`,
+  '/contact': () => render`<${Contact} />`,
+  '/post': ({
+    query
+  }) => render`<${Post} query=${query}/>`,
+  '/posts': () => render`<${Posts} />`,
+  '*': () => render`<${NotFound} />`,
   _config: {
     head: {
-      '/': function _() {
-        return render(_templateObject7());
-      },
-      '/about': function about() {
-        return render(_templateObject8());
-      },
-      '/post': function post(_ref2) {
-        var query = _ref2.query;
-        return render(_templateObject9(), query.title, query.num);
-      },
-      '*': function _() {
-        return render(_templateObject10());
-      }
+      '/': () => render`
+        <title>Home</title>
+        <meta name='description' content='our home page'/>
+      `,
+      '/about': () => render`<title>About</title>`,
+      '/post': ({
+        query
+      }) => render`<title>${query.title}-${query.num}</title>`,
+      '*': () => render`
+        <meta name='author' content='5alidz' />
+        <meta name='author' content='5alidz' />
+      `
     },
-    on_route_change: function on_route_change(current) {
+    on_route_change: current => {
       console.log(current);
     }
   }
 });
 
-function Post(_ref3) {
-  var query = _ref3.query;
-  return render(_templateObject11(), query.num, query.title);
+function Post({
+  query
+}) {
+  return render`
+    <div>
+      <h3>${query.num}</h3>
+      <p>${query.title}</p>
+    </div>
+  `;
 }
 
 function Posts() {
-  return render(_templateObject12(), _toConsumableArray(Array(20).keys()).map(function (n) {
-    return render(_templateObject13(), n, "/post?num=".concat(n, "&title=hiiiii"), "/posts/".concat(n));
-  }));
+  return render`
+    <div>
+      <h1>all the posts you want</h1>
+      <Link href='/post?num=100&title=img' as='/posts/product'>
+        <img src="https://via.placeholder.com/150" />
+      </Link>
+      ${[...Array(20).keys()].map(n => render`
+        <div>
+          <h3>i'm post number-${n}</h3>
+          <Link href=${`/post?num=${n}&title=hiiiii`} as=${`/posts/${n}`}>
+            <a>Read More</a>
+          </Link>
+        </div>
+      `)}
+    </div>
+  `;
 }
 
-function test_async(_x) {
-  return _test_async.apply(this, arguments);
+async function test_async({
+  timer
+}) {
+  const msg = await new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve('hello');
+    }, timer);
+  });
+  return render`
+    <div>${msg}</div>
+  `;
 }
 
-function _test_async() {
-  _test_async = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(_ref4) {
-    var timer, msg;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            timer = _ref4.timer;
-            _context.next = 3;
-            return new Promise(function (resolve, reject) {
-              setTimeout(function () {
-                resolve('hello');
-              }, timer);
-            });
-
-          case 3:
-            msg = _context.sent;
-            return _context.abrupt("return", render(_templateObject22(), msg));
-
-          case 5:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _test_async.apply(this, arguments);
-}
-
-function with_data(_x2) {
-  return _with_data.apply(this, arguments);
-}
-
-function _with_data() {
-  _with_data = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(_ref5) {
-    var id, data, json;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            id = _ref5.id;
-            _context2.next = 3;
-            return fetch('https://jsonplaceholder.typicode.com/todos/' + id);
-
-          case 3:
-            data = _context2.sent;
-            _context2.next = 6;
-            return data.json();
-
-          case 6:
-            json = _context2.sent;
-            return _context2.abrupt("return", render(_templateObject23(), json.title, json.completed ? 'completed' : 'progress'));
-
-          case 8:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-  return _with_data.apply(this, arguments);
+async function with_data({
+  id
+}) {
+  const data = await fetch('https://jsonplaceholder.typicode.com/todos/' + id);
+  const json = await data.json();
+  return render`
+    <div>
+      <h3>${json.title}</h3>
+      <p>${json.completed ? 'completed' : 'progress'}</p>
+    </div>
+  `;
 }
 
 function spinner() {
-  return render(_templateObject14());
+  return render`
+    <p>...</p>
+  `;
 }
 
-function todo(_ref6) {
-  var id = _ref6.id;
-  return render(_templateObject15(), with_data, id, function () {
-    return render(_templateObject16(), spinner);
-  });
+function todo({
+  id
+}) {
+  return render`
+    <${with_data}
+      id=${id}
+      placeholder=${() => render`<${spinner} />`}/>
+  `;
 }
 
-function Home(_ref7) {
-  var content = _ref7.content;
-  return function () {
-    return render(_templateObject17(), content, todo, todo, todo, test_async, 500, function () {
-      return render(_templateObject18(), spinner);
-    });
-  };
+function Home({
+  content
+}) {
+  return () => render`
+    <div>
+      <h1>Home</h1>
+      <p>${content}</p>
+      <${todo} id=1 />
+      <${todo} id=2 />
+      <${todo} id=3 />
+      <${test_async}
+        timer=${500}
+        placeholder=${() => render`<${spinner} />`} />
+      <Link href='/posts'>
+        <a>all posts</a>
+      </Link>
+    </div>
+  `;
 }
 
 function About() {
-  return function () {
-    return render(_templateObject19());
-  };
+  return () => render`
+    <div>
+      <h1>About</h1>
+    </div>
+  `;
 }
 
 function Contact() {
-  return function () {
-    return render(_templateObject20());
-  };
+  return () => render`
+    <div>
+      <h1>Contact</h1>
+    </div>
+  `;
 }
 
 function NotFound() {
-  return render(_templateObject21());
+  return render`
+    <h1 style='margin: 0 auto;'>404</h1>
+  `;
 }
 },{"../src/index.js":"../src/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -967,7 +639,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64327" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64975" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

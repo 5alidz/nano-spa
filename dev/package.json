@@ -14,5 +14,8 @@
   "staticPath": {
     "source": "/static",
     "target": "/dist/static"
-  }
+  },
+  "browserslist": [
+    "last 1 Chrome version"
+  ]
 }
