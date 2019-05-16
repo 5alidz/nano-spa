@@ -22,6 +22,9 @@ var nano_spa = (function () {
       }
       const render = _node.type(_node.props);
       const new_node = typeof render === 'function' ? render() : render;
+      if(typeof render === 'function') {
+        new_node.props.__INTERNAL_RERENDER__ = render;
+      }
       return create_element(
         new_node.type,
         new_node.props,
@@ -52,10 +55,13 @@ var nano_spa = (function () {
   const get_pathname = () => window.location.pathname;
 
   function router(_container, _) {
+
     function handle_props(props, element) {
       Object.entries(props).forEach(([key, value]) => {
         if (key.startsWith('on') && key.toLowerCase() === key) {
           element[key] = value;
+        } else if(key == '__INTERNAL_RERENDER__') {
+          console.log('has rerender => ', element);
         } else {
           element.setAttribute(key, value);
         }
