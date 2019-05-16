@@ -202,11 +202,6 @@ var _default = _htmMin.default.bind(function create_element(type, props, ...chil
     const render = _node.type(_node.props);
 
     const new_node = typeof render === 'function' ? render() : render;
-
-    if (typeof render === 'function') {
-      new_node.props.__INTERNAL_RERENDER__ = render;
-    }
-
     return create_element(new_node.type, new_node.props, ...new_node.children.concat(_node.children));
   }
 
@@ -492,7 +487,7 @@ function Posts() {
 async function test_async({
   timer
 }) {
-  const msg = await new Promise(resolve => {
+  const msg = await new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve('hello');
     }, timer);
@@ -531,20 +526,6 @@ function todo({
   `;
 }
 
-function Statefull({
-  initial_color
-}) {
-  const styles = `
-    background-color: ${initial_color};
-    width: 1rem;
-    height: 1rem;
-    display: inline-block;
-  `;
-  return () => render`
-    <div style=${styles}></div>
-  `;
-}
-
 function Home({
   content
 }) {
@@ -561,11 +542,6 @@ function Home({
       <Link href='/posts'>
         <a>all posts</a>
       </Link>
-      <div>
-        <h3>
-          Statful => <${Statefull} initial_color='blue'/>
-        </h3>
-      </div>
     </div>
   `;
 }
