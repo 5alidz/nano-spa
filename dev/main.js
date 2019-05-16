@@ -56,7 +56,7 @@ function Posts() {
 }
 
 async function test_async({ timer }) {
-  const msg = await new Promise((resolve, reject) => {
+  const msg = await new Promise((resolve) => {
     setTimeout(() => {
       resolve('hello')
     }, timer)
@@ -91,6 +91,17 @@ function todo({ id }) {
   `
 }
 
+function Statefull({ initial_color }) {
+  const styles = `
+    background-color: ${initial_color};
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+  `
+  return () => render`
+    <div style=${styles}></div>
+  `
+}
 function Home({ content }) {
   return () => render`
     <div>
@@ -105,6 +116,11 @@ function Home({ content }) {
       <Link href='/posts'>
         <a>all posts</a>
       </Link>
+      <div>
+        <h3>
+          Statful => <${Statefull} initial_color='blue'/>
+        </h3>
+      </div>
     </div>
   `
 }

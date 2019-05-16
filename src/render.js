@@ -19,6 +19,9 @@ export default htm.bind(function create_element(type, props, ...children) {
     }
     const render = _node.type(_node.props)
     const new_node = typeof render === 'function' ? render() : render
+    if(typeof render === 'function') {
+      new_node.props.__INTERNAL_RERENDER__ = render
+    }
     return create_element(
       new_node.type,
       new_node.props,

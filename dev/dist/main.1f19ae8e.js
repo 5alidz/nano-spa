@@ -202,6 +202,11 @@ var _default = _htmMin.default.bind(function create_element(type, props, ...chil
     const render = _node.type(_node.props);
 
     const new_node = typeof render === 'function' ? render() : render;
+
+    if (typeof render === 'function') {
+      new_node.props.__INTERNAL_RERENDER__ = render;
+    }
+
     return create_element(new_node.type, new_node.props, ...new_node.children.concat(_node.children));
   }
 
@@ -210,59 +215,7 @@ var _default = _htmMin.default.bind(function create_element(type, props, ...chil
 });
 
 exports.default = _default;
-},{"./htm.min.js":"../src/htm.min.js"}],"../src/head.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _default = (() => {
-  const dom = document.getElementsByTagName('head')[0];
-
-  const _clean = maybe_arr => Array.isArray(maybe_arr) ? maybe_arr : [maybe_arr].filter(_ => _);
-
-  const append = arr => arr.map(node => dom.appendChild(node));
-
-  let _head = [];
-  return {
-    set: (arr, presis) => {
-      const clean = _clean(arr);
-
-      if (!presis) {
-        _head.map(el => dom.removeChild(el));
-
-        _head = clean;
-      }
-
-      append(clean);
-    }
-  };
-})();
-
-exports.default = _default;
-},{}],"../src/parse_query.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-const reducer = (acc, [key, value]) => {
-  Object.defineProperty(acc, key, {
-    value
-  });
-  return acc;
-};
-
-function _default(path) {
-  const arr = path.split('?');
-  const q = arr[1] ? arr[1].split('&') : undefined;
-  return q ? q.map(str => str.split('=')).reduce(reducer, {}) : undefined;
-}
-},{}],"../src/router.js":[function(require,module,exports) {
+},{"./htm.min.js":"../src/htm.min.js"}],"../src/router.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -270,46 +223,36 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = router;
 
-var _head2 = _interopRequireDefault(require("./head.js"));
+// what a mess!
+const _head = (() => {
+  const dom = document.getElementsByTagName('head')[0];
+  let _head = [];
+  return {
+    set: (arr, presis) => {
+      const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _);
 
-var _parse_query = _interopRequireDefault(require("./parse_query.js"));
+      if (!presis) {
+        _head.map(el => dom.removeChild(el));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+        _head = clean;
+      }
+
+      clean.map(node => dom.appendChild(node));
+    }
+  };
+})();
+
+const is_fn = maybe_fn => typeof maybe_fn === 'function';
 
 const get_pathname = () => window.location.pathname;
 
-const bind_initial_nav = (render_route, on_route_change) => () => {
-  Array.from(document.querySelectorAll('.spa-nav')).map(element => {
-    element.onclick = e => {
-      e.preventDefault();
-
-      if (get_pathname() === element.getAttribute('href')) {
-        return;
-      }
-
-      window.history.pushState({}, '', element.href);
-      render_route(get_pathname());
-
-      if (on_route_change) {
-        on_route_change(get_pathname());
-      }
-    };
-  });
-};
-
-function router(_container, config) {
-  const {
-    _config,
-    ...routes
-  } = config;
-  const head = _config.head || {}; //const plugins = _config.plugins || []
-
-  const on_route_change = _config.on_route_change || undefined;
-
+function router(_container, _) {
   function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
       if (key.startsWith('on') && key.toLowerCase() === key) {
         element[key] = value;
+      } else if (key == '__INTERNAL_RERENDER__') {
+        console.log('has rerender => ', element);
       } else {
         element.setAttribute(key, value);
       }
@@ -341,103 +284,121 @@ function router(_container, config) {
     });
   }
 
-  function create_dom_nodes(node) {
+  function handle_link(_node) {
+    const {
+      props,
+      children
+    } = _node;
+    const node = children[0];
+    const element = document.createElement(node.type);
+
+    if (node.type == 'a') {
+      element.href = props.href;
+    }
+
+    element.onclick = e => {
+      e.preventDefault();
+      window.history.pushState({}, '', props.href);
+      render_route(props.href);
+
+      if (_._config.on_route_change) {
+        _._config.on_route_change(props.href);
+      }
+    };
+
+    handle_props(node.props, element);
+    handle_children(node.children, element);
+    return element;
+  }
+
+  function handle_promise(node) {
+    const {
+      props
+    } = node;
+    const {
+      placeholder,
+      ..._props
+    } = props.promise.props;
+    const new_node = props.promise.type(_props);
+
+    const _placeholder = placeholder();
+
+    const element = create_dom_nodes(_placeholder);
+    new_node.then(_node => {
+      element.parentNode.replaceChild(create_dom_nodes(_node), element);
+    });
+    return element;
+  }
+
+  function handle_default(node) {
     let {
       type,
       props,
       children
     } = node;
+    const element = document.createElement(type);
+    handle_props(props, element);
+    handle_children(children, element);
+    return element;
+  }
 
-    if (type == 'Link') {
-      const node = children[0];
-      const element = document.createElement(node.type);
-
-      if (node.type == 'a') {
-        element.href = props.as ? props.as : props.href;
-      }
-
-      const base = props.href.split('?')[0];
-      const query = (0, _parse_query.default)(props.href);
-
-      if (query) {
-        routes[props.as] = routes[base].bind(null, {
-          query
-        });
-        head[props.as] = head[base].bind(null, {
-          query
-        });
-      }
-
-      element.onclick = e => {
-        e.preventDefault();
-        window.history.pushState({
-          query
-        }, '', props.as || props.href);
-        render_route(props.as || props.href, {
-          query
-        });
-
-        if (on_route_change) {
-          on_route_change(props.href);
-        }
-      };
-
-      handle_props(node.props, element);
-      handle_children(node.children, element);
-      return element;
-    } else if (type === '__PROMISE__') {
-      const {
-        placeholder,
-        ..._props
-      } = props.promise.props;
-      const new_node = props.promise.type(_props);
-
-      const _placeholder = placeholder();
-
-      const element = create_dom_nodes(_placeholder);
-      new_node.then(_node => {
-        element.parentNode.replaceChild(create_dom_nodes(_node), element);
-      });
-      return element;
+  function create_dom_nodes(node) {
+    if (node.type == 'Link') {
+      return handle_link(node);
+    } else if (node.type === '__PROMISE__') {
+      return handle_promise(node);
     } else {
-      const element = document.createElement(type);
-      handle_props(props, element);
-      handle_children(children, element);
-      return element;
+      return handle_default(node);
     }
   }
 
-  const maybe_node_arr = arr => Array.isArray(arr) ? arr.map(vnode => create_dom_nodes(vnode)) : create_dom_nodes(arr);
+  function maybe_node_arr(arr) {
+    return Array.isArray(arr) ? arr.map(vnode => create_dom_nodes(vnode)) : create_dom_nodes(arr);
+  }
 
-  function render_route(path, ctx = {}) {
-    const route_component = routes[path] ? routes[path](ctx) : routes['*']();
-    const head_component = head[path] && path !== '*' ? head[path](ctx) : [];
+  function render_route(path) {
+    const route_component = _[path] ? _[path]() : _['*']();
+    const head_component = _._config.head[path] && path !== '*' ? _._config.head[path]() : [];
 
-    _head2.default.set(maybe_node_arr(head_component));
+    _head.set(maybe_node_arr(head_component));
 
     _container.innerHTML = '';
 
     _container.appendChild(create_dom_nodes(route_component));
   }
 
-  if (head['*']) {
-    const head_component = typeof head['*'] === 'function' ? head['*']() : undefined;
+  if (_._config && _._config.head['*']) {
+    const head_component = is_fn(_._config.head['*']) ? _._config.head['*']() : 0;
 
-    if (!head_component) {
-      return;
+    if (head_component) {
+      _head.set(maybe_node_arr(head_component), true);
     }
-
-    _head2.default.set(maybe_node_arr(head_component), true);
   }
 
-  bind_initial_nav(render_route, on_route_change)();
+  Array.from(document.querySelectorAll('.spa-nav')).map(element => {
+    element.onclick = e => {
+      e.preventDefault();
+      const href = element.getAttribute('href');
+
+      if (get_pathname() === href) {
+        return;
+      }
+
+      window.history.pushState({}, '', href);
+      render_route(get_pathname());
+
+      if (_._config.on_route_change) {
+        _._config.on_route_change(get_pathname());
+      }
+    };
+  });
   render_route(get_pathname());
 
   window.onpopstate = () => {
     render_route(get_pathname());
   };
 }
-},{"./head.js":"../src/head.js","./parse_query.js":"../src/parse_query.js"}],"../src/index.js":[function(require,module,exports) {
+},{}],"../src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -531,7 +492,7 @@ function Posts() {
 async function test_async({
   timer
 }) {
-  const msg = await new Promise((resolve, reject) => {
+  const msg = await new Promise(resolve => {
     setTimeout(() => {
       resolve('hello');
     }, timer);
@@ -570,6 +531,20 @@ function todo({
   `;
 }
 
+function Statefull({
+  initial_color
+}) {
+  const styles = `
+    background-color: ${initial_color};
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+  `;
+  return () => render`
+    <div style=${styles}></div>
+  `;
+}
+
 function Home({
   content
 }) {
@@ -586,6 +561,11 @@ function Home({
       <Link href='/posts'>
         <a>all posts</a>
       </Link>
+      <div>
+        <h3>
+          Statful => <${Statefull} initial_color='blue'/>
+        </h3>
+      </div>
     </div>
   `;
 }
@@ -639,7 +619,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65172" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65335" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
