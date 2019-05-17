@@ -71,7 +71,8 @@ var nano_spa = (function () {
       replace_with(dom_node) {
         root.innerHTML = '';
         root.appendChild(dom_node);
-      }
+      },
+      root
     }
   };
 
@@ -89,7 +90,11 @@ var nano_spa = (function () {
     }
     return {
       set(route) {
-        if(!components[route]) {return}
+        if(!components[route]) {
+          prev_head.map(node => head.removeChild(node));
+          prev_head = [];
+          return
+        }
         prev_head.map(dom_node => head.removeChild(dom_node));
         const rendered = components[route] ? components[route]() : undefined;
         if(!rendered) {return}
@@ -106,7 +111,7 @@ var nano_spa = (function () {
     }
   };
 
-  const init_routes = (routes, root_handler, head_handler) => {
+  const init_routes = (routes, root_handler, head_handler, methods) => {
     const NOT_FOUND = routes['*']
       ? routes['*']
       : () => render`<h1 style='text-align: center;'>404</h1>`;
@@ -139,6 +144,10 @@ var nano_spa = (function () {
         element.href = href;
         element.onclick = e => {
           e.preventDefault();
+          methods['on_route_unmount']&&methods['on_route_unmount'](
+            window.location.pathname,
+            root_handler.root.children[0]
+          );
           window.history.pushState({}, '', href);
           head_handler.set(href);
           const route_component = routes[href]
@@ -146,9 +155,9 @@ var nano_spa = (function () {
             : routes[source.src]
               ? routes[source.src](source.params)
               : NOT_FOUND();
-          root_handler.replace_with(
-            create_dom_nodes(route_component)
-          );
+          const route_dom = create_dom_nodes(route_component);
+          methods['on_route_mount']&&methods['on_route_mount'](href, route_dom);
+          root_handler.replace_with(route_dom);
         };
         return element
       }
@@ -165,19 +174,32 @@ var nano_spa = (function () {
     }
   };
 
-  const init_render_route = (root_handler, head_handler, route_handler) => {
+  const init_render_route = (
+    root_handler,
+    head_handler,
+    route_handler,
+    methods
+  ) => {
     return (route) => {
+      const route_dom = route_handler.get(route);
       head_handler.set(route);
-      root_handler.replace_with(route_handler.get(route));
+      root_handler.replace_with(route_dom);
+      methods['on_route_mount']&&methods['on_route_mount'](route, route_dom);
     }
   };
 
-  const bind_initial = (render_route) => {
+  const current_path = () => window.location.pathname;
+
+  const bind_initial = (render_route, root_handler, methods) => {
     document.querySelectorAll('.LINK').forEach(link => {
       link.onclick = function(e) {
         e.preventDefault();
         const href = this.getAttribute('href');
-        if(window.location.pathname === href) {return}
+        if(current_path() === href) {return}
+        methods['on_route_unmount']&&methods['on_route_unmount'](
+          current_path(),
+          root_handler.root.children[0]
+        );
         window.history.pushState({}, '', href);
         render_route(href);
       };
@@ -185,18 +207,29 @@ var nano_spa = (function () {
   };
 
   function router(o) {
-    const { root, routes, head } = o;
+    const { root, routes, head, methods } = o;
 
     const root_handler = init_root(root);
     const head_handler = init_head(head);
-    const route_handler = init_routes(routes, root_handler, head_handler);
-    const render_route = init_render_route(root_handler, head_handler, route_handler);
+    const route_handler = init_routes(routes, root_handler, head_handler, methods);
+    const render_route = init_render_route(
+      root_handler,
+      head_handler,
+      route_handler,
+      methods
+    );
 
-    bind_initial(render_route);
+    bind_initial(render_route, root_handler, methods);
 
-    render_route(window.location.pathname);
+    render_route(current_path());
 
-    window.onpopstate = () => render_route(window.location.pathname);
+    window.onpopstate = () => {
+      methods['on_route_unmount']&&methods['on_route_unmount'](
+        window.location.pathname,
+        root_handler.root.children[0]
+      );
+      render_route(current_path());
+    };
   }
 
   var index = Object.freeze({render, router});
