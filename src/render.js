@@ -2,14 +2,6 @@ import htm from './htm.min.js'
 
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('')
 
-/*
-const typeOf = o => Object.prototype.toString
-  .call(o)
-  .replace(/[[\]]/g, '')
-  .split(' ')[1]
-  .toLowerCase()
-*/
-
 export default htm.bind(function create_element(type, props, ...children) {
   const node = {type, props, children}
   node.props = node.props || {}
@@ -19,9 +11,6 @@ export default htm.bind(function create_element(type, props, ...children) {
     }
     const render = _node.type(_node.props)
     const new_node = typeof render === 'function' ? render() : render
-    if(typeof render === 'function') {
-      new_node.props.__INTERNAL_RERENDER__ = render
-    }
     return create_element(
       new_node.type,
       new_node.props,

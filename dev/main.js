@@ -1,26 +1,29 @@
 import lib from '../src/index.js'
 const { render, router } = lib
 
-router(document.getElementById('app'), {
-  '/': () => render`<${Home} content='Hello World'/>`,
-  '/about': () => render`<${About} />`,
-  '/contact': () => render`<${Contact} />`,
-  '/post': ({ query }) => render`<${Post} query=${query}/>`,
-  '/posts': () => render`<${Posts} />`,
-  '*': () => render`<${NotFound} />`,
-  _config: {
-    head: {
-      '/': () => render`
-        <title>Home</title>
-        <meta name='description' content='our home page'/>
-      `,
-      '/about': () => render`<title>About</title>`,
-      '/post': ({query}) => render`<title>${query.title}-${query.num}</title>`,
-      '*': () => render`
-        <meta name='author' content='5alidz' />
-        <meta name='author' content='5alidz' />
-      `
-    },
+router({
+  root: document.getElementById('app'),
+  routes: {
+    '/': () => render`<${Home} content='Hello World'/>`,
+    '/about': () => render`<${About} />`,
+    '/contact': () => render`<${Contact} />`,
+    '/post': ({ query }) => render`<${Post} query=${query}/>`,
+    '/posts': () => render`<${Posts} />`,
+    '*': () => render`<${NotFound} />`,
+  },
+  head: {
+    '/': () => render`
+      <title>Home</title>
+      <meta name='description' content='our home page'/>
+    `,
+    '/about': () => render`<title>About</title>`,
+    '/post': ({query}) => render`<title>${query.title}-${query.num}</title>`,
+    '*': () => render`
+      <meta name='author' content='5alidz' />
+      <meta name='author' content='5alidz' />
+    `
+  },
+  methods: {
     on_route_change: (current) => {
       console.log(current)
     }
