@@ -10,7 +10,6 @@ export const init_root = (root) => {
   }
 }
 
-  
 export const init_head = (components={}) => {
   let prev_head = []
   const head = document.head
@@ -43,21 +42,23 @@ export const init_head = (components={}) => {
 }
 
 export const init_routes = (routes, root_handler, head_handler) => {
-  const NOT_FOUND = () => render`<h1 style='text-align: center;'>404</h1>`
-    /* integrate
-  function handle_promise(node) {
-    const { props } = node
-    const { placeholder, ..._props } = props.promise.props
-    const new_node = props.promise.type(_props)
-    const _placeholder = placeholder()
-    const element = create_dom_nodes(_placeholder)
-    new_node.then(_node => {
-      element.parentNode.replaceChild(create_dom_nodes(_node), element)
-    })
-    return element
-  } */
+  const NOT_FOUND = routes['*']
+    ? routes['*']
+    : () => render`<h1 style='text-align: center;'>404</h1>`
+
   const handlers = {
-    'Link': (node) => {
+    'PROMISE': (node) => {
+      const { props } = node
+      const { placeholder, ..._props } = props.promise.props
+      const new_node = props.promise.type(_props)
+      const _placeholder = placeholder()
+      const element = create_dom_nodes(_placeholder)
+      new_node.then(_node => {
+        element.parentNode.replaceChild(create_dom_nodes(_node), element)
+      })
+      return element
+    },
+    'LINK': (node) => {
       const target = node.children[0]
       const element = create_dom_nodes(target)
       const href = node.props.href
@@ -87,6 +88,7 @@ export const init_routes = (routes, root_handler, head_handler) => {
       return element
     }
   }
+
   return {
     get: (route) => {
       if(routes[route]) {

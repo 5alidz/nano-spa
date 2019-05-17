@@ -1,7 +1,5 @@
 import htm from './htm.min.js'
-
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('')
-
 export default htm.bind(function create_element(type, props, ...children) {
   const node = {type, props, children}
   node.props = node.props || {}

@@ -7,8 +7,6 @@ router({
     '/': () => render`<${Home} content='Hello World'/>`,
     '/about': () => render`<${About} />`,
     '/contact': () => render`<${Contact} />`,
-    '/post': ({ query }) => render`<${Post} query=${query}/>`,
-    '/posts': () => render`<${Posts} />`,
     '*': () => render`<${NotFound} />`,
   },
   head: {
@@ -29,34 +27,6 @@ router({
     }
   }
 })
-
-function Post({ query }) {
-  return render`
-    <div>
-      <h3>${query.num}</h3>
-      <p>${query.title}</p>
-    </div>
-  `
-}
-
-function Posts() {
-  return render`
-    <div>
-      <h1>all the posts you want</h1>
-      <Link href='/post?num=100&title=img' as='/posts/product'>
-        <img src="https://via.placeholder.com/150" />
-      </Link>
-      ${[...Array(20).keys()].map(n => render`
-        <div>
-          <h3>i'm post number-${n}</h3>
-          <Link href=${`/post?num=${n}&title=hiiiii`} as=${`/posts/${n}`}>
-            <a>Read More</a>
-          </Link>
-        </div>
-      `)}
-    </div>
-  `
-}
 
 async function test_async({ timer }) {
   const msg = await new Promise((resolve) => {
@@ -94,17 +64,6 @@ function todo({ id }) {
   `
 }
 
-function Statefull({ initial_color }) {
-  const styles = `
-    background-color: ${initial_color};
-    width: 1rem;
-    height: 1rem;
-    display: inline-block;
-  `
-  return () => render`
-    <div style=${styles}></div>
-  `
-}
 function Home({ content }) {
   return () => render`
     <div>
@@ -116,17 +75,13 @@ function Home({ content }) {
       <${test_async}
         timer=${500}
         placeholder=${() => render`<${spinner} />`} />
-      <Link href='/posts'>
-        <a>all posts</a>
+      <Link href='/about'>
+        <a>read more...</a>
       </Link>
-      <div>
-        <h3>
-          Statful => <${Statefull} initial_color='blue'/>
-        </h3>
-      </div>
     </div>
   `
 }
+
 function About() {
   return () => render`
     <div>
@@ -134,6 +89,7 @@ function About() {
     </div>
   `
 }
+
 function Contact() {
   return () => render`
     <div>
@@ -141,6 +97,7 @@ function Contact() {
     </div>
   `
 }
+
 function NotFound() {
   return render`
     <h1 style='margin: 0 auto;'>404</h1>

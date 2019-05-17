@@ -33,7 +33,8 @@ function handle_children(children, element) {
 export default function create_dom_nodes(node) {
   let {type, props, children} = node
   const children_with_handlers = handle_children.bind(this)
-  if(type === 'Link') { return this['Link'](node) }
+  if(type === 'Link') { return this['LINK'](node) }
+  if(type === '__PROMISE__') { return this['PROMISE'](node) }
   const element = document.createElement(type)
   handle_props(props, element)
   children_with_handlers(children, element)

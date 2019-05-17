@@ -162,7 +162,7 @@ function _default(t) {
 }
 
 ;
-},{}],"../src/render.js":[function(require,module,exports) {
+},{}],"../src/create_element.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -175,14 +175,6 @@ var _htmMin = _interopRequireDefault(require("./htm.min.js"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('');
-/*
-const typeOf = o => Object.prototype.toString
-  .call(o)
-  .replace(/[[\]]/g, '')
-  .split(' ')[1]
-  .toLowerCase()
-*/
-
 
 var _default = _htmMin.default.bind(function create_element(type, props, ...children) {
   const node = {
@@ -210,7 +202,214 @@ var _default = _htmMin.default.bind(function create_element(type, props, ...chil
 });
 
 exports.default = _default;
-},{"./htm.min.js":"../src/htm.min.js"}],"../src/router.js":[function(require,module,exports) {
+},{"./htm.min.js":"../src/htm.min.js"}],"../src/create_dom_nodes.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = create_dom_nodes;
+
+function handle_props(props, element) {
+  Object.entries(props).forEach(([key, value]) => {
+    if (key.startsWith('on') && key.toLowerCase() === key) {
+      element[key] = value;
+    } else if (key === 'use_state') {
+      return;
+    } else {
+      element.setAttribute(key, value);
+    }
+  });
+}
+
+function handle_children(children, element) {
+  children.forEach(child => {
+    if (child === undefined || child === null) {
+      return;
+    } else if (typeof child === 'string' || typeof child === 'number') {
+      element.appendChild(document.createTextNode(child));
+    } else if (Array.isArray(child)) {
+      child.map(({
+        type,
+        props,
+        children
+      }) => {
+        element.appendChild(create_dom_nodes.call(this, {
+          type,
+          props,
+          children
+        }));
+      });
+    } else {
+      element.appendChild(create_dom_nodes.call(this, { ...child
+      }));
+    }
+  });
+}
+
+function create_dom_nodes(node) {
+  let {
+    type,
+    props,
+    children
+  } = node;
+  const children_with_handlers = handle_children.bind(this);
+
+  if (type === 'Link') {
+    return this['LINK'](node);
+  }
+
+  if (type === '__PROMISE__') {
+    return this['PROMISE'](node);
+  }
+
+  const element = document.createElement(type);
+  handle_props(props, element);
+  children_with_handlers(children, element);
+  return element;
+}
+},{}],"../src/router.utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.init_render_route = exports.init_routes = exports.init_head = exports.init_root = void 0;
+
+var _create_element = _interopRequireDefault(require("./create_element.js"));
+
+var _create_dom_nodes = _interopRequireDefault(require("./create_dom_nodes.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const init_root = root => {
+  return {
+    replace_with(dom_node) {
+      root.innerHTML = '';
+      root.appendChild(dom_node);
+    }
+
+  };
+};
+
+exports.init_root = init_root;
+
+const init_head = (components = {}) => {
+  let prev_head = [];
+  const head = document.head;
+  const default_head = components['*'];
+
+  if (default_head) {
+    const rendered = default_head();
+
+    if (Array.isArray(rendered)) {
+      rendered.map(vnode => head.appendChild((0, _create_dom_nodes.default)(vnode)));
+    } else {
+      head.appendChild((0, _create_dom_nodes.default)(rendered));
+    }
+  }
+
+  return {
+    set(route) {
+      if (!components[route]) {
+        return;
+      }
+
+      prev_head.map(dom_node => head.removeChild(dom_node));
+      const rendered = components[route] ? components[route]() : undefined;
+
+      if (!rendered) {
+        return;
+      }
+
+      if (Array.isArray(rendered)) {
+        const nodes = rendered.map(vnode => (0, _create_dom_nodes.default)(vnode));
+        prev_head = nodes;
+        nodes.map(dom_node => head.appendChild(dom_node));
+      } else {
+        const node = (0, _create_dom_nodes.default)(rendered);
+        prev_head = [node];
+        head.appendChild(node);
+      }
+    }
+
+  };
+};
+
+exports.init_head = init_head;
+
+const init_routes = (routes, root_handler, head_handler) => {
+  const NOT_FOUND = routes['*'] ? routes['*'] : () => _create_element.default`<h1 style='text-align: center;'>404</h1>`;
+  const handlers = {
+    'PROMISE': node => {
+      const {
+        props
+      } = node;
+      const {
+        placeholder,
+        ..._props
+      } = props.promise.props;
+      const new_node = props.promise.type(_props);
+
+      const _placeholder = placeholder();
+
+      const element = (0, _create_dom_nodes.default)(_placeholder);
+      new_node.then(_node => {
+        element.parentNode.replaceChild((0, _create_dom_nodes.default)(_node), element);
+      });
+      return element;
+    },
+    'LINK': node => {
+      const target = node.children[0];
+      const element = (0, _create_dom_nodes.default)(target);
+      const href = node.props.href;
+      const match_href = href.split('/').filter(_ => _);
+      const source = Object.keys(routes).reduce((acc, curr) => {
+        const match_arr = curr.split('*').map(s => s.replace(/\//g, ''));
+
+        if (match_arr.length === match_href.length) {
+          acc.src = '/' + match_arr.map(el => !el ? '*' : el).join('/');
+          acc.params = match_href.filter(s => match_arr.indexOf(s) === -1);
+          return acc;
+        } else {
+          return acc;
+        }
+      }, {});
+      element.href = href;
+
+      element.onclick = e => {
+        e.preventDefault();
+        window.history.pushState({}, '', href);
+        head_handler.set(href);
+        const route_component = routes[href] ? routes[href]() : routes[source.src] ? routes[source.src](source.params) : NOT_FOUND();
+        root_handler.replace_with((0, _create_dom_nodes.default)(route_component));
+      };
+
+      return element;
+    }
+  };
+  return {
+    get: route => {
+      if (routes[route]) {
+        return _create_dom_nodes.default.call(handlers, routes[route]());
+      } else {
+        return (0, _create_dom_nodes.default)(NOT_FOUND());
+      }
+    }
+  };
+};
+
+exports.init_routes = init_routes;
+
+const init_render_route = (root_handler, head_handler, route_handler) => {
+  return route => {
+    head_handler.set(route);
+    root_handler.replace_with(route_handler.get(route));
+  };
+};
+
+exports.init_render_route = init_render_route;
+},{"./create_element.js":"../src/create_element.js","./create_dom_nodes.js":"../src/create_dom_nodes.js"}],"../src/router.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -218,182 +417,40 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = router;
 
-// what a mess!
-const _head = (() => {
-  const dom = document.getElementsByTagName('head')[0];
-  let _head = [];
-  return {
-    set: (arr, presis) => {
-      const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _);
+var _routerUtils = require("./router.utils.js");
 
-      if (!presis) {
-        _head.map(el => dom.removeChild(el));
-
-        _head = clean;
-      }
-
-      clean.map(node => dom.appendChild(node));
-    }
-  };
-})();
-
-const is_fn = maybe_fn => typeof maybe_fn === 'function';
-
-const get_pathname = () => window.location.pathname;
-
-function router(_container, _) {
-  function handle_props(props, element) {
-    Object.entries(props).forEach(([key, value]) => {
-      if (key.startsWith('on') && key.toLowerCase() === key) {
-        element[key] = value;
-      } else if (key == '__INTERNAL_RERENDER__') {
-        console.log('has rerender => ', element);
-      } else {
-        element.setAttribute(key, value);
-      }
-    });
-  }
-
-  function handle_children(children, element) {
-    children.forEach(child => {
-      if (child === undefined || child === null) {
-        return;
-      } else if (typeof child === 'string' || typeof child === 'number') {
-        element.appendChild(document.createTextNode(child));
-      } else if (Array.isArray(child)) {
-        child.map(({
-          type,
-          props,
-          children
-        }) => {
-          element.appendChild(create_dom_nodes({
-            type,
-            props,
-            children
-          }));
-        });
-      } else {
-        element.appendChild(create_dom_nodes({ ...child
-        }));
-      }
-    });
-  }
-
-  function handle_link(_node) {
-    const {
-      props,
-      children
-    } = _node;
-    const node = children[0];
-    const element = document.createElement(node.type);
-
-    if (node.type == 'a') {
-      element.href = props.href;
-    }
-
-    element.onclick = e => {
+const bind_initial = render_route => {
+  document.querySelectorAll('.LINK').forEach(link => {
+    link.onclick = function (e) {
       e.preventDefault();
-      window.history.pushState({}, '', props.href);
-      render_route(props.href);
+      const href = this.getAttribute('href');
 
-      if (_._config.on_route_change) {
-        _._config.on_route_change(props.href);
-      }
-    };
-
-    handle_props(node.props, element);
-    handle_children(node.children, element);
-    return element;
-  }
-
-  function handle_promise(node) {
-    const {
-      props
-    } = node;
-    const {
-      placeholder,
-      ..._props
-    } = props.promise.props;
-    const new_node = props.promise.type(_props);
-
-    const _placeholder = placeholder();
-
-    const element = create_dom_nodes(_placeholder);
-    new_node.then(_node => {
-      element.parentNode.replaceChild(create_dom_nodes(_node), element);
-    });
-    return element;
-  }
-
-  function handle_default(node) {
-    let {
-      type,
-      props,
-      children
-    } = node;
-    const element = document.createElement(type);
-    handle_props(props, element);
-    handle_children(children, element);
-    return element;
-  }
-
-  function create_dom_nodes(node) {
-    if (node.type == 'Link') {
-      return handle_link(node);
-    } else if (node.type === '__PROMISE__') {
-      return handle_promise(node);
-    } else {
-      return handle_default(node);
-    }
-  }
-
-  function maybe_node_arr(arr) {
-    return Array.isArray(arr) ? arr.map(vnode => create_dom_nodes(vnode)) : create_dom_nodes(arr);
-  }
-
-  function render_route(path) {
-    const route_component = _[path] ? _[path]() : _['*']();
-    const head_component = _._config.head[path] && path !== '*' ? _._config.head[path]() : [];
-
-    _head.set(maybe_node_arr(head_component));
-
-    _container.innerHTML = '';
-
-    _container.appendChild(create_dom_nodes(route_component));
-  }
-
-  if (_._config && _._config.head['*']) {
-    const head_component = is_fn(_._config.head['*']) ? _._config.head['*']() : 0;
-
-    if (head_component) {
-      _head.set(maybe_node_arr(head_component), true);
-    }
-  }
-
-  Array.from(document.querySelectorAll('.spa-nav')).map(element => {
-    element.onclick = e => {
-      e.preventDefault();
-      const href = element.getAttribute('href');
-
-      if (get_pathname() === href) {
+      if (window.location.pathname === href) {
         return;
       }
 
       window.history.pushState({}, '', href);
-      render_route(get_pathname());
-
-      if (_._config.on_route_change) {
-        _._config.on_route_change(get_pathname());
-      }
+      render_route(href);
     };
   });
-  render_route(get_pathname());
+};
 
-  window.onpopstate = () => {
-    render_route(get_pathname());
-  };
+function router(o) {
+  const {
+    root,
+    routes,
+    head
+  } = o;
+  const root_handler = (0, _routerUtils.init_root)(root);
+  const head_handler = (0, _routerUtils.init_head)(head);
+  const route_handler = (0, _routerUtils.init_routes)(routes, root_handler, head_handler);
+  const render_route = (0, _routerUtils.init_render_route)(root_handler, head_handler, route_handler);
+  bind_initial(render_route);
+  render_route(window.location.pathname);
+
+  window.onpopstate = () => render_route(window.location.pathname);
 }
-},{}],"../src/index.js":[function(require,module,exports) {
+},{"./router.utils.js":"../src/router.utils.js"}],"../src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -401,19 +458,19 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _render = _interopRequireDefault(require("./render.js"));
+var _create_element = _interopRequireDefault(require("./create_element.js"));
 
 var _router = _interopRequireDefault(require("./router.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _default = Object.freeze({
-  render: _render.default,
+  render: _create_element.default,
   router: _router.default
 });
 
 exports.default = _default;
-},{"./render.js":"../src/render.js","./router.js":"../src/router.js"}],"main.js":[function(require,module,exports) {
+},{"./create_element.js":"../src/create_element.js","./router.js":"../src/router.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
 var _index = _interopRequireDefault(require("../src/index.js"));
@@ -424,70 +481,39 @@ const {
   render,
   router
 } = _index.default;
-router(document.getElementById('app'), {
-  '/': () => render`<${Home} content='Hello World'/>`,
-  '/about': () => render`<${About} />`,
-  '/contact': () => render`<${Contact} />`,
-  '/post': ({
-    query
-  }) => render`<${Post} query=${query}/>`,
-  '/posts': () => render`<${Posts} />`,
-  '*': () => render`<${NotFound} />`,
-  _config: {
-    head: {
-      '/': () => render`
-        <title>Home</title>
-        <meta name='description' content='our home page'/>
-      `,
-      '/about': () => render`<title>About</title>`,
-      '/post': ({
-        query
-      }) => render`<title>${query.title}-${query.num}</title>`,
-      '*': () => render`
-        <meta name='author' content='5alidz' />
-        <meta name='author' content='5alidz' />
-      `
-    },
+router({
+  root: document.getElementById('app'),
+  routes: {
+    '/': () => render`<${Home} content='Hello World'/>`,
+    '/about': () => render`<${About} />`,
+    '/contact': () => render`<${Contact} />`,
+    '*': () => render`<${NotFound} />`
+  },
+  head: {
+    '/': () => render`
+      <title>Home</title>
+      <meta name='description' content='our home page'/>
+    `,
+    '/about': () => render`<title>About</title>`,
+    '/post': ({
+      query
+    }) => render`<title>${query.title}-${query.num}</title>`,
+    '*': () => render`
+      <meta name='author' content='5alidz' />
+      <meta name='author' content='5alidz' />
+    `
+  },
+  methods: {
     on_route_change: current => {
       console.log(current);
     }
   }
 });
 
-function Post({
-  query
-}) {
-  return render`
-    <div>
-      <h3>${query.num}</h3>
-      <p>${query.title}</p>
-    </div>
-  `;
-}
-
-function Posts() {
-  return render`
-    <div>
-      <h1>all the posts you want</h1>
-      <Link href='/post?num=100&title=img' as='/posts/product'>
-        <img src="https://via.placeholder.com/150" />
-      </Link>
-      ${[...Array(20).keys()].map(n => render`
-        <div>
-          <h3>i'm post number-${n}</h3>
-          <Link href=${`/post?num=${n}&title=hiiiii`} as=${`/posts/${n}`}>
-            <a>Read More</a>
-          </Link>
-        </div>
-      `)}
-    </div>
-  `;
-}
-
 async function test_async({
   timer
 }) {
-  const msg = await new Promise((resolve, reject) => {
+  const msg = await new Promise(resolve => {
     setTimeout(() => {
       resolve('hello');
     }, timer);
@@ -539,8 +565,8 @@ function Home({
       <${test_async}
         timer=${500}
         placeholder=${() => render`<${spinner} />`} />
-      <Link href='/posts'>
-        <a>all posts</a>
+      <Link href='/about'>
+        <a>read more...</a>
       </Link>
     </div>
   `;
@@ -595,7 +621,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65335" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56545" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
