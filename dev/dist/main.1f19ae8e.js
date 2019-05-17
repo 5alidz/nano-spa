@@ -268,7 +268,7 @@ function create_dom_nodes(node) {
   children_with_handlers(children, element);
   return element;
 }
-},{}],"../src/router.utils.js":[function(require,module,exports) {
+},{}],"../src/handlers.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -319,11 +319,7 @@ const init_head = (components = {}) => {
       }
 
       prev_head.map(dom_node => head.removeChild(dom_node));
-      const rendered = components[route] ? components[route]() : undefined;
-
-      if (!rendered) {
-        return;
-      }
+      const rendered = components[route]();
 
       if (Array.isArray(rendered)) {
         const nodes = rendered.map(vnode => (0, _create_dom_nodes.default)(vnode));
@@ -425,7 +421,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = router;
 
-var _routerUtils = require("./router.utils.js");
+var _handlers = require("./handlers.js");
 
 const current_path = () => window.location.pathname;
 
@@ -449,14 +445,14 @@ const bind_initial = (render_route, root_handler, methods) => {
 function router(o) {
   const {
     root,
-    routes,
-    head,
-    methods
+    routes = {},
+    head = {},
+    methods = {}
   } = o;
-  const root_handler = (0, _routerUtils.init_root)(root);
-  const head_handler = (0, _routerUtils.init_head)(head);
-  const route_handler = (0, _routerUtils.init_routes)(routes, root_handler, head_handler, methods);
-  const render_route = (0, _routerUtils.init_render_route)(root_handler, head_handler, route_handler, methods);
+  const root_handler = (0, _handlers.init_root)(root);
+  const head_handler = (0, _handlers.init_head)(head);
+  const route_handler = (0, _handlers.init_routes)(routes, root_handler, head_handler, methods);
+  const render_route = (0, _handlers.init_render_route)(root_handler, head_handler, route_handler, methods);
   bind_initial(render_route, root_handler, methods);
   render_route(current_path());
 
@@ -465,7 +461,7 @@ function router(o) {
     render_route(current_path());
   };
 }
-},{"./router.utils.js":"../src/router.utils.js"}],"../src/index.js":[function(require,module,exports) {
+},{"./handlers.js":"../src/handlers.js"}],"../src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -479,54 +475,42 @@ var _router = _interopRequireDefault(require("./router.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/* TODO:
+ * - cache                     [ ]
+ * - context & setContext      [ ]
+ * - component level state     [ ]
+ * - refactor for abstractions [ ]
+ * - max bundle size 4         [ ]
+***********************************/
 var _default = Object.freeze({
   render: _create_element.default,
   router: _router.default
 });
 
 exports.default = _default;
-},{"./create_element.js":"../src/create_element.js","./router.js":"../src/router.js"}],"main.js":[function(require,module,exports) {
+},{"./create_element.js":"../src/create_element.js","./router.js":"../src/router.js"}],"pages/index.js":[function(require,module,exports) {
 "use strict";
 
-var _index = _interopRequireDefault(require("../src/index.js"));
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.HomeHead = HomeHead;
+exports.Home = Home;
+
+var _index = _interopRequireDefault(require("../../src/index.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const {
-  render,
-  router
+  render
 } = _index.default;
-router({
-  root: document.getElementById('app'),
-  routes: {
-    '/': () => render`<${Home} content='Hello World'/>`,
-    '/about': () => render`<${About} />`,
-    '/contact': () => render`<${Contact} />`,
-    '*': () => render`<${NotFound} />`
-  },
-  head: {
-    '/': () => render`
+
+function HomeHead() {
+  return render`
       <title>Home</title>
       <meta name='description' content='our home page'/>
-    `,
-    '/about': () => render`<title>About</title>`,
-    '/post': ({
-      query
-    }) => render`<title>${query.title}-${query.num}</title>`,
-    '*': () => render`
-      <meta name='author' content='5alidz' />
-      <meta name='author' content='5alidz' />
-    `
-  },
-  methods: {
-    on_route_mount: (current, element) => {
-      return;
-    },
-    on_route_unmount: (route, element) => {
-      return;
-    }
-  }
-});
+    `;
+}
 
 async function test_async({
   timer
@@ -592,6 +576,22 @@ function Home({
     </div>
   `;
 }
+},{"../../src/index.js":"../src/index.js"}],"pages/about.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.About = About;
+exports.AboutHead = void 0;
+
+var _index = _interopRequireDefault(require("../../src/index.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const {
+  render
+} = _index.default;
 
 function About() {
   return () => render`
@@ -601,6 +601,25 @@ function About() {
   `;
 }
 
+const AboutHead = () => render`<title>About</title>`;
+
+exports.AboutHead = AboutHead;
+},{"../../src/index.js":"../src/index.js"}],"pages/contact.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Contact = Contact;
+
+var _index = _interopRequireDefault(require("../../src/index.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const {
+  render
+} = _index.default;
+
 function Contact() {
   return () => render`
     <div id='contact'>
@@ -608,13 +627,69 @@ function Contact() {
     </div>
   `;
 }
+},{"../../src/index.js":"../src/index.js"}],"pages/404.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.NotFound = NotFound;
+exports.defaultHead = void 0;
+
+var _index = _interopRequireDefault(require("../../src/index.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const {
+  render
+} = _index.default;
 
 function NotFound() {
   return render`
     <h1 style='text-align: center; color: red;'>404</h1>
   `;
 }
-},{"../src/index.js":"../src/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+
+const defaultHead = () => render`
+  <meta name='author' content='5alidz' />
+  <meta name='author' content='5alidz' />
+`;
+
+exports.defaultHead = defaultHead;
+},{"../../src/index.js":"../src/index.js"}],"main.js":[function(require,module,exports) {
+"use strict";
+
+var _index = _interopRequireDefault(require("../src/index.js"));
+
+var _index2 = require("./pages/index.js");
+
+var _about = require("./pages/about.js");
+
+var _contact = require("./pages/contact.js");
+
+var _ = require("./pages/404.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const {
+  router,
+  render
+} = _index.default;
+router({
+  root: document.getElementById('app'),
+  routes: {
+    '/': () => render`<${_index2.Home} content='Hello World'/>`,
+    '/about': () => render`<${_about.About} />`,
+    '/contact': () => render`<${_contact.Contact} />`,
+    '*': () => render`<${_.NotFound} />`
+  },
+  head: {
+    '/': _index2.HomeHead,
+    '/about': _about.AboutHead,
+    '*': _.defaultHead
+  }
+});
+},{"../src/index.js":"../src/index.js","./pages/index.js":"pages/index.js","./pages/about.js":"pages/about.js","./pages/contact.js":"pages/contact.js","./pages/404.js":"pages/404.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

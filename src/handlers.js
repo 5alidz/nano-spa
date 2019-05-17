@@ -31,8 +31,7 @@ export const init_head = (components={}) => {
         return
       }
       prev_head.map(dom_node => head.removeChild(dom_node))
-      const rendered = components[route] ? components[route]() : undefined
-      if(!rendered) {return}
+      const rendered = components[route]()
       if(Array.isArray(rendered)) {
         const nodes = rendered.map(vnode => create_dom_nodes(vnode))
         prev_head = nodes

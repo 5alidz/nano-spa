@@ -3,7 +3,7 @@ import {
   init_head,
   init_render_route,
   init_routes,
-} from './router.utils.js'
+} from './handlers.js'
 
 const current_path = () => window.location.pathname
 
@@ -24,7 +24,7 @@ const bind_initial = (render_route, root_handler, methods) => {
 }
 
 export default function router(o) {
-  const { root, routes, head, methods } = o
+  const { root, routes={}, head={}, methods={} } = o
 
   const root_handler = init_root(root)
   const head_handler = init_head(head)
