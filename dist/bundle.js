@@ -4,15 +4,6 @@ var nano_spa = (function () {
   var n = function(t,r,u,e){for(var p=1;p<r.length;p++){var s=r[p++],a="number"==typeof s?u[s]:s;1===r[p]?e[0]=a:2===r[p]?(e[1]=e[1]||{})[r[++p]]=a:3===r[p]?e[1]=Object.assign(e[1]||{},a):e.push(r[p]?t.apply(null,n(t,a,u,["",null])):a);}return e},t=function(n){for(var t,r,u=1,e="",p="",s=[0],a=function(n){1===u&&(n||(e=e.replace(/^\s*\n\s*|\s*\n\s*$/g,"")))?s.push(n||e,0):3===u&&(n||e)?(s.push(n||e,1),u=2):2===u&&"..."===e&&n?s.push(n,3):2===u&&e&&!n?s.push(!0,2,e):4===u&&r&&(s.push(n||e,2,r),r=""),e="";},f=0;f<n.length;f++){f&&(1===u&&a(),a(f));for(var h=0;h<n[f].length;h++)t=n[f][h],1===u?"<"===t?(a(),s=[s],u=3):e+=t:p?t===p?p="":e+=t:'"'===t||"'"===t?p=t:">"===t?(a(),u=1):u&&("="===t?(u=4,r=e,e=""):"/"===t?(a(),3===u&&(s=s[0]),u=s,(s=s[0]).push(u,4),u=0):" "===t||"\t"===t||"\n"===t||"\r"===t?(a(),u=2):e+=t);}return a(),s},r="function"==typeof Map,u=r?new Map:{},e=r?function(n){var r=u.get(n);return r||u.set(n,r=t(n)),r}:function(n){for(var r="",e=0;e<n.length;e++)r+=n[e].length+"-"+n[e];return u[r]||(u[r]=t(n))};function htm(t){var r=n(this,e(t),arguments,[]);return r.length>1?r:r[0]}
 
   const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('');
-
-  /*
-  const typeOf = o => Object.prototype.toString
-    .call(o)
-    .replace(/[[\]]/g, '')
-    .split(' ')[1]
-    .toLowerCase()
-  */
-
   var render = htm.bind(function create_element(type, props, ...children) {
     const node = {type, props, children};
     node.props = node.props || {};
@@ -22,9 +13,6 @@ var nano_spa = (function () {
       }
       const render = _node.type(_node.props);
       const new_node = typeof render === 'function' ? render() : render;
-      if(typeof render === 'function') {
-        new_node.props.__INTERNAL_RERENDER__ = render;
-      }
       return create_element(
         new_node.type,
         new_node.props,
@@ -35,141 +23,180 @@ var nano_spa = (function () {
     return typeof type === 'function' ? handle_custom_element(node) : node
   });
 
-  // what a mess!
-  const _head = (() => {
-    const dom = document.getElementsByTagName('head')[0];
-    let _head = [];
-    return {
-      set: (arr, presis) => {
-        const clean = Array.isArray(arr) ? arr : [arr].filter(_ => _);
-        if(!presis) {
-          _head.map(el => dom.removeChild(el));
-          _head = clean;
-        }
-        clean.map(node => dom.appendChild(node));
-      }
-    }
-  })();
-
-  const is_fn = (maybe_fn) => typeof maybe_fn === 'function';
-  const get_pathname = () => window.location.pathname;
-
-  function router(_container, _) {
-
-    function handle_props(props, element) {
-      Object.entries(props).forEach(([key, value]) => {
-        if (key.startsWith('on') && key.toLowerCase() === key) {
-          element[key] = value;
-        } else if(key == '__INTERNAL_RERENDER__') {
-          console.log('has rerender => ', element);
-        } else {
-          element.setAttribute(key, value);
-        }
-      });
-    }
-
-    function handle_children(children, element) {
-      children.forEach(child => {
-        if (child === undefined || child === null) {
-          return
-        } else if (typeof child === 'string' || typeof child === 'number') {
-          element.appendChild(document.createTextNode(child));
-        } else if (Array.isArray(child)) {
-          child.map(({type, props, children}) => {
-            element.appendChild(create_dom_nodes({type, props, children}));
-          });
-        } else {
-          element.appendChild(create_dom_nodes({...child}));
-        }
-      });
-    }
-
-    function handle_link(_node) {
-      const { props, children } = _node;
-      const node = children[0];
-      const element = document.createElement(node.type);
-      if(node.type == 'a') {element.href = props.href;}
-      element.onclick = e => {
-        e.preventDefault();
-        window.history.pushState({}, '', props.href);
-        render_route(props.href);
-        if(_._config.on_route_change) {_._config.on_route_change(props.href);}
-      };
-      handle_props(node.props, element);
-      handle_children(node.children, element);
-      return element
-    }
-
-    function handle_promise(node) {
-      const { props } = node;
-      const { placeholder, ..._props } = props.promise.props;
-      const new_node = props.promise.type(_props);
-      const _placeholder = placeholder();
-      const element = create_dom_nodes(_placeholder);
-      new_node.then(_node => {
-        element.parentNode.replaceChild(create_dom_nodes(_node), element);
-      });
-      return element
-    }
-
-    function handle_default(node) {
-      let {type, props, children} = node;
-      const element = document.createElement(type);
-      handle_props(props, element);
-      handle_children(children, element);
-      return element
-    }
-
-    function create_dom_nodes(node) {
-      if(node.type == 'Link') {
-        return handle_link(node)
-      } else if(node.type === '__PROMISE__') {
-        return handle_promise(node)
+  function handle_props(props, element) {
+    Object.entries(props).forEach(([key, value]) => {
+      if (key.startsWith('on') && key.toLowerCase() === key) {
+        element[key] = value;
+      } else if(key === 'use_state'){
+        return
       } else {
-        return handle_default(node)
+        element.setAttribute(key, value);
+      }
+    });
+  }
+
+  function handle_children(children, element) {
+    children.forEach(child => {
+      if (child === undefined || child === null) {
+        return
+      } else if (typeof child === 'string' || typeof child === 'number') {
+        element.appendChild(document.createTextNode(child));
+      } else if (Array.isArray(child)) {
+        child.map(({type, props, children}) => {
+          element.appendChild(
+            create_dom_nodes.call(this, {type, props, children})
+          );
+        });
+      } else {
+        element.appendChild(
+          create_dom_nodes.call(this, {...child})
+        );
+      }
+    });
+  }
+
+  function create_dom_nodes(node) {
+    let {type, props, children} = node;
+    const children_with_handlers = handle_children.bind(this);
+    if(type === 'Link') { return this['LINK'](node) }
+    if(type === '__PROMISE__') { return this['PROMISE'](node) }
+    const element = document.createElement(type);
+    handle_props(props, element);
+    children_with_handlers(children, element);
+    return element
+  }
+
+  const init_root = (root) => {
+    return {
+      replace_with(dom_node) {
+        root.innerHTML = '';
+        root.appendChild(dom_node);
       }
     }
+  };
 
-    function maybe_node_arr(arr){
-      return Array.isArray(arr)
-        ? arr.map((vnode => create_dom_nodes(vnode)))
-        : create_dom_nodes(arr)
+  const init_head = (components={}) => {
+    let prev_head = [];
+    const head = document.head;
+    const default_head = components['*'];
+    if(default_head) {
+      const rendered = default_head();
+      if(Array.isArray(rendered)) {
+        rendered.map(vnode => head.appendChild(create_dom_nodes(vnode)));
+      } else {
+        head.appendChild(create_dom_nodes(rendered));
+      }
     }
-
-    function render_route(path) {
-      const route_component = _[path]
-        ? _[path]()
-        : _['*']();
-      const head_component = (_._config.head[path] && path !== '*')
-        ? _._config.head[path]()
-        : [];
-      _head.set(maybe_node_arr(head_component));
-      _container.innerHTML = '';
-      _container.appendChild(create_dom_nodes(route_component));
+    return {
+      set(route) {
+        if(!components[route]) {return}
+        prev_head.map(dom_node => head.removeChild(dom_node));
+        const rendered = components[route] ? components[route]() : undefined;
+        if(!rendered) {return}
+        if(Array.isArray(rendered)) {
+          const nodes = rendered.map(vnode => create_dom_nodes(vnode));
+          prev_head = nodes;
+          nodes.map(dom_node => head.appendChild(dom_node));
+        } else {
+          const node = create_dom_nodes(rendered);
+          prev_head = [node];
+          head.appendChild(node);
+        }
+      }
     }
+  };
 
-    if(_._config && _._config.head['*']) {
-      const head_component = is_fn(_._config.head['*']) ? _._config.head['*']() : 0;
-      if(head_component) {_head.set(maybe_node_arr(head_component), true);}
-    }
+  const init_routes = (routes, root_handler, head_handler) => {
+    const NOT_FOUND = routes['*']
+      ? routes['*']
+      : () => render`<h1 style='text-align: center;'>404</h1>`;
 
-    Array.from(document.querySelectorAll('.spa-nav'))
-      .map(element => {
+    const handlers = {
+      'PROMISE': (node) => {
+        const { props } = node;
+        const { placeholder, ..._props } = props.promise.props;
+        const new_node = props.promise.type(_props);
+        const _placeholder = placeholder();
+        const element = create_dom_nodes(_placeholder);
+        new_node.then(_node => {
+          element.parentNode.replaceChild(create_dom_nodes(_node), element);
+        });
+        return element
+      },
+      'LINK': (node) => {
+        const target = node.children[0];
+        const element = create_dom_nodes(target);
+        const href = node.props.href;
+        const match_href = href.split('/').filter(_ => _);
+        const source = Object.keys(routes).reduce((acc, curr) => {
+          const match_arr = curr.split('*').map(s => s.replace(/\//g, ''));
+          if(match_arr.length === match_href.length) {
+            acc.src = '/' + match_arr.map(el => !el ? '*' : el).join('/');
+            acc.params = match_href.filter(s => match_arr.indexOf(s) === -1);
+            return acc
+          } else {return acc}
+        }, {});
+        element.href = href;
         element.onclick = e => {
           e.preventDefault();
-          const href = element.getAttribute('href');
-          if(get_pathname() === href) {return}
           window.history.pushState({}, '', href);
-          render_route(get_pathname());
-          if(_._config.on_route_change) {
-            _._config.on_route_change(get_pathname());
-          }
+          head_handler.set(href);
+          const route_component = routes[href]
+            ? routes[href]()
+            : routes[source.src]
+              ? routes[source.src](source.params)
+              : NOT_FOUND();
+          root_handler.replace_with(
+            create_dom_nodes(route_component)
+          );
         };
-      });
+        return element
+      }
+    };
 
-    render_route(get_pathname());
+    return {
+      get: (route) => {
+        if(routes[route]) {
+          return create_dom_nodes.call(handlers, routes[route]())
+        } else {
+          return create_dom_nodes(NOT_FOUND())
+        }
+      }
+    }
+  };
 
-    window.onpopstate = () => {render_route(get_pathname());};
+  const init_render_route = (root_handler, head_handler, route_handler) => {
+    return (route) => {
+      head_handler.set(route);
+      root_handler.replace_with(route_handler.get(route));
+    }
+  };
+
+  const bind_initial = (render_route) => {
+    document.querySelectorAll('.LINK').forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const href = this.getAttribute('href');
+        if(window.location.pathname === href) {return}
+        window.history.pushState({}, '', href);
+        render_route(href);
+      };
+    });
+  };
+
+  function router(o) {
+    const { root, routes, head } = o;
+
+    const root_handler = init_root(root);
+    const head_handler = init_head(head);
+    const route_handler = init_routes(routes, root_handler, head_handler);
+    const render_route = init_render_route(root_handler, head_handler, route_handler);
+
+    bind_initial(render_route);
+
+    render_route(window.location.pathname);
+
+    window.onpopstate = () => render_route(window.location.pathname);
   }
 
   var index = Object.freeze({render, router});

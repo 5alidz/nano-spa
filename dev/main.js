@@ -22,8 +22,11 @@ router({
     `
   },
   methods: {
-    on_route_change: (current) => {
-      console.log(current)
+    on_route_mount: (current, element) => {
+      return
+    },
+    on_route_unmount: (route, element) => {
+      return
     }
   }
 })
@@ -34,8 +37,9 @@ async function test_async({ timer }) {
       resolve('hello')
     }, timer)
   })
+  const say_hi = () => console.log('hi')
   return render`
-    <div>${msg}</div>
+    <div onload=${say_hi}>${msg}</div>
   `
 }
 
@@ -66,7 +70,7 @@ function todo({ id }) {
 
 function Home({ content }) {
   return () => render`
-    <div>
+    <div id='home'>
       <h1>Home</h1>
       <p>${content}</p>
       <${todo} id=1 />
@@ -84,7 +88,7 @@ function Home({ content }) {
 
 function About() {
   return () => render`
-    <div>
+    <div id='about'>
       <h1>About</h1>
     </div>
   `
@@ -92,7 +96,7 @@ function About() {
 
 function Contact() {
   return () => render`
-    <div>
+    <div id='contact'>
       <h1>Contact</h1>
     </div>
   `
@@ -100,6 +104,6 @@ function Contact() {
 
 function NotFound() {
   return render`
-    <h1 style='margin: 0 auto;'>404</h1>
+    <h1 style='text-align: center; color: red;'>404</h1>
   `
 }

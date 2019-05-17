@@ -6,7 +6,8 @@ export const init_root = (root) => {
     replace_with(dom_node) {
       root.innerHTML = ''
       root.appendChild(dom_node)
-    }
+    },
+    root
   }
 }
 
@@ -24,7 +25,11 @@ export const init_head = (components={}) => {
   }
   return {
     set(route) {
-      if(!components[route]) {return}
+      if(!components[route]) {
+        prev_head.map(node => head.removeChild(node))
+        prev_head = []
+        return
+      }
       prev_head.map(dom_node => head.removeChild(dom_node))
       const rendered = components[route] ? components[route]() : undefined
       if(!rendered) {return}
@@ -41,7 +46,7 @@ export const init_head = (components={}) => {
   }
 }
 
-export const init_routes = (routes, root_handler, head_handler) => {
+export const init_routes = (routes, root_handler, head_handler, methods) => {
   const NOT_FOUND = routes['*']
     ? routes['*']
     : () => render`<h1 style='text-align: center;'>404</h1>`
@@ -74,6 +79,10 @@ export const init_routes = (routes, root_handler, head_handler) => {
       element.href = href
       element.onclick = e => {
         e.preventDefault()
+        methods['on_route_unmount']&&methods['on_route_unmount'](
+          window.location.pathname,
+          root_handler.root.children[0]
+        )
         window.history.pushState({}, '', href)
         head_handler.set(href)
         const route_component = routes[href]
@@ -81,9 +90,9 @@ export const init_routes = (routes, root_handler, head_handler) => {
           : routes[source.src]
             ? routes[source.src](source.params)
             : NOT_FOUND()
-        root_handler.replace_with(
-          create_dom_nodes(route_component)
-        )
+        const route_dom = create_dom_nodes(route_component)
+        methods['on_route_mount']&&methods['on_route_mount'](href, route_dom)
+        root_handler.replace_with(route_dom)
       }
       return element
     }
@@ -100,9 +109,16 @@ export const init_routes = (routes, root_handler, head_handler) => {
   }
 }
 
-export const init_render_route = (root_handler, head_handler, route_handler) => {
+export const init_render_route = (
+  root_handler,
+  head_handler,
+  route_handler,
+  methods
+) => {
   return (route) => {
+    const route_dom = route_handler.get(route)
     head_handler.set(route)
-    root_handler.replace_with(route_handler.get(route))
+    root_handler.replace_with(route_dom)
+    methods['on_route_mount']&&methods['on_route_mount'](route, route_dom)
   }
 }

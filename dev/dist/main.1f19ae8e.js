@@ -287,8 +287,9 @@ const init_root = root => {
     replace_with(dom_node) {
       root.innerHTML = '';
       root.appendChild(dom_node);
-    }
+    },
 
+    root
   };
 };
 
@@ -312,6 +313,8 @@ const init_head = (components = {}) => {
   return {
     set(route) {
       if (!components[route]) {
+        prev_head.map(node => head.removeChild(node));
+        prev_head = [];
         return;
       }
 
@@ -338,7 +341,7 @@ const init_head = (components = {}) => {
 
 exports.init_head = init_head;
 
-const init_routes = (routes, root_handler, head_handler) => {
+const init_routes = (routes, root_handler, head_handler, methods) => {
   const NOT_FOUND = routes['*'] ? routes['*'] : () => _create_element.default`<h1 style='text-align: center;'>404</h1>`;
   const handlers = {
     'PROMISE': node => {
@@ -379,10 +382,13 @@ const init_routes = (routes, root_handler, head_handler) => {
 
       element.onclick = e => {
         e.preventDefault();
+        methods['on_route_unmount'] && methods['on_route_unmount'](window.location.pathname, root_handler.root.children[0]);
         window.history.pushState({}, '', href);
         head_handler.set(href);
         const route_component = routes[href] ? routes[href]() : routes[source.src] ? routes[source.src](source.params) : NOT_FOUND();
-        root_handler.replace_with((0, _create_dom_nodes.default)(route_component));
+        const route_dom = (0, _create_dom_nodes.default)(route_component);
+        methods['on_route_mount'] && methods['on_route_mount'](href, route_dom);
+        root_handler.replace_with(route_dom);
       };
 
       return element;
@@ -401,10 +407,12 @@ const init_routes = (routes, root_handler, head_handler) => {
 
 exports.init_routes = init_routes;
 
-const init_render_route = (root_handler, head_handler, route_handler) => {
+const init_render_route = (root_handler, head_handler, route_handler, methods) => {
   return route => {
+    const route_dom = route_handler.get(route);
     head_handler.set(route);
-    root_handler.replace_with(route_handler.get(route));
+    root_handler.replace_with(route_dom);
+    methods['on_route_mount'] && methods['on_route_mount'](route, route_dom);
   };
 };
 
@@ -419,16 +427,19 @@ exports.default = router;
 
 var _routerUtils = require("./router.utils.js");
 
-const bind_initial = render_route => {
+const current_path = () => window.location.pathname;
+
+const bind_initial = (render_route, root_handler, methods) => {
   document.querySelectorAll('.LINK').forEach(link => {
     link.onclick = function (e) {
       e.preventDefault();
       const href = this.getAttribute('href');
 
-      if (window.location.pathname === href) {
+      if (current_path() === href) {
         return;
       }
 
+      methods['on_route_unmount'] && methods['on_route_unmount'](current_path(), root_handler.root.children[0]);
       window.history.pushState({}, '', href);
       render_route(href);
     };
@@ -439,16 +450,20 @@ function router(o) {
   const {
     root,
     routes,
-    head
+    head,
+    methods
   } = o;
   const root_handler = (0, _routerUtils.init_root)(root);
   const head_handler = (0, _routerUtils.init_head)(head);
-  const route_handler = (0, _routerUtils.init_routes)(routes, root_handler, head_handler);
-  const render_route = (0, _routerUtils.init_render_route)(root_handler, head_handler, route_handler);
-  bind_initial(render_route);
-  render_route(window.location.pathname);
+  const route_handler = (0, _routerUtils.init_routes)(routes, root_handler, head_handler, methods);
+  const render_route = (0, _routerUtils.init_render_route)(root_handler, head_handler, route_handler, methods);
+  bind_initial(render_route, root_handler, methods);
+  render_route(current_path());
 
-  window.onpopstate = () => render_route(window.location.pathname);
+  window.onpopstate = () => {
+    methods['on_route_unmount'] && methods['on_route_unmount'](window.location.pathname, root_handler.root.children[0]);
+    render_route(current_path());
+  };
 }
 },{"./router.utils.js":"../src/router.utils.js"}],"../src/index.js":[function(require,module,exports) {
 "use strict";
@@ -504,8 +519,11 @@ router({
     `
   },
   methods: {
-    on_route_change: current => {
-      console.log(current);
+    on_route_mount: (current, element) => {
+      return;
+    },
+    on_route_unmount: (route, element) => {
+      return;
     }
   }
 });
@@ -518,8 +536,11 @@ async function test_async({
       resolve('hello');
     }, timer);
   });
+
+  const say_hi = () => console.log('hi');
+
   return render`
-    <div>${msg}</div>
+    <div onload=${say_hi}>${msg}</div>
   `;
 }
 
@@ -556,7 +577,7 @@ function Home({
   content
 }) {
   return () => render`
-    <div>
+    <div id='home'>
       <h1>Home</h1>
       <p>${content}</p>
       <${todo} id=1 />
@@ -574,7 +595,7 @@ function Home({
 
 function About() {
   return () => render`
-    <div>
+    <div id='about'>
       <h1>About</h1>
     </div>
   `;
@@ -582,7 +603,7 @@ function About() {
 
 function Contact() {
   return () => render`
-    <div>
+    <div id='contact'>
       <h1>Contact</h1>
     </div>
   `;
@@ -590,7 +611,7 @@ function Contact() {
 
 function NotFound() {
   return render`
-    <h1 style='margin: 0 auto;'>404</h1>
+    <h1 style='text-align: center; color: red;'>404</h1>
   `;
 }
 },{"../src/index.js":"../src/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
