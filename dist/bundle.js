@@ -76,6 +76,20 @@ var nano_spa = (function () {
   const on_mount = (methods, route_dom) => methods[MOUNT]
     && methods[MOUNT](get_current(), route_dom);
 
+  const regex_match = (route, routes) => {
+    let matched = undefined;
+    Object.keys(routes).filter(key => key !== '*').map(key => {
+      if(routes[route]) {return}
+      const regex = new RegExp(key);
+      const regex_vals = regex.exec(route);
+      if(regex.test(route) && regex_vals.length >= 2) {
+        const [, ...matches] = regex_vals;
+        matched = routes[key] ? [routes[key], matches] : undefined;
+      }
+    });
+    return matched
+  };
+
   const init_root = (root) => {
     return {
       replace_with(dom_node) {
@@ -104,6 +118,8 @@ var nano_spa = (function () {
     return {
       set(route) {
         clear_prev();
+        const matched = regex_match(route, components);
+        if(matched) {return handle_component(matched[0](matched[1]), true)}
         if(!components[route]) {return (prev_head = [])}
         handle_component(components[route](), true);
       }
@@ -119,20 +135,6 @@ var nano_spa = (function () {
       on_mount(methods, dom);
       head_handler.set(route);
       root_handler.replace_with(dom);
-    };
-
-    const regex_match = (route) => {
-      let matched = undefined;
-      Object.keys(routes).filter(key => key !== '*').map(key => {
-        if(routes[route]) {return}
-        const regex = new RegExp(key);
-        const regex_vals = regex.exec(route);
-        if(regex.test(route) && regex_vals.length >= 2) {
-          const [, ...matches] = regex_vals;
-          matched = routes[key] ? [routes[key], matches] : undefined;
-        }
-      });
-      return matched
     };
 
     const handlers = {
@@ -156,7 +158,7 @@ var nano_spa = (function () {
         // regex
         element.href = href;
         /* EXPERIMENTAL*/
-        const matched = regex_match(href, with_handlers);
+        const matched = regex_match(href, routes);
         /***************/
         element.onclick = e => {
           e.preventDefault();
@@ -175,7 +177,7 @@ var nano_spa = (function () {
       render: () => {
         const with_handlers = create_dom_nodes.bind(handlers);
         const route = get_current();
-        const matched = regex_match(route, with_handlers);
+        const matched = regex_match(route, routes);
         // regex
         const route_dom = routes[route]
           ? with_handlers(routes[route]())
@@ -216,10 +218,8 @@ var nano_spa = (function () {
 
   /* TODO:
    * - cache                     [ ]
-   * - context & setContext      [ ]
    * - component level state     [ ]
-   * - refactor for abstractions [ ]
-   * - max bundle size 4         [ ]
+   * - refactor for abstractions [x]
   ***********************************/
   var index = Object.freeze({render, router});
 

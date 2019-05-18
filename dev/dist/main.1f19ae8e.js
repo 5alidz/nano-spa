@@ -298,6 +298,24 @@ var _utils = require("./utils.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const regex_match = (route, routes) => {
+  let matched = undefined;
+  Object.keys(routes).filter(key => key !== '*').map(key => {
+    if (routes[route]) {
+      return;
+    }
+
+    const regex = new RegExp(key);
+    const regex_vals = regex.exec(route);
+
+    if (regex.test(route) && regex_vals.length >= 2) {
+      const [, ...matches] = regex_vals;
+      matched = routes[key] ? [routes[key], matches] : undefined;
+    }
+  });
+  return matched;
+};
+
 const init_root = root => {
   return {
     replace_with(dom_node) {
@@ -331,6 +349,11 @@ const init_head = (components = {}) => {
   return {
     set(route) {
       clear_prev();
+      const matched = regex_match(route, components);
+
+      if (matched) {
+        return handle_component(matched[0](matched[1]), true);
+      }
 
       if (!components[route]) {
         return prev_head = [];
@@ -351,24 +374,6 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
     (0, _utils.on_mount)(methods, dom);
     head_handler.set(route);
     root_handler.replace_with(dom);
-  };
-
-  const regex_match = route => {
-    let matched = undefined;
-    Object.keys(routes).filter(key => key !== '*').map(key => {
-      if (routes[route]) {
-        return;
-      }
-
-      const regex = new RegExp(key);
-      const regex_vals = regex.exec(route);
-
-      if (regex.test(route) && regex_vals.length >= 2) {
-        const [, ...matches] = regex_vals;
-        matched = routes[key] ? [routes[key], matches] : undefined;
-      }
-    });
-    return matched;
   };
 
   const handlers = {
@@ -402,7 +407,7 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       element.href = href;
       /* EXPERIMENTAL*/
 
-      const matched = regex_match(href, with_handlers);
+      const matched = regex_match(href, routes);
       /***************/
 
       element.onclick = e => {
@@ -422,7 +427,7 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       const with_handlers = _create_dom_nodes.default.bind(handlers);
 
       const route = (0, _utils.get_current)();
-      const matched = regex_match(route, with_handlers); // regex
+      const matched = regex_match(route, routes); // regex
 
       const route_dom = routes[route] ? with_handlers(routes[route]()) : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
 
@@ -498,10 +503,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /* TODO:
  * - cache                     [ ]
- * - context & setContext      [ ]
  * - component level state     [ ]
- * - refactor for abstractions [ ]
- * - max bundle size 4         [ ]
+ * - refactor for abstractions [x]
 ***********************************/
 var _default = Object.freeze({
   render: _create_element.default,
@@ -689,6 +692,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Posts = Posts;
+exports.posts_data = void 0;
 
 var _index = _interopRequireDefault(require("../../src/index.js"));
 
@@ -697,7 +701,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const {
   render
 } = _index.default;
-const posts = [{
+const posts_data = [{
   id: 0,
   title: 'Amet totam tempore repudiandae distinctio'
 }, {
@@ -710,6 +714,7 @@ const posts = [{
   id: 3,
   title: 'Ipsum debitis eveniet veritatis iste!'
 }];
+exports.posts_data = posts_data;
 
 const post = ({
   title,
@@ -727,7 +732,7 @@ function Posts() {
     <div>
       <h1>Posts</h1>
       <ul>
-        ${posts.map(({
+        ${posts_data.map(({
     id,
     title
   }) => render`<${post} id=${id} title=${title} />`)}
@@ -742,8 +747,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Post = Post;
+exports.PostHead = PostHead;
 
 var _index = _interopRequireDefault(require("../../src/index.js"));
+
+var _posts = require("./posts.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -754,14 +762,26 @@ const {
 function Post({
   matches
 }) {
-  console.log(`i ${matches} executed!!`);
+  const {
+    title,
+    id
+  } = _posts.posts_data[matches[0]];
   return render`
     <div>
-      i'm a Post!! ${JSON.stringify(matches)}
+      <h1>${id} -- ${title}</h1>
     </div>
   `;
 }
-},{"../../src/index.js":"../src/index.js"}],"main.js":[function(require,module,exports) {
+
+function PostHead(matches) {
+  const {
+    title
+  } = _posts.posts_data[matches[0]];
+  return render`
+    <title>${title}</title>
+  `;
+}
+},{"../../src/index.js":"../src/index.js","./posts.js":"pages/posts.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
 var _index = _interopRequireDefault(require("../src/index.js"));
@@ -798,6 +818,7 @@ router({
   head: {
     '/': _index2.HomeHead,
     '/about': _about.AboutHead,
+    '/posts/(.+)': _post.PostHead,
     '*': _.defaultHead
   }
   /*

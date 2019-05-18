@@ -3,6 +3,20 @@ import create_dom_nodes from './create_dom_nodes.js'
 
 import { on_unmount, on_mount, __PUSH_STATE__, get_current } from './utils.js'
 
+const regex_match = (route, routes) => {
+  let matched = undefined
+  Object.keys(routes).filter(key => key !== '*').map(key => {
+    if(routes[route]) {return}
+    const regex = new RegExp(key)
+    const regex_vals = regex.exec(route)
+    if(regex.test(route) && regex_vals.length >= 2) {
+      const [, ...matches] = regex_vals
+      matched = routes[key] ? [routes[key], matches] : undefined
+    }
+  })
+  return matched
+}
+
 export const init_root = (root) => {
   return {
     replace_with(dom_node) {
@@ -31,6 +45,8 @@ export const init_head = (components={}) => {
   return {
     set(route) {
       clear_prev()
+      const matched = regex_match(route, components)
+      if(matched) {return handle_component(matched[0](matched[1]), true)}
       if(!components[route]) {return (prev_head = [])}
       handle_component(components[route](), true)
     }
@@ -46,20 +62,6 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
     on_mount(methods, dom)
     head_handler.set(route)
     root_handler.replace_with(dom)
-  }
-
-  const regex_match = (route) => {
-    let matched = undefined
-    Object.keys(routes).filter(key => key !== '*').map(key => {
-      if(routes[route]) {return}
-      const regex = new RegExp(key)
-      const regex_vals = regex.exec(route)
-      if(regex.test(route) && regex_vals.length >= 2) {
-        const [, ...matches] = regex_vals
-        matched = routes[key] ? [routes[key], matches] : undefined
-      }
-    })
-    return matched
   }
 
   const handlers = {
@@ -83,7 +85,7 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
       // regex
       element.href = href
       /* EXPERIMENTAL*/
-      const matched = regex_match(href, with_handlers)
+      const matched = regex_match(href, routes)
       /***************/
       element.onclick = e => {
         e.preventDefault()
@@ -102,7 +104,7 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
     render: () => {
       const with_handlers = create_dom_nodes.bind(handlers)
       const route = get_current()
-      const matched = regex_match(route, with_handlers)
+      const matched = regex_match(route, routes)
       // regex
       const route_dom = routes[route]
         ? with_handlers(routes[route]())

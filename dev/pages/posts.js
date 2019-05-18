@@ -1,6 +1,7 @@
 import lib from '../../src/index.js'
 const { render } = lib
-const posts = [
+
+export const posts_data = [
   {id: 0, title: 'Amet totam tempore repudiandae distinctio'},
   {id: 1, title: 'Sit eveniet exercitationem vitae minima.'},
   {id: 2, title: 'Dolor sit dignissimos omnis ducimus'},
@@ -19,7 +20,7 @@ export function Posts() {
     <div>
       <h1>Posts</h1>
       <ul>
-        ${posts.map(({ id, title }) => render`<${post} id=${id} title=${title} />`)}
+        ${posts_data.map(({ id, title }) => render`<${post} id=${id} title=${title} />`)}
       </ul>
     </div>
   `

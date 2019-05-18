@@ -1,12 +1,19 @@
 import lib from '../../src/index.js'
+import { posts_data } from './posts.js'
 const { render } = lib
 
 export function Post({ matches }) {
-  console.log(`i ${matches} executed!!`)
+  const { title, id } = posts_data[matches[0]]
   return render`
     <div>
-      i'm a Post!! ${JSON.stringify(matches)}
+      <h1>${id} -- ${title}</h1>
     </div>
   `
 }
 
+export function PostHead(matches) {
+  const { title } = posts_data[matches[0]]
+  return render`
+    <title>${title}</title>
+  `
+}

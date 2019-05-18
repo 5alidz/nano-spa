@@ -5,7 +5,7 @@ import { About, AboutHead } from './pages/about.js'
 import { Contact } from './pages/contact.js'
 import { NotFound, defaultHead } from './pages/404.js'
 import { Posts } from './pages/posts.js'
-import { Post } from './pages/post.js'
+import { Post, PostHead } from './pages/post.js'
 
 const { router, render } = lib
 
@@ -23,6 +23,7 @@ router({
   head: {
     '/': HomeHead,
     '/about': AboutHead,
+    '/posts/(.+)': PostHead,
     '*': defaultHead
   },
   /*

@@ -3,9 +3,7 @@ import router from './router.js'
 
 /* TODO:
  * - cache                     [ ]
- * - context & setContext      [ ]
  * - component level state     [ ]
- * - refactor for abstractions [ ]
- * - max bundle size 4         [ ]
+ * - refactor for abstractions [x]
 ***********************************/
 export default Object.freeze({render, router})
