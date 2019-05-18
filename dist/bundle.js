@@ -121,7 +121,7 @@ var nano_spa = (function () {
       root_handler.replace_with(dom);
     };
 
-    const regex_match = (route, with_handlers) => {
+    const regex_match = (route) => {
       let matched = undefined;
       Object.keys(routes).filter(key => key !== '*').map(key => {
         if(routes[route]) {return}
@@ -129,7 +129,7 @@ var nano_spa = (function () {
         const regex_vals = regex.exec(route);
         if(regex.test(route) && regex_vals.length >= 2) {
           const [, ...matches] = regex_vals;
-          matched = with_handlers(routes[key](matches));
+          matched = routes[key] ? [routes[key], matches] : undefined;
         }
       });
       return matched
@@ -157,13 +157,14 @@ var nano_spa = (function () {
         element.href = href;
         /* EXPERIMENTAL*/
         const matched = regex_match(href, with_handlers);
+        /***************/
         element.onclick = e => {
           e.preventDefault();
           on_unmount(methods, root_handler);
           __PUSH_STATE__(href);
           const route_dom = routes[href]
             ? with_handlers(routes[href]())
-            : matched ? matched : with_handlers(NOT_FOUND());
+            : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
           __FINAL__(href, route_dom);
         };
         return element
@@ -178,7 +179,7 @@ var nano_spa = (function () {
         // regex
         const route_dom = routes[route]
           ? with_handlers(routes[route]())
-          : matched ? matched : with_handlers(NOT_FOUND());
+          : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
         __FINAL__(route, route_dom);
       }
     }

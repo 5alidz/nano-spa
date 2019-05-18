@@ -353,7 +353,7 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
     root_handler.replace_with(dom);
   };
 
-  const regex_match = (route, with_handlers) => {
+  const regex_match = route => {
     let matched = undefined;
     Object.keys(routes).filter(key => key !== '*').map(key => {
       if (routes[route]) {
@@ -365,7 +365,7 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
 
       if (regex.test(route) && regex_vals.length >= 2) {
         const [, ...matches] = regex_vals;
-        matched = with_handlers(routes[key](matches));
+        matched = routes[key] ? [routes[key], matches] : undefined;
       }
     });
     return matched;
@@ -403,12 +403,13 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       /* EXPERIMENTAL*/
 
       const matched = regex_match(href, with_handlers);
+      /***************/
 
       element.onclick = e => {
         e.preventDefault();
         (0, _utils.on_unmount)(methods, root_handler);
         (0, _utils.__PUSH_STATE__)(href);
-        const route_dom = routes[href] ? with_handlers(routes[href]()) : matched ? matched : with_handlers(NOT_FOUND());
+        const route_dom = routes[href] ? with_handlers(routes[href]()) : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
 
         __FINAL__(href, route_dom);
       };
@@ -423,7 +424,7 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       const route = (0, _utils.get_current)();
       const matched = regex_match(route, with_handlers); // regex
 
-      const route_dom = routes[route] ? with_handlers(routes[route]()) : matched ? matched : with_handlers(NOT_FOUND());
+      const route_dom = routes[route] ? with_handlers(routes[route]()) : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
 
       __FINAL__(route, route_dom);
     }
@@ -753,6 +754,7 @@ const {
 function Post({
   matches
 }) {
+  console.log(`i ${matches} executed!!`);
   return render`
     <div>
       i'm a Post!! ${JSON.stringify(matches)}
