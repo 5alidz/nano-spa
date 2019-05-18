@@ -176,6 +176,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('');
 
+let count = 0;
+
 var _default = _htmMin.default.bind(function create_element(type, props, ...children) {
   const node = {
     type,
@@ -187,7 +189,8 @@ var _default = _htmMin.default.bind(function create_element(type, props, ...chil
   function handle_custom_element(_node) {
     if (_node.type.constructor.name === 'AsyncFunction') {
       return create_element('__PROMISE__', {
-        promise: _node
+        promise: _node,
+        id: ++count
       }, []);
     }
 
@@ -263,7 +266,7 @@ function create_dom_nodes(node) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.on_mount = exports.on_unmount = exports.__PUSH_STATE__ = exports.get_current = void 0;
+exports.traverse = exports.on_mount = exports.on_unmount = exports.__PUSH_STATE__ = exports.get_current = void 0;
 
 const get_current = () => window.location.pathname;
 
@@ -282,6 +285,20 @@ exports.on_unmount = on_unmount;
 const on_mount = (methods, route_dom) => methods[MOUNT] && methods[MOUNT](get_current(), route_dom);
 
 exports.on_mount = on_mount;
+
+const traverse = (root, callback) => {
+  root = callback(root);
+
+  if (root.children && root.children.length) {
+    root.children = root.children.map(child => {
+      return traverse(child, callback);
+    });
+  }
+
+  return root;
+};
+
+exports.traverse = traverse;
 },{}],"../src/handlers.js":[function(require,module,exports) {
 "use strict";
 
@@ -368,11 +385,13 @@ const init_head = (components = {}) => {
 exports.init_head = init_head;
 
 const init_routes = (routes, root_handler, head_handler, methods, cache) => {
-  /* add caching and a way to escape */
   const caches = {};
   const NOT_FOUND = routes['*'] ? routes['*'] : () => _create_element.default`<h1 style='text-align: center;'>404</h1>`;
 
-  const __FINAL__ = (route, dom) => {
+  const gen_tree = (route, matched) => routes[route] ? routes[route]() : matched ? matched[0](matched[1]) : NOT_FOUND();
+
+  const __FINAL__ = (route, tree, with_handlers) => {
+    const dom = with_handlers(tree);
     (0, _utils.on_mount)(methods, dom);
     head_handler.set(route);
     root_handler.replace_with(dom);
@@ -396,6 +415,13 @@ const init_routes = (routes, root_handler, head_handler, methods, cache) => {
       const element = with_handlers(_placeholder);
       new_node.then(_node => {
         element.parentNode.replaceChild(with_handlers(_node), element);
+        caches[(0, _utils.get_current)()] = (0, _utils.traverse)(caches[(0, _utils.get_current)()], root => {
+          if (root.type == '__PROMISE__' && root.props.id === node.props.id) {
+            return _node;
+          }
+
+          return root;
+        });
       });
       return element;
     },
@@ -404,21 +430,17 @@ const init_routes = (routes, root_handler, head_handler, methods, cache) => {
 
       const target = node.children[0];
       const element = with_handlers(target);
-      const href = node.props.href; // regex
-
+      const href = node.props.href;
       element.href = href;
-      /* EXPERIMENTAL*/
-
       const matched = regex_match(href, routes);
-      /***************/
 
       element.onclick = e => {
         e.preventDefault();
         (0, _utils.on_unmount)(methods, root_handler);
         (0, _utils.__PUSH_STATE__)(href);
-        const route_dom = routes[href] ? with_handlers(routes[href]()) : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
+        const route_tree = gen_tree(href, matched);
 
-        __FINAL__(href, route_dom);
+        __FINAL__(href, route_tree, with_handlers);
       };
 
       return element;
@@ -429,12 +451,15 @@ const init_routes = (routes, root_handler, head_handler, methods, cache) => {
       const with_handlers = _create_dom_nodes.default.bind(handlers);
 
       const route = (0, _utils.get_current)();
+      const DONT_CACHE = cache.includes(route);
       const matched = regex_match(route, routes);
-      const from_cache = cache[route]; // regex
+      const route_tree = gen_tree(route, matched);
 
-      const route_dom = routes[route] ? with_handlers(routes[route]()) : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
+      if (!caches[route]) {
+        caches[route] = route_tree;
+      }
 
-      __FINAL__(route, route_dom);
+      __FINAL__(route, DONT_CACHE ? route_tree : caches[route], with_handlers);
     }
   };
 };
@@ -485,7 +510,6 @@ function router(o) {
   let prev = (0, _utils.get_current)();
 
   window.onpopstate = () => {
-    // fix prev route on on_unmount
     (0, _utils.on_unmount)(methods, root_handler, prev);
     prev = (0, _utils.get_current)();
     route_handler.render();
@@ -830,8 +854,8 @@ router({
     '/about': _about.AboutHead,
     '/posts/(.+)': _post.PostHead,
     '*': _.defaultHead
-  },
-  cache: ['/']
+  } //cache: ['/']
+
 });
 },{"../src/index.js":"../src/index.js","./pages/index.js":"pages/index.js","./pages/about.js":"pages/about.js","./pages/contact.js":"pages/contact.js","./pages/404.js":"pages/404.js","./pages/posts.js":"pages/posts.js","./pages/post.js":"pages/post.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];

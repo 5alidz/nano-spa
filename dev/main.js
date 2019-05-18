@@ -26,7 +26,7 @@ router({
     '/posts/(.+)': PostHead,
     '*': defaultHead
   },
-  cache: ['/']
+  //cache: ['/']
 })
 
 

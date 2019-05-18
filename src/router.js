@@ -26,9 +26,9 @@ export default function router(o) {
   const route_handler = init_routes(routes, root_handler, head_handler, methods, cache)
   bind_initial(route_handler.render, root_handler, methods)
   route_handler.render()
+
   let prev = get_current()
   window.onpopstate = () => {
-    // fix prev route on on_unmount
     on_unmount(methods, root_handler, prev)
     prev = get_current()
     route_handler.render()
