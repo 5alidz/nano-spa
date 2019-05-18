@@ -268,17 +268,40 @@ function create_dom_nodes(node) {
   children_with_handlers(children, element);
   return element;
 }
+},{}],"../src/utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.on_mount = exports.on_unmount = exports.get_current = void 0;
+
+const get_current = () => window.location.pathname;
+
+exports.get_current = get_current;
+const UNMOUNT = 'on_route_unmount';
+const MOUNT = 'on_route_mount';
+
+const on_unmount = (methods, root_handler) => methods[UNMOUNT] && methods[UNMOUNT](get_current(), root_handler.root.children[0]);
+
+exports.on_unmount = on_unmount;
+
+const on_mount = (methods, route_dom) => methods[MOUNT] && methods[MOUNT](get_current(), route_dom);
+
+exports.on_mount = on_mount;
 },{}],"../src/handlers.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.init_render_route = exports.init_routes = exports.init_head = exports.init_root = void 0;
+exports.init_routes = exports.init_head = exports.init_root = void 0;
 
 var _create_element = _interopRequireDefault(require("./create_element.js"));
 
 var _create_dom_nodes = _interopRequireDefault(require("./create_dom_nodes.js"));
+
+var _utils = require("./utils.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -297,11 +320,14 @@ exports.init_root = init_root;
 
 const init_head = (components = {}) => {
   let prev_head = [];
+
+  const clear_prev = () => prev_head.map(node => head.removeChild(node));
+
   const head = document.head;
   const default_head = components['*'];
 
   if (default_head) {
-    const rendered = default_head();
+    const rendered = default_head(); // #1
 
     if (Array.isArray(rendered)) {
       rendered.map(vnode => head.appendChild((0, _create_dom_nodes.default)(vnode)));
@@ -313,22 +339,20 @@ const init_head = (components = {}) => {
   return {
     set(route) {
       if (!components[route]) {
-        prev_head.map(node => head.removeChild(node));
+        clear_prev();
         prev_head = [];
         return;
       }
 
-      prev_head.map(dom_node => head.removeChild(dom_node));
-      const rendered = components[route]();
+      clear_prev();
+      const rendered = components[route](); // #1
 
       if (Array.isArray(rendered)) {
-        const nodes = rendered.map(vnode => (0, _create_dom_nodes.default)(vnode));
-        prev_head = nodes;
+        const nodes = prev_head = rendered.map(vnode => (0, _create_dom_nodes.default)(vnode));
         nodes.map(dom_node => head.appendChild(dom_node));
       } else {
-        const node = (0, _create_dom_nodes.default)(rendered);
-        prev_head = [node];
-        head.appendChild(node);
+        const node = prev_head = [(0, _create_dom_nodes.default)(rendered)];
+        head.appendChild(node[0]);
       }
     }
 
@@ -362,7 +386,9 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       const target = node.children[0];
       const element = (0, _create_dom_nodes.default)(target);
       const href = node.props.href;
-      const match_href = href.split('/').filter(_ => _);
+      console.log(node);
+      const match_href = href.split('/').filter(_ => _); // pls regex.
+
       const source = Object.keys(routes).reduce((acc, curr) => {
         const match_arr = curr.split('*').map(s => s.replace(/\//g, ''));
 
@@ -378,12 +404,12 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
 
       element.onclick = e => {
         e.preventDefault();
-        methods['on_route_unmount'] && methods['on_route_unmount'](window.location.pathname, root_handler.root.children[0]);
+        (0, _utils.on_unmount)(methods, root_handler);
         window.history.pushState({}, '', href);
         head_handler.set(href);
         const route_component = routes[href] ? routes[href]() : routes[source.src] ? routes[source.src](source.params) : NOT_FOUND();
         const route_dom = (0, _create_dom_nodes.default)(route_component);
-        methods['on_route_mount'] && methods['on_route_mount'](href, route_dom);
+        (0, _utils.on_mount)(methods, route_dom);
         root_handler.replace_with(route_dom);
       };
 
@@ -391,29 +417,18 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
     }
   };
   return {
-    get: route => {
-      if (routes[route]) {
-        return _create_dom_nodes.default.call(handlers, routes[route]());
-      } else {
-        return (0, _create_dom_nodes.default)(NOT_FOUND());
-      }
+    render: () => {
+      const route = window.location.pathname;
+      const route_dom = routes[route] ? _create_dom_nodes.default.call(handlers, routes[route]()) : (0, _create_dom_nodes.default)(NOT_FOUND());
+      head_handler.set(route);
+      (0, _utils.on_mount)(methods, route_dom);
+      root_handler.replace_with(route_dom);
     }
   };
 };
 
 exports.init_routes = init_routes;
-
-const init_render_route = (root_handler, head_handler, route_handler, methods) => {
-  return route => {
-    const route_dom = route_handler.get(route);
-    head_handler.set(route);
-    root_handler.replace_with(route_dom);
-    methods['on_route_mount'] && methods['on_route_mount'](route, route_dom);
-  };
-};
-
-exports.init_render_route = init_render_route;
-},{"./create_element.js":"../src/create_element.js","./create_dom_nodes.js":"../src/create_dom_nodes.js"}],"../src/router.js":[function(require,module,exports) {
+},{"./create_element.js":"../src/create_element.js","./create_dom_nodes.js":"../src/create_dom_nodes.js","./utils.js":"../src/utils.js"}],"../src/router.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -423,7 +438,7 @@ exports.default = router;
 
 var _handlers = require("./handlers.js");
 
-const current_path = () => window.location.pathname;
+var _utils = require("./utils.js");
 
 const bind_initial = (render_route, root_handler, methods) => {
   document.querySelectorAll('.LINK').forEach(link => {
@@ -431,11 +446,11 @@ const bind_initial = (render_route, root_handler, methods) => {
       e.preventDefault();
       const href = this.getAttribute('href');
 
-      if (current_path() === href) {
+      if ((0, _utils.get_current)() === href) {
         return;
       }
 
-      methods['on_route_unmount'] && methods['on_route_unmount'](current_path(), root_handler.root.children[0]);
+      (0, _utils.on_unmount)(methods, root_handler);
       window.history.pushState({}, '', href);
       render_route(href);
     };
@@ -452,16 +467,16 @@ function router(o) {
   const root_handler = (0, _handlers.init_root)(root);
   const head_handler = (0, _handlers.init_head)(head);
   const route_handler = (0, _handlers.init_routes)(routes, root_handler, head_handler, methods);
-  const render_route = (0, _handlers.init_render_route)(root_handler, head_handler, route_handler, methods);
-  bind_initial(render_route, root_handler, methods);
-  render_route(current_path());
+  bind_initial(route_handler.render, root_handler, methods);
+  route_handler.render();
 
   window.onpopstate = () => {
-    methods['on_route_unmount'] && methods['on_route_unmount'](window.location.pathname, root_handler.root.children[0]);
-    render_route(current_path());
+    // fix prev route on on_unmount
+    (0, _utils.on_unmount)(methods, root_handler);
+    route_handler.render();
   };
 }
-},{"./handlers.js":"../src/handlers.js"}],"../src/index.js":[function(require,module,exports) {
+},{"./handlers.js":"../src/handlers.js","./utils.js":"../src/utils.js"}],"../src/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -573,6 +588,9 @@ function Home({
       <Link href='/about'>
         <a>read more...</a>
       </Link>
+      <Link href'/posts'>
+        <a>--POSTS</a>
+      </Link>
     </div>
   `;
 }
@@ -656,6 +674,56 @@ const defaultHead = () => render`
 `;
 
 exports.defaultHead = defaultHead;
+},{"../../src/index.js":"../src/index.js"}],"pages/posts.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Posts = Posts;
+
+var _index = _interopRequireDefault(require("../../src/index.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const {
+  render
+} = _index.default;
+const posts = [{
+  id: 0,
+  title: 'Amet totam tempore repudiandae distinctio'
+}, {
+  id: 1,
+  title: 'Sit eveniet exercitationem vitae minima.'
+}, {
+  id: 2,
+  title: 'Dolor sit dignissimos omnis ducimus'
+}, {
+  id: 3,
+  title: 'Ipsum debitis eveniet veritatis iste!'
+}];
+
+function Posts() {
+  return render`
+    <div>
+      <h1>Posts</h1>
+      <ul>
+        ${posts.map(({
+    id,
+    title
+  }) => {
+    return render`
+            <li>
+              <Link href=${`/posts/${id}`}>
+                <a>${title}</a>
+              </Link>
+            </li>
+          `;
+  })}
+      </ul>
+    </div>
+  `;
+}
 },{"../../src/index.js":"../src/index.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
@@ -669,6 +737,8 @@ var _contact = require("./pages/contact.js");
 
 var _ = require("./pages/404.js");
 
+var _posts = require("./pages/posts.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const {
@@ -681,6 +751,7 @@ router({
     '/': () => render`<${_index2.Home} content='Hello World'/>`,
     '/about': () => render`<${_about.About} />`,
     '/contact': () => render`<${_contact.Contact} />`,
+    '/posts': () => render`<${_posts.Posts} />`,
     '*': () => render`<${_.NotFound} />`
   },
   head: {
@@ -689,7 +760,7 @@ router({
     '*': _.defaultHead
   }
 });
-},{"../src/index.js":"../src/index.js","./pages/index.js":"pages/index.js","./pages/about.js":"pages/about.js","./pages/contact.js":"pages/contact.js","./pages/404.js":"pages/404.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"../src/index.js":"../src/index.js","./pages/index.js":"pages/index.js","./pages/about.js":"pages/about.js","./pages/contact.js":"pages/contact.js","./pages/404.js":"pages/404.js","./pages/posts.js":"pages/posts.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

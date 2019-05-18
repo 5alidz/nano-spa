@@ -58,6 +58,9 @@ export function Home({ content }) {
       <Link href='/about'>
         <a>read more...</a>
       </Link>
+      <Link href'/posts'>
+        <a>--POSTS</a>
+      </Link>
     </div>
   `
 }

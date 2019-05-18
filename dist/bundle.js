@@ -66,6 +66,19 @@ var nano_spa = (function () {
     return element
   }
 
+  const get_current = () => window.location.pathname;
+
+  const UNMOUNT = 'on_route_unmount';
+  const MOUNT = 'on_route_mount';
+
+  const on_unmount = (methods, root_handler) => methods[UNMOUNT]
+    && methods[UNMOUNT](
+      get_current(),
+      root_handler.root.children[0]
+    );
+  const on_mount = (methods, route_dom) => methods[MOUNT]
+    && methods[MOUNT](get_current(), route_dom);
+
   const init_root = (root) => {
     return {
       replace_with(dom_node) {
@@ -78,10 +91,12 @@ var nano_spa = (function () {
 
   const init_head = (components={}) => {
     let prev_head = [];
+    const clear_prev = () => prev_head.map(node => head.removeChild(node));
     const head = document.head;
     const default_head = components['*'];
     if(default_head) {
       const rendered = default_head();
+      // #1
       if(Array.isArray(rendered)) {
         rendered.map(vnode => head.appendChild(create_dom_nodes(vnode)));
       } else {
@@ -91,21 +106,19 @@ var nano_spa = (function () {
     return {
       set(route) {
         if(!components[route]) {
-          prev_head.map(node => head.removeChild(node));
+          clear_prev();
           prev_head = [];
           return
         }
-        prev_head.map(dom_node => head.removeChild(dom_node));
-        const rendered = components[route] ? components[route]() : undefined;
-        if(!rendered) {return}
+        clear_prev();
+        const rendered = components[route]();
+        // #1
         if(Array.isArray(rendered)) {
-          const nodes = rendered.map(vnode => create_dom_nodes(vnode));
-          prev_head = nodes;
+          const nodes = prev_head = rendered.map(vnode => create_dom_nodes(vnode));
           nodes.map(dom_node => head.appendChild(dom_node));
         } else {
-          const node = create_dom_nodes(rendered);
-          prev_head = [node];
-          head.appendChild(node);
+          const node = prev_head = [create_dom_nodes(rendered)];
+          head.appendChild(node[0]);
         }
       }
     }
@@ -133,6 +146,7 @@ var nano_spa = (function () {
         const element = create_dom_nodes(target);
         const href = node.props.href;
         const match_href = href.split('/').filter(_ => _);
+        // pls regex.
         const source = Object.keys(routes).reduce((acc, curr) => {
           const match_arr = curr.split('*').map(s => s.replace(/\//g, ''));
           if(match_arr.length === match_href.length) {
@@ -144,10 +158,7 @@ var nano_spa = (function () {
         element.href = href;
         element.onclick = e => {
           e.preventDefault();
-          methods['on_route_unmount']&&methods['on_route_unmount'](
-            window.location.pathname,
-            root_handler.root.children[0]
-          );
+          on_unmount(methods, root_handler);
           window.history.pushState({}, '', href);
           head_handler.set(href);
           const route_component = routes[href]
@@ -156,7 +167,8 @@ var nano_spa = (function () {
               ? routes[source.src](source.params)
               : NOT_FOUND();
           const route_dom = create_dom_nodes(route_component);
-          methods['on_route_mount']&&methods['on_route_mount'](href, route_dom);
+          // #2
+          on_mount(methods, route_dom);
           root_handler.replace_with(route_dom);
         };
         return element
@@ -164,42 +176,26 @@ var nano_spa = (function () {
     };
 
     return {
-      get: (route) => {
-        if(routes[route]) {
-          return create_dom_nodes.call(handlers, routes[route]())
-        } else {
-          return create_dom_nodes(NOT_FOUND())
-        }
+      render: () => {
+        const route = window.location.pathname;
+        const route_dom = routes[route]
+          ? create_dom_nodes.call(handlers, routes[route]())
+          : create_dom_nodes(NOT_FOUND());
+        head_handler.set(route);
+        root_handler.replace_with(route_dom);
+        // #2
+        on_mount(methods, route_dom);
       }
     }
   };
-
-  const init_render_route = (
-    root_handler,
-    head_handler,
-    route_handler,
-    methods
-  ) => {
-    return (route) => {
-      const route_dom = route_handler.get(route);
-      head_handler.set(route);
-      root_handler.replace_with(route_dom);
-      methods['on_route_mount']&&methods['on_route_mount'](route, route_dom);
-    }
-  };
-
-  const current_path = () => window.location.pathname;
 
   const bind_initial = (render_route, root_handler, methods) => {
     document.querySelectorAll('.LINK').forEach(link => {
       link.onclick = function(e) {
         e.preventDefault();
         const href = this.getAttribute('href');
-        if(current_path() === href) {return}
-        methods['on_route_unmount']&&methods['on_route_unmount'](
-          current_path(),
-          root_handler.root.children[0]
-        );
+        if(get_current() === href) {return}
+        on_unmount(methods, root_handler);
         window.history.pushState({}, '', href);
         render_route(href);
       };
@@ -207,31 +203,30 @@ var nano_spa = (function () {
   };
 
   function router(o) {
-    const { root, routes, head, methods } = o;
+    const { root, routes={}, head={}, methods={} } = o;
 
     const root_handler = init_root(root);
     const head_handler = init_head(head);
     const route_handler = init_routes(routes, root_handler, head_handler, methods);
-    const render_route = init_render_route(
-      root_handler,
-      head_handler,
-      route_handler,
-      methods
-    );
 
-    bind_initial(render_route, root_handler, methods);
+    bind_initial(route_handler.render, root_handler, methods);
 
-    render_route(current_path());
+    route_handler.render();
 
     window.onpopstate = () => {
-      methods['on_route_unmount']&&methods['on_route_unmount'](
-        window.location.pathname,
-        root_handler.root.children[0]
-      );
-      render_route(current_path());
+      // fix prev route on on_unmount
+      on_unmount(methods, root_handler);
+      route_handler.render();
     };
   }
 
+  /* TODO:
+   * - cache                     [ ]
+   * - context & setContext      [ ]
+   * - component level state     [ ]
+   * - refactor for abstractions [ ]
+   * - max bundle size 4         [ ]
+  ***********************************/
   var index = Object.freeze({render, router});
 
   return index;
