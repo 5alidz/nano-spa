@@ -7,6 +7,7 @@ export function HomeHead() {
       <meta name='description' content='our home page'/>
     `
 }
+
 async function test_async({ timer }) {
   const msg = await new Promise((resolve) => {
     setTimeout(() => {
@@ -45,9 +46,14 @@ function todo({ id }) {
 }
 
 export function Home({ content }) {
+  let count = 0
+  const change_title = () => {
+    document.getElementById('page-title').textContent = `Home ${++count}`
+  }
   return () => render`
     <div id='home'>
-      <h1>Home</h1>
+      <h1 id='page-title'>Home ${count}</h1>
+      <button onclick=${change_title}>change title</button>
       <p>${content}</p>
       <${todo} id=1 />
       <${todo} id=2 />

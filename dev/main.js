@@ -12,13 +12,13 @@ const { router, render } = lib
 router({
   root: document.getElementById('app'),
   routes: {
-    '/': () => render`<${Home} content='Hello World'/>`,
-    '/about': () => render`<${About} />`,
-    '/contact': () => render`<${Contact} />`,
-    '/posts': () => render`<${Posts} />`,
-    '/blogs/(.+)': () => render`<div>just mess up</div>`,
+    '/':           () => render`<${Home} content='Hello World'/>`,
+    '/about':      () => render`<${About} />`,
+    '/contact':    () => render`<${Contact} />`,
+    '/posts':      () => render`<${Posts} />`,
+    '/blogs/(.+)': (matches) => render`<div>just mess up${JSON.stringify(matches)}</div>`,
     '/posts/(.+)': (matches) => render`<${Post} matches=${matches}/>`,
-    '*': () => render`<${NotFound} />`,
+    '*':           () => render`<${NotFound} />`,
   },
   head: {
     '/': HomeHead,
@@ -26,11 +26,7 @@ router({
     '/posts/(.+)': PostHead,
     '*': defaultHead
   },
-  /*
-  methods: {
-    on_route_unmount: (c, r) => console.log(c, r)
-  }
-  */
+  cache: ['/']
 })
 
 

@@ -3,7 +3,6 @@ import router from './router.js'
 
 /* TODO:
  * - cache                     [ ]
- * - component level state     [ ]
  * - refactor for abstractions [x]
 ***********************************/
 export default Object.freeze({render, router})

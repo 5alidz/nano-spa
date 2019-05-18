@@ -367,7 +367,9 @@ const init_head = (components = {}) => {
 
 exports.init_head = init_head;
 
-const init_routes = (routes, root_handler, head_handler, methods) => {
+const init_routes = (routes, root_handler, head_handler, methods, cache) => {
+  /* add caching and a way to escape */
+  const caches = {};
   const NOT_FOUND = routes['*'] ? routes['*'] : () => _create_element.default`<h1 style='text-align: center;'>404</h1>`;
 
   const __FINAL__ = (route, dom) => {
@@ -427,7 +429,8 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       const with_handlers = _create_dom_nodes.default.bind(handlers);
 
       const route = (0, _utils.get_current)();
-      const matched = regex_match(route, routes); // regex
+      const matched = regex_match(route, routes);
+      const from_cache = cache[route]; // regex
 
       const route_dom = routes[route] ? with_handlers(routes[route]()) : matched ? with_handlers(matched[0](matched[1])) : with_handlers(NOT_FOUND());
 
@@ -471,11 +474,12 @@ function router(o) {
     root,
     routes = {},
     head = {},
-    methods = {}
+    methods = {},
+    cache = []
   } = o;
   const root_handler = (0, _handlers.init_root)(root);
   const head_handler = (0, _handlers.init_head)(head);
-  const route_handler = (0, _handlers.init_routes)(routes, root_handler, head_handler, methods);
+  const route_handler = (0, _handlers.init_routes)(routes, root_handler, head_handler, methods, cache);
   bind_initial(route_handler.render, root_handler, methods);
   route_handler.render();
   let prev = (0, _utils.get_current)();
@@ -503,7 +507,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /* TODO:
  * - cache                     [ ]
- * - component level state     [ ]
  * - refactor for abstractions [x]
 ***********************************/
 var _default = Object.freeze({
@@ -584,9 +587,16 @@ function todo({
 function Home({
   content
 }) {
+  let count = 0;
+
+  const change_title = () => {
+    document.getElementById('page-title').textContent = `Home ${++count}`;
+  };
+
   return () => render`
     <div id='home'>
-      <h1>Home</h1>
+      <h1 id='page-title'>Home ${count}</h1>
+      <button onclick=${change_title}>change title</button>
       <p>${content}</p>
       <${todo} id=1 />
       <${todo} id=2 />
@@ -811,7 +821,7 @@ router({
     '/about': () => render`<${_about.About} />`,
     '/contact': () => render`<${_contact.Contact} />`,
     '/posts': () => render`<${_posts.Posts} />`,
-    '/blogs/(.+)': () => render`<div>just mess up</div>`,
+    '/blogs/(.+)': matches => render`<div>just mess up${JSON.stringify(matches)}</div>`,
     '/posts/(.+)': matches => render`<${_post.Post} matches=${matches}/>`,
     '*': () => render`<${_.NotFound} />`
   },
@@ -820,13 +830,8 @@ router({
     '/about': _about.AboutHead,
     '/posts/(.+)': _post.PostHead,
     '*': _.defaultHead
-  }
-  /*
-  methods: {
-    on_route_unmount: (c, r) => console.log(c, r)
-  }
-  */
-
+  },
+  cache: ['/']
 });
 },{"../src/index.js":"../src/index.js","./pages/index.js":"pages/index.js","./pages/about.js":"pages/about.js","./pages/contact.js":"pages/contact.js","./pages/404.js":"pages/404.js","./pages/posts.js":"pages/posts.js","./pages/post.js":"pages/post.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];

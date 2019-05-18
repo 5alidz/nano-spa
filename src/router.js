@@ -20,10 +20,10 @@ const bind_initial = (render_route, root_handler, methods) => {
 }
 
 export default function router(o) {
-  const { root, routes={}, head={}, methods={} } = o
+  const { root, routes={}, head={}, methods={}, cache=[] } = o
   const root_handler = init_root(root)
   const head_handler = init_head(head)
-  const route_handler = init_routes(routes, root_handler, head_handler, methods)
+  const route_handler = init_routes(routes, root_handler, head_handler, methods, cache)
   bind_initial(route_handler.render, root_handler, methods)
   route_handler.render()
   let prev = get_current()

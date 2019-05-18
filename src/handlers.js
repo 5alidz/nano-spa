@@ -53,7 +53,15 @@ export const init_head = (components={}) => {
   }
 }
 
-export const init_routes = (routes, root_handler, head_handler, methods) => {
+export const init_routes = (
+  routes,
+  root_handler,
+  head_handler,
+  methods,
+  cache
+) => {
+  /* add caching and a way to escape */
+  const caches = {}
   const NOT_FOUND = routes['*']
     ? routes['*']
     : () => render`<h1 style='text-align: center;'>404</h1>`
@@ -105,6 +113,7 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
       const with_handlers = create_dom_nodes.bind(handlers)
       const route = get_current()
       const matched = regex_match(route, routes)
+      const from_cache = cache[route]
       // regex
       const route_dom = routes[route]
         ? with_handlers(routes[route]())
