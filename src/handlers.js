@@ -41,10 +41,25 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
   const NOT_FOUND = routes['*']
     ? routes['*']
     : () => render`<h1 style='text-align: center;'>404</h1>`
+
   const __FINAL__ = (route, dom) => {
     on_mount(methods, dom)
     head_handler.set(route)
     root_handler.replace_with(dom)
+  }
+
+  const regex_match = (route, with_handlers) => {
+    let matched = undefined
+    Object.keys(routes).filter(key => key !== '*').map(key => {
+      if(routes[route]) {return}
+      const regex = new RegExp(key)
+      const regex_vals = regex.exec(route)
+      if(regex.test(route) && regex_vals.length >= 2) {
+        const [, ...matches] = regex_vals
+        matched = with_handlers(routes[key](matches))
+      }
+    })
+    return matched
   }
 
   const handlers = {
@@ -67,13 +82,15 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
       const href = node.props.href
       // regex
       element.href = href
+      /* EXPERIMENTAL*/
+      const matched = regex_match(href, with_handlers)
       element.onclick = e => {
         e.preventDefault()
         on_unmount(methods, root_handler)
         __PUSH_STATE__(href)
         const route_dom = routes[href]
           ? with_handlers(routes[href]())
-          : with_handlers(NOT_FOUND())
+          : matched ? matched : with_handlers(NOT_FOUND())
         __FINAL__(href, route_dom)
       }
       return element
@@ -84,10 +101,11 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
     render: () => {
       const with_handlers = create_dom_nodes.bind(handlers)
       const route = get_current()
+      const matched = regex_match(route, with_handlers)
       // regex
       const route_dom = routes[route]
         ? with_handlers(routes[route]())
-        : with_handlers(NOT_FOUND())
+        : matched ? matched : with_handlers(NOT_FOUND())
       __FINAL__(route, route_dom)
     }
   }

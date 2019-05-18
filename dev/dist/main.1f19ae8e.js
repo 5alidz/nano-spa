@@ -275,7 +275,7 @@ exports.__PUSH_STATE__ = __PUSH_STATE__;
 const UNMOUNT = 'on_route_unmount';
 const MOUNT = 'on_route_mount';
 
-const on_unmount = (methods, root_handler) => methods[UNMOUNT] && methods[UNMOUNT](get_current(), root_handler.root.children[0]);
+const on_unmount = (methods, root_handler, route) => methods[UNMOUNT] && methods[UNMOUNT](route || get_current(), root_handler.root.children[0]);
 
 exports.on_unmount = on_unmount;
 
@@ -353,6 +353,24 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
     root_handler.replace_with(dom);
   };
 
+  const regex_match = (route, with_handlers) => {
+    let matched = undefined;
+    Object.keys(routes).filter(key => key !== '*').map(key => {
+      if (routes[route]) {
+        return;
+      }
+
+      const regex = new RegExp(key);
+      const regex_vals = regex.exec(route);
+
+      if (regex.test(route) && regex_vals.length >= 2) {
+        const [, ...matches] = regex_vals;
+        matched = with_handlers(routes[key](matches));
+      }
+    });
+    return matched;
+  };
+
   const handlers = {
     PROMISE: node => {
       const with_handlers = _create_dom_nodes.default.bind(handlers);
@@ -382,12 +400,15 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       const href = node.props.href; // regex
 
       element.href = href;
+      /* EXPERIMENTAL*/
+
+      const matched = regex_match(href, with_handlers);
 
       element.onclick = e => {
         e.preventDefault();
         (0, _utils.on_unmount)(methods, root_handler);
         (0, _utils.__PUSH_STATE__)(href);
-        const route_dom = routes[href] ? with_handlers(routes[href]()) : with_handlers(NOT_FOUND());
+        const route_dom = routes[href] ? with_handlers(routes[href]()) : matched ? matched : with_handlers(NOT_FOUND());
 
         __FINAL__(href, route_dom);
       };
@@ -399,9 +420,10 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
     render: () => {
       const with_handlers = _create_dom_nodes.default.bind(handlers);
 
-      const route = (0, _utils.get_current)(); // regex
+      const route = (0, _utils.get_current)();
+      const matched = regex_match(route, with_handlers); // regex
 
-      const route_dom = routes[route] ? with_handlers(routes[route]()) : with_handlers(NOT_FOUND());
+      const route_dom = routes[route] ? with_handlers(routes[route]()) : matched ? matched : with_handlers(NOT_FOUND());
 
       __FINAL__(route, route_dom);
     }
@@ -450,10 +472,12 @@ function router(o) {
   const route_handler = (0, _handlers.init_routes)(routes, root_handler, head_handler, methods);
   bind_initial(route_handler.render, root_handler, methods);
   route_handler.render();
+  let prev = (0, _utils.get_current)();
 
   window.onpopstate = () => {
     // fix prev route on on_unmount
-    (0, _utils.on_unmount)(methods, root_handler);
+    (0, _utils.on_unmount)(methods, root_handler, prev);
+    prev = (0, _utils.get_current)();
     route_handler.render();
   };
 }
@@ -710,6 +734,31 @@ function Posts() {
     </div>
   `;
 }
+},{"../../src/index.js":"../src/index.js"}],"pages/post.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Post = Post;
+
+var _index = _interopRequireDefault(require("../../src/index.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const {
+  render
+} = _index.default;
+
+function Post({
+  matches
+}) {
+  return render`
+    <div>
+      i'm a Post!! ${JSON.stringify(matches)}
+    </div>
+  `;
+}
 },{"../../src/index.js":"../src/index.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
@@ -725,6 +774,8 @@ var _ = require("./pages/404.js");
 
 var _posts = require("./pages/posts.js");
 
+var _post = require("./pages/post.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const {
@@ -738,6 +789,8 @@ router({
     '/about': () => render`<${_about.About} />`,
     '/contact': () => render`<${_contact.Contact} />`,
     '/posts': () => render`<${_posts.Posts} />`,
+    '/blogs/(.+)': () => render`<div>just mess up</div>`,
+    '/posts/(.+)': matches => render`<${_post.Post} matches=${matches}/>`,
     '*': () => render`<${_.NotFound} />`
   },
   head: {
@@ -745,8 +798,14 @@ router({
     '/about': _about.AboutHead,
     '*': _.defaultHead
   }
+  /*
+  methods: {
+    on_route_unmount: (c, r) => console.log(c, r)
+  }
+  */
+
 });
-},{"../src/index.js":"../src/index.js","./pages/index.js":"pages/index.js","./pages/about.js":"pages/about.js","./pages/contact.js":"pages/contact.js","./pages/404.js":"pages/404.js","./pages/posts.js":"pages/posts.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"../src/index.js":"../src/index.js","./pages/index.js":"pages/index.js","./pages/about.js":"pages/about.js","./pages/contact.js":"pages/contact.js","./pages/404.js":"pages/404.js","./pages/posts.js":"pages/posts.js","./pages/post.js":"pages/post.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -774,7 +833,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63340" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60334" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

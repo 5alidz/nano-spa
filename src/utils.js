@@ -4,9 +4,9 @@ export const __PUSH_STATE__ = route => window.history.pushState({}, '', route)
 const UNMOUNT = 'on_route_unmount'
 const MOUNT = 'on_route_mount'
 
-export const on_unmount = (methods, root_handler) => methods[UNMOUNT]
+export const on_unmount = (methods, root_handler, route) => methods[UNMOUNT]
   && methods[UNMOUNT](
-    get_current(),
+    route || get_current(),
     root_handler.root.children[0]
   )
 export const on_mount = (methods, route_dom) => methods[MOUNT]
