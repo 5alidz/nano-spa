@@ -1,7 +1,7 @@
 import render from './create_element.js'
 import create_dom_nodes from './create_dom_nodes.js'
 
-import { on_unmount, on_mount } from './utils.js'
+import { on_unmount, on_mount, __PUSH_STATE__, get_current } from './utils.js'
 
 export const init_root = (root) => {
   return {
@@ -70,7 +70,7 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
       element.onclick = e => {
         e.preventDefault()
         on_unmount(methods, root_handler)
-        window.history.pushState({}, '', href)
+        __PUSH_STATE__(href)
         const route_dom = routes[href]
           ? with_handlers(routes[href]())
           : with_handlers(NOT_FOUND())
@@ -83,7 +83,7 @@ export const init_routes = (routes, root_handler, head_handler, methods) => {
   return {
     render: () => {
       const with_handlers = create_dom_nodes.bind(handlers)
-      const route = window.location.pathname
+      const route = get_current()
       // regex
       const route_dom = routes[route]
         ? with_handlers(routes[route]())

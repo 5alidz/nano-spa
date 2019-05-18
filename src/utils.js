@@ -1,4 +1,5 @@
 export const get_current = () => window.location.pathname
+export const __PUSH_STATE__ = route => window.history.pushState({}, '', route)
 
 const UNMOUNT = 'on_route_unmount'
 const MOUNT = 'on_route_mount'

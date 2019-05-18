@@ -263,11 +263,15 @@ function create_dom_nodes(node) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.on_mount = exports.on_unmount = exports.get_current = void 0;
+exports.on_mount = exports.on_unmount = exports.__PUSH_STATE__ = exports.get_current = void 0;
 
 const get_current = () => window.location.pathname;
 
 exports.get_current = get_current;
+
+const __PUSH_STATE__ = route => window.history.pushState({}, '', route);
+
+exports.__PUSH_STATE__ = __PUSH_STATE__;
 const UNMOUNT = 'on_route_unmount';
 const MOUNT = 'on_route_mount';
 
@@ -382,7 +386,7 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
       element.onclick = e => {
         e.preventDefault();
         (0, _utils.on_unmount)(methods, root_handler);
-        window.history.pushState({}, '', href);
+        (0, _utils.__PUSH_STATE__)(href);
         const route_dom = routes[href] ? with_handlers(routes[href]()) : with_handlers(NOT_FOUND());
 
         __FINAL__(href, route_dom);
@@ -395,7 +399,7 @@ const init_routes = (routes, root_handler, head_handler, methods) => {
     render: () => {
       const with_handlers = _create_dom_nodes.default.bind(handlers);
 
-      const route = window.location.pathname; // regex
+      const route = (0, _utils.get_current)(); // regex
 
       const route_dom = routes[route] ? with_handlers(routes[route]()) : with_handlers(NOT_FOUND());
 
@@ -428,7 +432,7 @@ const bind_initial = (render_route, root_handler, methods) => {
       }
 
       (0, _utils.on_unmount)(methods, root_handler);
-      window.history.pushState({}, '', href);
+      (0, _utils.__PUSH_STATE__)(href);
       render_route(href);
     };
   });

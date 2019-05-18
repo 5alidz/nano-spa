@@ -4,7 +4,7 @@ import {
   init_routes,
 } from './handlers.js'
 
-import { get_current, on_unmount } from  './utils.js'
+import { get_current, on_unmount, __PUSH_STATE__ } from  './utils.js'
 
 const bind_initial = (render_route, root_handler, methods) => {
   document.querySelectorAll('.LINK').forEach(link => {
@@ -13,7 +13,7 @@ const bind_initial = (render_route, root_handler, methods) => {
       const href = this.getAttribute('href')
       if(get_current() === href) {return}
       on_unmount(methods, root_handler)
-      window.history.pushState({}, '', href)
+      __PUSH_STATE__(href)
       render_route(href)
     }
   })

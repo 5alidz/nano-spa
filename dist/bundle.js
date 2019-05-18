@@ -63,6 +63,7 @@ var nano_spa = (function () {
   }
 
   const get_current = () => window.location.pathname;
+  const __PUSH_STATE__ = route => window.history.pushState({}, '', route);
 
   const UNMOUNT = 'on_route_unmount';
   const MOUNT = 'on_route_mount';
@@ -142,7 +143,7 @@ var nano_spa = (function () {
         element.onclick = e => {
           e.preventDefault();
           on_unmount(methods, root_handler);
-          window.history.pushState({}, '', href);
+          __PUSH_STATE__(href);
           const route_dom = routes[href]
             ? with_handlers(routes[href]())
             : with_handlers(NOT_FOUND());
@@ -155,7 +156,7 @@ var nano_spa = (function () {
     return {
       render: () => {
         const with_handlers = create_dom_nodes.bind(handlers);
-        const route = window.location.pathname;
+        const route = get_current();
         // regex
         const route_dom = routes[route]
           ? with_handlers(routes[route]())
@@ -172,7 +173,7 @@ var nano_spa = (function () {
         const href = this.getAttribute('href');
         if(get_current() === href) {return}
         on_unmount(methods, root_handler);
-        window.history.pushState({}, '', href);
+        __PUSH_STATE__(href);
         render_route(href);
       };
     });
