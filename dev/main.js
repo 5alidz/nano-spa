@@ -16,7 +16,7 @@ router({
     '/about':      () => render`<${About} />`,
     '/contact':    () => render`<${Contact} />`,
     '/posts':      () => render`<${Posts} />`,
-    '/blogs/(.+)': (matches) => render`<div>just mess up${JSON.stringify(matches)}</div>`,
+    '/blogs/(\\w+)': (matches) => render`<div>just mess up${JSON.stringify(matches)}</div>`,
     '/posts/(.+)': (matches) => render`<${Post} matches=${matches}/>`,
     '*':           () => render`<${NotFound} />`,
   },
@@ -28,5 +28,3 @@ router({
   },
   //cache: ['/']
 })
-
-

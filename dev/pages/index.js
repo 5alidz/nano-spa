@@ -48,6 +48,7 @@ function todo({ id }) {
 export function Home({ content }) {
   let count = 0
   const change_title = () => {
+    console.log('hello')
     document.getElementById('page-title').textContent = `Home ${++count}`
   }
   return () => render`
