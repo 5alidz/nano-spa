@@ -119,6 +119,7 @@ export const init_routes = (
       const matched = regex_match(route, routes)
       const route_tree = with_handlers(gen_tree(route, matched))
       if(!caches[route]) { caches[route] = route_tree }
+      console.log(route)
       __FINAL__(route, DONT_CACHE ? route_tree : caches[route])
     }
   }
