@@ -27,6 +27,7 @@ var nano_spa = (function () {
   function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
       if (key.startsWith('on') && key.toLowerCase() === key) {
+        // maybe on unmout and no-cache we need to remove it??
         element[key] = value;
       } else {
         element.setAttribute(key, value);
@@ -58,7 +59,7 @@ var nano_spa = (function () {
     if(type === '__PROMISE__') { return this.PROMISE(node) }
     const element = document.createElement(type);
     handle_props(props, element);
-    children_with_handlers.call(this, children, element);
+    children_with_handlers(children, element);
     return element
   }
 
@@ -223,11 +224,7 @@ var nano_spa = (function () {
     };
   }
 
-  /* TODO:
-   * - cache                     [ ]
-   * - refactor for abstractions [x]
-  ***********************************/
-  var index = Object.freeze({render, router});
+  var index = {render, router};
 
   return index;
 

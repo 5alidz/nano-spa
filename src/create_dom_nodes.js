@@ -1,6 +1,7 @@
 function handle_props(props, element) {
   Object.entries(props).forEach(([key, value]) => {
     if (key.startsWith('on') && key.toLowerCase() === key) {
+      // maybe on unmout and no-cache we need to remove it??
       element[key] = value
     } else {
       element.setAttribute(key, value)
@@ -32,6 +33,6 @@ export default function create_dom_nodes(node) {
   if(type === '__PROMISE__') { return this.PROMISE(node) }
   const element = document.createElement(type)
   handle_props(props, element)
-  children_with_handlers.call(this, children, element)
+  children_with_handlers(children, element)
   return element
 }
