@@ -2,14 +2,12 @@ import htm from './htm.min.js'
 
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('')
 
-let count = 0
-
 export default htm.bind(function create_element(type, props, ...children) {
   const node = {type, props, children}
   node.props = node.props || {}
   function handle_custom_element(_node) {
     if(_node.type.constructor.name === 'AsyncFunction'){
-      return create_element('__PROMISE__', {promise: _node, id: ++count}, [])
+      return create_element('__PROMISE__', {promise: _node}, [])
     }
     const render = _node.type(_node.props)
     const new_node =  typeof render === 'function' ? render() : render

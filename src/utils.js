@@ -12,13 +12,3 @@ export const on_unmount = (methods, root_handler, route) => methods[UNMOUNT]
 
 export const on_mount = (methods, route_dom) => methods[MOUNT]
   && methods[MOUNT](get_current(), route_dom)
-
-export const traverse = (root, callback) => {
-  root = callback(root)
-  if(root.children && root.children.length) {
-    root.children = root.children.map(child => {
-    return traverse(child, callback)
-    })
-  }
-  return root
-}

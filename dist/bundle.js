@@ -5,14 +5,12 @@ var nano_spa = (function () {
 
   const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('');
 
-  let count = 0;
-
   var render = htm.bind(function create_element(type, props, ...children) {
     const node = {type, props, children};
     node.props = node.props || {};
     function handle_custom_element(_node) {
       if(_node.type.constructor.name === 'AsyncFunction'){
-        return create_element('__PROMISE__', {promise: _node, id: ++count}, [])
+        return create_element('__PROMISE__', {promise: _node}, [])
       }
       const render = _node.type(_node.props);
       const new_node =  typeof render === 'function' ? render() : render;
@@ -78,16 +76,6 @@ var nano_spa = (function () {
 
   const on_mount = (methods, route_dom) => methods[MOUNT]
     && methods[MOUNT](get_current(), route_dom);
-
-  const traverse = (root, callback) => {
-    root = callback(root);
-    if(root.children && root.children.length) {
-      root.children = root.children.map(child => {
-      return traverse(child, callback)
-      });
-    }
-    return root
-  };
 
   const regex_match = (route, routes) => {
     let matched = undefined;
@@ -156,8 +144,7 @@ var nano_spa = (function () {
       ? routes[route]()
       : matched ? matched[0](matched[1]) : NOT_FOUND();
 
-    const __FINAL__ = (route, tree, with_handlers) => {
-      const dom = with_handlers(tree);
+    const __FINAL__ = (route, dom) => {
       on_mount(methods, dom);
       head_handler.set(route);
       root_handler.replace_with(dom);
@@ -173,12 +160,6 @@ var nano_spa = (function () {
         const element = with_handlers(_placeholder);
         new_node.then(_node => {
           element.parentNode.replaceChild(with_handlers(_node), element);
-          caches[get_current()] = traverse(caches[get_current()], (root) => {
-            if(root.type == '__PROMISE__' && root.props.id === node.props.id) {
-              return _node
-            }
-            return root
-          });
         });
         return element
       },
@@ -193,8 +174,8 @@ var nano_spa = (function () {
           e.preventDefault();
           on_unmount(methods, root_handler);
           __PUSH_STATE__(href);
-          const route_tree = gen_tree(href, matched);
-          __FINAL__(href, route_tree, with_handlers);
+          const route_tree = with_handlers(gen_tree(href, matched));
+          __FINAL__(href, route_tree);
         };
         return element
       }
@@ -206,9 +187,9 @@ var nano_spa = (function () {
         const route = get_current();
         const DONT_CACHE = cache.includes(route);
         const matched = regex_match(route, routes);
-        const route_tree = gen_tree(route, matched);
+        const route_tree = with_handlers(gen_tree(route, matched));
         if(!caches[route]) { caches[route] = route_tree; }
-        __FINAL__(route, DONT_CACHE ? route_tree : caches[route], with_handlers);
+        __FINAL__(route, DONT_CACHE ? route_tree : caches[route]);
       }
     }
   };

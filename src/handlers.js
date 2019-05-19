@@ -1,12 +1,10 @@
 import render from './create_element.js'
 import create_dom_nodes from './create_dom_nodes.js'
-
 import {
   on_unmount,
   on_mount,
-  __PUSH_STATE__,
   get_current,
-  traverse
+  __PUSH_STATE__,
 } from './utils.js'
 
 const regex_match = (route, routes) => {
@@ -76,8 +74,7 @@ export const init_routes = (
     ? routes[route]()
     : matched ? matched[0](matched[1]) : NOT_FOUND()
 
-  const __FINAL__ = (route, tree, with_handlers) => {
-    const dom = with_handlers(tree)
+  const __FINAL__ = (route, dom) => {
     on_mount(methods, dom)
     head_handler.set(route)
     root_handler.replace_with(dom)
@@ -93,12 +90,6 @@ export const init_routes = (
       const element = with_handlers(_placeholder)
       new_node.then(_node => {
         element.parentNode.replaceChild(with_handlers(_node), element)
-        caches[get_current()] = traverse(caches[get_current()], (root) => {
-          if(root.type == '__PROMISE__' && root.props.id === node.props.id) {
-            return _node
-          }
-          return root
-        })
       })
       return element
     },
@@ -113,8 +104,8 @@ export const init_routes = (
         e.preventDefault()
         on_unmount(methods, root_handler)
         __PUSH_STATE__(href)
-        const route_tree = gen_tree(href, matched)
-        __FINAL__(href, route_tree, with_handlers)
+        const route_tree = with_handlers(gen_tree(href, matched))
+        __FINAL__(href, route_tree)
       }
       return element
     }
@@ -126,9 +117,9 @@ export const init_routes = (
       const route = get_current()
       const DONT_CACHE = cache.includes(route)
       const matched = regex_match(route, routes)
-      const route_tree = gen_tree(route, matched)
+      const route_tree = with_handlers(gen_tree(route, matched))
       if(!caches[route]) { caches[route] = route_tree }
-      __FINAL__(route, DONT_CACHE ? route_tree : caches[route], with_handlers)
+      __FINAL__(route, DONT_CACHE ? route_tree : caches[route])
     }
   }
 }
