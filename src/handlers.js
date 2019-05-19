@@ -36,24 +36,18 @@ export const init_root = (root) => {
 export const init_head = (components={}) => {
   const head = document.head
   let prev_head = []
-
   const clear_prev = () => prev_head.map(node => head.removeChild(node))
-
   const render_single = vnode => {
     const node = create_dom_nodes(vnode)
     head.appendChild(node)
     return node
   }
-
   const render_arr = nodes => nodes.map(render_single)
-
   const handle_component = (comp, is_to_prev) => comp ? Array.isArray(comp)
     ? is_to_prev ? prev_head = render_arr(comp) : render_arr(comp)
     : is_to_prev ? prev_head = [render_single(comp)] : render_single(comp)
     : undefined
-
   handle_component(components['*'] && components['*'](), false)
-
   return {
     set(route) {
       clear_prev()
@@ -88,7 +82,7 @@ export const init_routes = (
     head_handler.set(route)
     root_handler.replace_with(dom)
   }
-  
+
   const handlers = {
     PROMISE: (node) => {
       const with_handlers = create_dom_nodes.bind(handlers)
