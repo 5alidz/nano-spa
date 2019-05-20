@@ -36,7 +36,7 @@ the one requirment for a valid component is that it returns one single element f
 
 ```javascript
 
-// this is an INVALID component.
+// this is an INVALID as a route component.
 function myComponent() {
   return render`
     <h1>lorem ipsum</h1>
@@ -73,7 +73,7 @@ router({
     '/':          () => render`<${home} msg='hello world' />`,
     '/about':     () => render`<${about} />`,
     '/blog/(.+)': (matches) => render`<div>${JSON.stringify(matches)}</div>`,
-    '*':          () => render`<${notFound} />
+    '*':          () => render`<${notFound} />`
   }
 })
 ```
@@ -98,7 +98,7 @@ router({
     '/':          () => render`<${home} msg='hello world' />`,
     '/about':     () => render`<${about} />`,
     '/blog/(.+)': (matches) => render`<div>${JSON.stringify(matches)}</div>`,
-    '*':          () => render`<${notFound} />
+    '*':          () => render`<${notFound} />`
   },
   // adding head elements to routes.
   head: {
@@ -115,11 +115,11 @@ router({
 
 ```
 
-The `'*'` head element here will get added to the `<head></head>` dom element and will present on all routes.
+The `'*'` head element here will get added to the `<head></head>` dom element and will be present on all routes.
 
 ### methods
 
-nano_spa `methods` is a way to communicate to the router that a route has mounted or unmounted
+nano_spa `methods` is a way to do some work when a route is mounted or unmounted
 
 let's continue the same example here.
 
@@ -135,7 +135,7 @@ router({
     '/':          () => render`<${home} msg='hello world' />`,
     '/about':     () => render`<${about} />`,
     '/blog/(.+)': (matches) => render`<div>${JSON.stringify(matches)}</div>`,
-    '*':          () => render`<${notFound} />
+    '*':          () => render`<${notFound} />`
   },
   head: {
     '/': () => render`<title>my-app | Home</title>`,
