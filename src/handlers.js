@@ -9,16 +9,23 @@ import {
 
 const regex_match = (route, routes) => {
   let matched = undefined
-  Object.keys(routes).filter(key => key !== '*').map(key => {
-    if(routes[route]) {return}
-    const regex = new RegExp(key)
-    const regex_vals = regex.exec(route)
-    if(regex.test(route) && regex_vals.length >= 2) {
-      const [, ...matches] = regex_vals
-      matched = routes[key] ? [routes[key], matches] : undefined
-    }
-  })
-  return matched
+  if(routes[route]) {
+    return matched
+  } else {
+    Object
+      .keys(routes)
+      .filter(key => key !== '*' || routes.hasOwnProperty(route))
+      .map(key => {
+        const regex = new RegExp(key)
+        if(!regex.test(route)) { return }
+        const regex_vals = regex.exec(route)
+        if(regex.test(route) && regex_vals.length >= 2) {
+          const [, ...matches] = regex_vals
+          matched = routes[key] ? [routes[key], matches] : undefined
+        }
+      })
+    return matched
+  }
 }
 
 export const init_root = (root) => {
@@ -119,7 +126,6 @@ export const init_routes = (
       const matched = regex_match(route, routes)
       const route_tree = with_handlers(gen_tree(route, matched))
       if(!caches[route]) { caches[route] = route_tree }
-      console.log(route)
       __FINAL__(route, DONT_CACHE ? route_tree : caches[route])
     }
   }
