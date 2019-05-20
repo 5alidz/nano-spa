@@ -84,7 +84,6 @@ ignoring the details for now, but this is it. the entire api of `nano_spa`
 please **NOTE** that `head` doesn't accept a component as value of a route, consider the following.
 
 ```javascript
-
 const Home = () => render`
   <div>
     <h1>Hello, world</h1>
@@ -128,17 +127,15 @@ There's two kind of special routes:
 //...
   routes: {
     // ...
-
-    '/blog/(\\w+)': (matches) => render`<${BlogPost} matches=${matches}/>`
-
+    '/blog/(\\w+)': (matches) => render`<${BlogPost} matches=${matches}/>`,
+    '*': () => render`<${NotFound} />`
     // ...
   },
   // this will reflect on head too.
   head: {
     // ...
-
     'blog/(\\w+)': (matches) => render`<title>${matches[0]}</title>`
-
+    '*': () => render`<meta name='author' content='5alidz' />`
     // ...
   }
 // ...
@@ -153,11 +150,9 @@ There's two kind of special routes:
 ```javascript
 async function Lazy() {
   // wait one second then resolve the promise.
-
   const text = await new Promise(resolve => {
     setTimeout(() => resolve('Hello, world'), 1000)
   })
-
   return render`<div>${text}</div>`
 }
 
