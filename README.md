@@ -74,7 +74,7 @@ router({
     }
   },
   // opt out of caching.
-  cache: [/]
+  cache: ['/']
 })
 
 ```
@@ -144,6 +144,32 @@ There's two kind of special routes:
 // ...
 ```
 
+### async component
+
+**Important**
+- await any values you will use inside `render`.
+- any async component requires a `placeholder` prop that should be a valid jsx element.
+
+```javascript
+async function Lazy() {
+  // wait one second then resolve the promise.
+
+  const text = await new Promise(resolve => {
+    setTimeout(() => resolve('Hello, world'), 1000)
+  })
+
+  return render`<div>${text}</div>`
+}
+
+function WithLazy() {
+  return render`
+    <div>
+      <p>this will load instantly</p>
+      <${Lazy} placeholder=${() => render`<div>...</div>`} />
+    </div>
+  `
+}
+```
 
 
 
