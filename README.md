@@ -1,7 +1,11 @@
 # nano_spa
+
 ## Why does this exist?
+
 Sometime i just wanted to create a quick and small website that is very simple and cheap but also have the composablity of components and with routes in mind, so basically a budget `react` :)
+
 **NOTE**: this is a work in progress.
+
 ## Features
 - Routing.
 - Composable components [htm](https://github.com/developit/htm).
