@@ -62,9 +62,12 @@ More examples of valid routes.
 
 ```javascript
 import { router, render  } from 'nano_spa'
+
 // using `msg` as prop.
 const home = ({ msg }) => render`<div>${msg}</div>`
+
 const about = () => render`<div>About</div>`
+
 const notFound = () => render`<div>404</div>`
 
 router({
@@ -88,6 +91,7 @@ continuing our example.
 
 ```javascript
 import { router, render  } from 'nano_spa'
+
 const home = ({ msg }) => render`<div>${msg}</div>`
 const about = () => render`<div>About</div>`
 const notFound = () => render`<div>404</div>`
@@ -125,6 +129,7 @@ let's continue the same example here.
 
 ```javascript
 import { router, render  } from 'nano_spa'
+
 const home = ({ msg }) => render`<div>${msg}</div>`
 const about = () => render`<div>About</div>`
 const notFound = () => render`<div>404</div>`
