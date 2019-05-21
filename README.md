@@ -1,5 +1,3 @@
-# nano_spa
-
 ## Why does this exist?
 
 Sometimes i just want to create a quick and small website to test something or explore an idea quickly without downlaoding lots of npm modules.
@@ -43,7 +41,7 @@ to build your app `npm run build` or `yarn build`
 - Routing.
 - Composable components [htm](https://github.com/developit/htm).
 - Async components.
-- speed. (since it's less than 4kb it loads instantly over slow 3g connection)
+- speed. (since it's less than 4kb it loads very fast over slow 3g connection)
 - SEO friendly.
 
 ## Routing
@@ -56,9 +54,8 @@ to build your app `npm run build` or `yarn build`
 import { router, render } from 'nano_spa'
 
 router({
-  routes: {
-    '/': () => render`<div>Hello, world!<//>`
-  },
+  root: document.getElementById('app'),
+  routes: { '/': () => render`<div>Hello, world!<//>` },
   head: {
   '/': () => render`
     <title>Home</title>
@@ -129,14 +126,12 @@ There's two kind of special routes:
     // ...
     '/blog/(\\w+)': (matches) => render`<${BlogPost} matches=${matches}/>`,
     '*': () => render`<${NotFound} />`
-    // ...
   },
   // this will reflect on head too.
   head: {
     // ...
-    'blog/(\\w+)': (matches) => render`<title>${matches[0]}</title>`
+    '/blog/(\\w+)': (matches) => render`<title>${matches[0]}</title>`
     '*': () => render`<meta name='author' content='5alidz' />`
-    // ...
   }
 // ...
 ```
@@ -145,7 +140,7 @@ There's two kind of special routes:
 
 **Important**
 - await any values you will use inside `render`.
-- any async component requires a `placeholder` prop that should be a valid jsx element.
+- any async component requires a `placeholder` prop to render until the async component is ready.
 
 ```javascript
 async function Lazy() {
@@ -166,20 +161,42 @@ function WithLazy() {
 }
 ```
 
+### Deployment
 
+once you feel happy about your app run `npm run build` this will populate dist folder with `index.html` and `/static`.
 
+the key concept to make a client side spa is serving `index.html` on every route.
 
+#### using Netlify
 
+`cd dist/ && touch _redirects` and the following to `_redirects`.
+```
+/*    /index.html   200
+```
 
+that's it, if you have installed `netlify-cli` then just run `netlify deploy`
 
+### using zeit's Now
 
+`cd dist/ && touch now.json` and add the following to `now.json`
 
+```javascript
+{
+  "version": 2,
+  "routes": [
+  {
+      "src": "/static/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable"   },
+      "dest": "/static/$1"
+  },
+    {"src": "/robots.txt", "dest": "/static/robots.txt"},
+    {
+      "src": "/(.*)",
+      "headers": {"cache-control": "s-maxage=0"},
+      "dest": "/index.html"
+    }
+    ]
+}
+```
 
-
-
-
-
-
-
-
-
+enjoy!
