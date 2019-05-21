@@ -184,19 +184,19 @@ that's it, if you have installed `netlify-cli` then just run `netlify deploy`
 {
   "version": 2,
   "routes": [
-  {
-      "src": "/static/(.*)",
-      "headers": { "cache-control": "s-maxage=31536000,immutable"   },
-      "dest": "/static/$1"
-  },
+    {
+        "src": "/static/(.*)",
+        "headers": { "cache-control": "s-maxage=31536000,immutable" },
+        "dest": "/static/$1"
+    },
     {"src": "/robots.txt", "dest": "/static/robots.txt"},
     {
       "src": "/(.*)",
       "headers": {"cache-control": "s-maxage=0"},
       "dest": "/index.html"
     }
-    ]
+  ]
 }
 ```
 
-enjoy!
+enjoy 🎉
