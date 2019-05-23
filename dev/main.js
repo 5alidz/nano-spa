@@ -27,5 +27,8 @@ router({
     '/posts/(.+)': PostHead,
     '*': defaultHead
   },
-  //cache: ['/']
+  methods: {
+    on_route_mount: console.log,
+    on_route_unmount: console.log
+  }
 })

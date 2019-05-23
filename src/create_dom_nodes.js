@@ -1,9 +1,8 @@
 function handle_props(props, element) {
   Object.entries(props).forEach(([key, value]) => {
-    if (key.startsWith('on') && key.toLowerCase() === key) {
-      // maybe on unmout and no-cache we need to remove it??
+    if (key.startsWith('on') && window.hasOwnProperty(key)) {
       element[key] = value
-    } else {
+    } else if(key in element){
       element.setAttribute(key, value)
     }
   })

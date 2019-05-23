@@ -24,12 +24,19 @@ var nano_spa = (function () {
     return typeof type === 'function' ? handle_custom_element(node) : node
   });
 
+  var _global = {
+    root: undefined,
+    routes: {},
+    head: {},
+    methods: {},
+    cache: []
+  };
+
   function handle_props(props, element) {
     Object.entries(props).forEach(([key, value]) => {
-      if (key.startsWith('on') && key.toLowerCase() === key) {
-        // maybe on unmout and no-cache we need to remove it??
+      if (key.startsWith('on') && window.hasOwnProperty(key)) {
         element[key] = value;
-      } else {
+      } else if(key in element){
         element.setAttribute(key, value);
       }
     });
@@ -63,22 +70,24 @@ var nano_spa = (function () {
     return element
   }
 
-  const get_current = () => window.location.pathname;
-  const __PUSH_STATE__ = route => window.history.pushState({}, '', route);
-
   const UNMOUNT = 'on_route_unmount';
   const MOUNT = 'on_route_mount';
 
-  const on_unmount = (methods, root_handler, route) => methods[UNMOUNT]
-    && methods[UNMOUNT](
+  const get_current = () => window.location.pathname;
+
+  const __PUSH_STATE__ = route => window.history.pushState({}, '', route);
+
+  const on_unmount = (route) => _global.methods[UNMOUNT]
+    && _global.methods[UNMOUNT](
       route || get_current(),
-      root_handler.root.children[0]
+      _global.root.children[0]
     );
 
-  const on_mount = (methods, route_dom) => methods[MOUNT]
-    && methods[MOUNT](get_current(), route_dom);
+  const on_mount = (route_dom) => _global.methods[MOUNT]
+    && _global.methods[MOUNT](get_current(), route_dom);
 
   const regex_match = (route, routes) => {
+    // pure.
     let matched = undefined;
     if(routes[route]) {
       return matched
@@ -99,139 +108,130 @@ var nano_spa = (function () {
     }
   };
 
-  const init_root = (root) => {
-    return {
-      replace_with(dom_node) {
-        root.innerHTML = '';
-        root.appendChild(dom_node);
-      },
-      root
+  const head = document.head;
+
+  let prev_head = [];
+
+  const clear_prev = () => prev_head.map(node => head.removeChild(node));
+
+  const render_single = vnode => {
+    const node = create_dom_nodes(vnode);
+    head.appendChild(node);
+    return node
+  };
+
+  const render_arr = nodes => nodes.map(render_single);
+
+  const handle_component = (comp, is_to_prev) => comp ? Array.isArray(comp)
+    ? is_to_prev ? prev_head = render_arr(comp) : render_arr(comp)
+    : is_to_prev ? prev_head = [render_single(comp)] : render_single(comp)
+    : undefined;
+
+  const mount_first_head = () => handle_component(
+    _global.head['*'] && _global.head['*'](),
+    false
+  );
+
+  const set = (route) => {
+    clear_prev();
+    const matched = regex_match(route, _global.head);
+    if(matched) {return handle_component(matched[0](matched[1]), true)}
+    if(!_global.head[route]) {return (prev_head = [])}
+    handle_component(_global.head[route](), true);
+  };
+
+  const replace_with = (dom_node) => {
+    _global.root.innerHTML = '';
+    _global.root.appendChild(dom_node);
+  };
+
+  const NOT_FOUND = () => _global.routes['*']
+    ? _global.routes['*']
+    : () => render`<h1 style='text-align: center;'>404</h1>`;
+
+  const gen_tree = (route, matched) => _global.routes[route]
+    ? _global.routes[route]()
+    : matched ? matched[0](matched[1]) : NOT_FOUND()();
+
+  const __FINAL__ = (route, dom) => {
+    on_mount(dom);
+    set(route);
+    replace_with(dom);
+  };
+
+  const caches = {};
+
+  const handlers = {
+    PROMISE(node) {
+      const with_handlers = create_dom_nodes.bind(this);
+      const { props } = node;
+      const { placeholder, ..._props } = props.promise.props;
+      const new_node = props.promise.type(_props);
+      const _placeholder = placeholder();
+      const element = with_handlers(_placeholder);
+      new_node.then(_node => {
+        element.replaceWith(with_handlers(_node));
+      });
+      return element
+    },
+    LINK(node) {
+      const with_handlers = create_dom_nodes.bind(this);
+      const target = node.children[0];
+      const element = with_handlers(target);
+      const href = node.props.href;
+      'href' in element && (element.href = href);
+      const matched = regex_match(href, _global.routes);
+      element.onclick = e => {
+        e.preventDefault();
+        if(get_current() == href) { return }
+        on_unmount();
+        __PUSH_STATE__(href);
+        const route_tree = with_handlers(gen_tree(href, matched));
+        __FINAL__(href, route_tree);
+      };
+      return element
     }
   };
 
-  const init_head = (components={}) => {
-    const head = document.head;
-    let prev_head = [];
-    const clear_prev = () => prev_head.map(node => head.removeChild(node));
-    const render_single = vnode => {
-      const node = create_dom_nodes(vnode);
-      head.appendChild(node);
-      return node
-    };
-    const render_arr = nodes => nodes.map(render_single);
-    const handle_component = (comp, is_to_prev) => comp ? Array.isArray(comp)
-      ? is_to_prev ? prev_head = render_arr(comp) : render_arr(comp)
-      : is_to_prev ? prev_head = [render_single(comp)] : render_single(comp)
-      : undefined;
-    handle_component(components['*'] && components['*'](), false);
-    return {
-      set(route) {
-        clear_prev();
-        const matched = regex_match(route, components);
-        if(matched) {return handle_component(matched[0](matched[1]), true)}
-        if(!components[route]) {return (prev_head = [])}
-        handle_component(components[route](), true);
-      }
-    }
+  const render_route = () => {
+    const with_handlers = create_dom_nodes.bind(handlers);
+    const route = get_current();
+    const DONT_CACHE = _global.cache.includes(route);
+    const matched = regex_match(route, _global.routes);
+    const route_tree = with_handlers(gen_tree(route, matched));
+    if(!caches[route]) { caches[route] = route_tree; }
+    __FINAL__(route, DONT_CACHE ? route_tree : caches[route]);
   };
 
-  const init_routes = (
-    routes,
-    root_handler,
-    head_handler,
-    methods,
-    cache
-  ) => {
-    const caches = {};
-
-    const NOT_FOUND = routes['*']
-      ? routes['*']
-      : () => render`<h1 style='text-align: center;'>404</h1>`;
-
-    const gen_tree = (route, matched) => routes[route]
-      ? routes[route]()
-      : matched ? matched[0](matched[1]) : NOT_FOUND();
-
-    const __FINAL__ = (route, dom) => {
-      on_mount(methods, dom);
-      head_handler.set(route);
-      root_handler.replace_with(dom);
-    };
-
-    const handlers = {
-      PROMISE: (node) => {
-        const with_handlers = create_dom_nodes.bind(handlers);
-        const { props } = node;
-        const { placeholder, ..._props } = props.promise.props;
-        const new_node = props.promise.type(_props);
-        const _placeholder = placeholder();
-        const element = with_handlers(_placeholder);
-        new_node.then(_node => {
-          element.parentNode.replaceChild(with_handlers(_node), element);
-        });
-        return element
-      },
-      LINK: (node) => {
-        const with_handlers = create_dom_nodes.bind(handlers);
-        const target = node.children[0];
-        const element = with_handlers(target);
-        const href = node.props.href;
-        element.href = href;
-        const matched = regex_match(href, routes);
-        element.onclick = e => {
-          e.preventDefault();
-          on_unmount(methods, root_handler);
-          __PUSH_STATE__(href);
-          const route_tree = with_handlers(gen_tree(href, matched));
-          __FINAL__(href, route_tree);
-        };
-        return element
-      }
-    };
-
-    return {
-      render: () => {
-        const with_handlers = create_dom_nodes.bind(handlers);
-        const route = get_current();
-        const DONT_CACHE = cache.includes(route);
-        const matched = regex_match(route, routes);
-        const route_tree = with_handlers(gen_tree(route, matched));
-        if(!caches[route]) { caches[route] = route_tree; }
-        __FINAL__(route, DONT_CACHE ? route_tree : caches[route]);
-      }
-    }
-  };
-
-  const bind_initial = (render_route, root_handler, methods) => {
+  const bind_initial = (render_route) => {
     document.querySelectorAll('.LINK').forEach(link => {
       link.onclick = function(e) {
         e.preventDefault();
         const href = this.getAttribute('href');
         if(get_current() === href) {return}
-        on_unmount(methods, root_handler);
+        on_unmount();
         __PUSH_STATE__(href);
-        render_route(href);
+        render_route();
       };
     });
   };
 
   function router(o) {
-    const { root, routes={}, head={}, methods={}, cache=[] } = o;
-    const root_handler = init_root(root);
-    const head_handler = init_head(head);
-    const route_handler = init_routes(routes, root_handler, head_handler, methods, cache);
-    bind_initial(route_handler.render, root_handler, methods);
-    route_handler.render();
+    Object.assign(_global, o);
+
+    bind_initial(render_route);
+    mount_first_head();
+    render_route();
 
     let prev = get_current();
     window.onpopstate = () => {
-      on_unmount(methods, root_handler, prev);
+      on_unmount(prev);
       prev = get_current();
-      route_handler.render();
+      render_route();
     };
   }
 
-  var index = {render, router};
+  var index = {render, router, to_dom: create_dom_nodes.bind(handlers)};
 
   return index;
 
