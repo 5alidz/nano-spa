@@ -56,7 +56,7 @@ export function Home({ content }) {
   return () => render`
     <div id='home'>
       <h1 id='page-title'>Home ${count}</h1>
-      <button onclick=${change_title} on_something=${something}>change title</button>
+      <button onclick=${change_title}>change title</button>
       <p>${content}</p>
       <${todo} id=1 />
       <${todo} id=2 />

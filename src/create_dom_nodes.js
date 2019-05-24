@@ -2,7 +2,7 @@ function handle_props(props, element) {
   Object.entries(props).forEach(([key, value]) => {
     if (key.startsWith('on') && window.hasOwnProperty(key)) {
       element[key] = value
-    } else if(key in element){
+    } else {
       element.setAttribute(key, value)
     }
   })
