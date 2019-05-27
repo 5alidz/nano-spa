@@ -17,7 +17,6 @@ export const on_mount = (route_dom) => _global.methods[MOUNT]
   && _global.methods[MOUNT](get_current(), route_dom)
 
 export const regex_match = (route, routes) => {
-  // pure.
   let matched = undefined
   if(routes[route]) {
     return matched
