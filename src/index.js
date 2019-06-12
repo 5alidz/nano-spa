@@ -6,4 +6,3 @@ import { handlers } from './render_route.js'
 
 
 export default {render, router, to_dom: create_dom_nodes.bind(handlers)}
-
