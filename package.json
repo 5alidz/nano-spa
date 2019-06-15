@@ -5,10 +5,10 @@
   "author": "5alidz <kzack-dev@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "roll": "rollup --config",
-    "uglify": "uglifyjs --compress --mangle -o dist/bundle.min.js -- dist/bundle.js"
+    "roll": "rm -rf dist && rollup --config",
+    "uglify": "uglifyjs --compress --mangle -o dist/bundle.min.js -- dist/bundle.js",
     "build": "npm run roll && npm run uglify",
-    "dev": "cd ./dev && yarn start",
+    "dev": "cd ./dev && yarn start"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
