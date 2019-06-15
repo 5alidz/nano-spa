@@ -6,6 +6,7 @@ const head = document.head
 let prev_head = []
 
 const clear_prev = () => prev_head.map(node => head.removeChild(node))
+
 const render_arr = nodes => nodes.map(vnode => {
   const node = create_dom_nodes(vnode)
   head.appendChild(node)
@@ -13,9 +14,13 @@ const render_arr = nodes => nodes.map(vnode => {
 })
 
 const to_arr = comp => Array.isArray(comp) ? comp : [comp]
-const handle_component = (comp, is_to_prev) => is_to_prev
-  ? prev_head = render_arr(to_arr(comp))
-  : render_arr(to_arr(comp))
+
+const handle_component = (comp, is_to_prev) => {
+  if(!comp) { return }
+  return is_to_prev
+    ? prev_head = render_arr(to_arr(comp))
+    : render_arr(to_arr(comp))
+}
 
 
 export const mount_first_head = () => handle_component(

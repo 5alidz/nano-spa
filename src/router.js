@@ -1,7 +1,9 @@
 import _global from './global.js'
 
 import { render_route } from './render_route.js'
+
 import { mount_first_head } from './head.js'
+
 import { get_current, on_unmount, __PUSH_STATE__ } from  './utils.js'
 
 const bind_initial = (render_route) => {

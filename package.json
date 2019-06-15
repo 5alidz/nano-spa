@@ -1,21 +1,12 @@
 {
-  "name": "nano_spa_src",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "nano_spa",
+  "version": "2.0.4",
+  "main": "src/index.js",
   "author": "5alidz <kzack-dev@hotmail.com>",
   "license": "MIT",
-  "scripts": {
-    "roll": "rm -rf dist && rollup --config",
-    "uglify": "uglifyjs --compress --mangle -o dist/bundle.min.js -- dist/bundle.js",
-    "build": "npm run roll && npm run uglify",
-    "dev": "cd ./dev && yarn start"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-transform-arrow-functions": "^7.2.0",
-    "@babel/plugin-transform-template-literals": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
-    "uglify-es": "^3.3.9"
+  "description": "route based statless components library",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/5alidz/nano_spa.git"
   }
 }
