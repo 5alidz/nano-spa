@@ -1,17 +1,15 @@
-import htm from './htm.min.js'
+import htm from './lib.htm.min.js'
 
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('')
 
-export default htm.bind(function create_element(type, props, ...children) {
+function render(type, props, ...children) {
   const node = {type, props, children}
   node.props = node.props || {}
+  node.$type = Symbol.for('component')
   function handle_custom_element(_node) {
-    if(_node.type.constructor.name === 'AsyncFunction'){
-      return create_element('__PROMISE__', {promise: _node}, [])
-    }
-    const render = _node.type(_node.props)
-    const new_node =  typeof render === 'function' ? render() : render
-    return create_element(
+    const rendered = _node.type.call(_node, _node.props)
+    const new_node =  typeof rendered === 'function' ? rendered() : rendered
+    return render(
       new_node.type,
       new_node.props,
       ...new_node.children.concat(_node.children)
@@ -19,4 +17,6 @@ export default htm.bind(function create_element(type, props, ...children) {
   }
   if(node.props.style) node.props.style = minify_style(node.props.style)
   return typeof type === 'function' ? handle_custom_element(node) : node
-})
+}
+
+export default htm.bind(render)
