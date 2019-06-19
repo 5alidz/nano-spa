@@ -12,7 +12,6 @@ export const mount_first_head = () => {
   if(typeof default_head == 'function') {
     const comp = default_head()
     const comp_dom = to_dom(comp)
-    console.log(comp_dom)
     comp_dom.forEach(node => head.appendChild(node))
   }
 }
