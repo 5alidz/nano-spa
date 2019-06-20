@@ -1,16 +1,18 @@
 import htm from './lib.htm.min.js'
 
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('')
+const is_comp = vn => vn.$type == Symbol.for('component')
 
 function render(type, props, ...children) {
-  const node = {type, props, children}
-  node.props = node.props || {}
+  const node = {type, props: props || {}, children: children || []}
   node.$type = Symbol.for('component')
   function handle_custom_element(_node) {
     const rendered = _node.type.call(_node, _node.props)
     const new_node =  typeof rendered === 'function' ? rendered() : rendered
     if(Array.isArray(new_node)) {
       return new_node
+    } else if(typeof new_node == 'undefined' || !is_comp(new_node)) {
+      return
     } else {
       return render(
         new_node.type,

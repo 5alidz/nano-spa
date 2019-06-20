@@ -40,7 +40,7 @@ function handle_children(children, element) {
       element.appendChild(to_dom.call(this, {...child}))
     } else if(typeof child == 'object') {
       element.appendChild(create_pre(JSON.stringify(child, null, 2)))
-    } else { return }
+    } else {return}
   })
 }
 
