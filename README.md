@@ -20,6 +20,7 @@ In your terminal.
 `git clone https://github.com/5alidz/create-nano-spa my-app`
 or [use as template](https://https://github.com/5alidz/create-nano-spa)
 you should see a directory structure like this ->
+```
 .
 my-app/
 |-- src/
@@ -32,6 +33,7 @@ my-app/
 |-- ...
 |-- webpack.config.js
 .
+```
 - Yes, webpack. `nano_spa` itself is not bundled and require a build tool.
 
 - If you don't know anything about `webpack` don't worry webpack has an amazing community around it so answers to any questions you have already exists.
