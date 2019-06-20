@@ -1,3 +1,3 @@
 import render from './render.js'
 
-export default render`<p>...</p>`
+export default () => render`<p>...</p>`

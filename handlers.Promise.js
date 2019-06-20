@@ -5,7 +5,7 @@ export default (vNode) => {
   const { props } = vNode
   let placeholder
   if(typeof props.placeholder == 'undefined') {
-    placeholder = default_spinner
+    placeholder = default_spinner()
   } else if(typeof props.placeholder == 'function') {
     placeholder = props.placeholder()
   } else {

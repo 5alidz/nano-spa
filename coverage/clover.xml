@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1561026896308" clover="3.2.0">
+  <project timestamp="1561026896308" name="All files">
+    <metrics statements="73" coveredstatements="46" conditionals="143" coveredconditionals="93" methods="24" coveredmethods="18" elements="240" coveredelements="157" complexity="0" loc="73" ncloc="73" packages="1" files="7" classes="7"/>
+    <file name="default.404.js" path="/home/5alidz/dev/projects/active/nano_spa/default.404.js">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <line num="3" count="1" type="stmt"/>
+    </file>
+    <file name="default.spinner.js" path="/home/5alidz/dev/projects/active/nano_spa/default.spinner.js">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <line num="3" count="1" type="stmt"/>
+    </file>
+    <file name="handlers.Box.js" path="/home/5alidz/dev/projects/active/nano_spa/handlers.Box.js">
+      <metrics statements="13" coveredstatements="12" conditionals="10" coveredconditionals="6" methods="2" coveredmethods="2"/>
+      <line num="4" count="5" type="stmt"/>
+      <line num="5" count="5" type="cond" truecount="2" falsecount="0"/>
+      <line num="6" count="2" type="stmt"/>
+      <line num="8" count="3" type="stmt"/>
+      <line num="9" count="3" type="stmt"/>
+      <line num="11" count="5" type="stmt"/>
+      <line num="12" count="6" type="cond" truecount="1" falsecount="1"/>
+      <line num="13" count="0" type="stmt"/>
+      <line num="15" count="6" type="stmt"/>
+      <line num="18" count="5" type="stmt"/>
+      <line num="19" count="5" type="cond" truecount="1" falsecount="3"/>
+      <line num="20" count="5" type="cond" truecount="2" falsecount="0"/>
+      <line num="21" count="5" type="stmt"/>
+    </file>
+    <file name="internal.global.js" path="/home/5alidz/dev/projects/active/nano_spa/internal.global.js">
+      <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+    </file>
+    <file name="lib.htm.min.js" path="/home/5alidz/dev/projects/active/nano_spa/lib.htm.min.js">
+      <metrics statements="1" coveredstatements="1" conditionals="85" coveredconditionals="67" methods="6" coveredmethods="5"/>
+      <line num="1" count="50" type="cond" truecount="67" falsecount="18"/>
+    </file>
+    <file name="render.js" path="/home/5alidz/dev/projects/active/nano_spa/render.js">
+      <metrics statements="11" coveredstatements="6" conditionals="10" coveredconditionals="5" methods="4" coveredmethods="3"/>
+      <line num="3" count="2" type="stmt"/>
+      <line num="6" count="2" type="stmt"/>
+      <line num="7" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="8" count="2" type="stmt"/>
+      <line num="10" count="0" type="stmt"/>
+      <line num="11" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="12" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="13" count="0" type="stmt"/>
+      <line num="15" count="0" type="stmt"/>
+      <line num="22" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="23" count="2" type="cond" truecount="1" falsecount="1"/>
+    </file>
+    <file name="to_dom.js" path="/home/5alidz/dev/projects/active/nano_spa/to_dom.js">
+      <metrics statements="46" coveredstatements="25" conditionals="38" coveredconditionals="15" methods="9" coveredmethods="6"/>
+      <line num="3" count="1" type="stmt"/>
+      <line num="4" count="0" type="stmt"/>
+      <line num="5" count="0" type="stmt"/>
+      <line num="6" count="0" type="stmt"/>
+      <line num="9" count="1" type="stmt"/>
+      <line num="10" count="12" type="stmt"/>
+      <line num="11" count="12" type="stmt"/>
+      <line num="12" count="12" type="stmt"/>
+      <line num="13" count="12" type="stmt"/>
+      <line num="14" count="12" type="stmt"/>
+      <line num="18" count="12" type="cond" truecount="1" falsecount="1"/>
+      <line num="19" count="12" type="stmt"/>
+      <line num="20" count="6" type="cond" truecount="2" falsecount="2"/>
+      <line num="21" count="0" type="stmt"/>
+      <line num="23" count="6" type="stmt"/>
+      <line num="29" count="12" type="cond" truecount="1" falsecount="1"/>
+      <line num="30" count="12" type="stmt"/>
+      <line num="31" count="8" type="cond" truecount="1" falsecount="1"/>
+      <line num="32" count="0" type="stmt"/>
+      <line num="33" count="8" type="cond" truecount="4" falsecount="0"/>
+      <line num="34" count="6" type="stmt"/>
+      <line num="35" count="2" type="cond" truecount="1" falsecount="1"/>
+      <line num="36" count="0" type="stmt"/>
+      <line num="37" count="2" type="cond" truecount="1" falsecount="1"/>
+      <line num="38" count="0" type="stmt"/>
+      <line num="39" count="2" type="cond" truecount="1" falsecount="1"/>
+      <line num="40" count="2" type="stmt"/>
+      <line num="41" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="42" count="0" type="stmt"/>
+      <line num="43" count="0" type="stmt"/>
+      <line num="48" count="12" type="stmt"/>
+      <line num="49" count="12" type="cond" truecount="1" falsecount="1"/>
+      <line num="50" count="0" type="stmt"/>
+      <line num="51" count="12" type="cond" truecount="1" falsecount="1"/>
+      <line num="52" count="12" type="cond" truecount="1" falsecount="1"/>
+      <line num="53" count="0" type="stmt"/>
+      <line num="55" count="12" type="stmt"/>
+      <line num="57" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="58" count="0" type="stmt"/>
+      <line num="59" count="0" type="cond" truecount="0" falsecount="4"/>
+      <line num="60" count="0" type="stmt"/>
+      <line num="61" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="62" count="0" type="stmt"/>
+      <line num="63" count="0" type="cond" truecount="0" falsecount="2"/>
+      <line num="64" count="0" type="stmt"/>
+      <line num="65" count="0" type="stmt"/>
+    </file>
+  </project>
+</coverage>
