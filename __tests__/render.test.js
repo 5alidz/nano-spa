@@ -3,7 +3,6 @@ const render = render_module.default
 
 test('returns string when input is string', () => {
   function x() {return render`hello`}
-  console.log(render`<${x} />`)
   expect(render`hello world`).toBe('hello world')
 })
 
