@@ -1,5 +1,4 @@
 const render_module = require('../render.js')
-
 const render = render_module.default
 
 test('returns string when input is string', () => {
