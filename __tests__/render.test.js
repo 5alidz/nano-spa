@@ -2,7 +2,6 @@ const render_module = require('../render.js')
 const render = render_module.default
 
 test('returns string when input is string', () => {
-  function x() {return render`hello`}
   expect(render`hello world`).toBe('hello world')
 })
 
