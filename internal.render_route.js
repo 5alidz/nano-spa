@@ -1,5 +1,6 @@
 import _global from './internal.global.js'
 import match from './internal.match.js'
+import mount_component from './mount_component.js'
 import { set } from './internal.head.js'
 
 import _404 from './default.404.js'
@@ -7,9 +8,7 @@ import to_dom from './to_dom.js'
 
 const finalize = (route, dom) => {
   set(route)
-  _global.methods.on_route_mount(window.location.pathname, dom)
-  _global.root.innerHTML = ''
-  _global.root.appendChild(dom)
+  mount_component(_global.root, dom)
 }
 
 const gen_tree = (route, matched) => {

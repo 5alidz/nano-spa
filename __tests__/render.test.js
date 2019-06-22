@@ -1,10 +1,6 @@
 const render_module = require('../render.js')
 const render = render_module.default
 
-test('returns string when input is string', () => {
-  expect(render`hello world`).toBe('hello world')
-})
-
 test('returns undefined when expression evaluates to undefined', () => {
   function noop() {}
   expect(render`${undefined}`).toBe(undefined)
@@ -21,6 +17,39 @@ test('function component must return a valid vNode', () => {
     type: 'div',
     props: {},
     children: ['hello, world'],
-    $type: Symbol.for('component')
+    $type: Symbol.for('nano_spa.component')
+  })
+})
+
+test('handles Fragment', () => {
+  function frag() { return render`<><a /><b /></>` }
+  expect(render`<${frag} />`).toEqual({
+    type: '',
+    props: {},
+    children: [{
+      type: 'a',
+      props: {},
+      children: [],
+      $type: Symbol.for('nano_spa.component')
+    }, {
+      type: 'b',
+      props: {},
+      children: [],
+      $type: Symbol.for('nano_spa.component')
+    }],
+    $type: Symbol.for('nano_spa.fragment')
+  })
+  function c({ color }) {return render`<div style=${`color: ${color};`}>txt</div>`}
+  function frag_c() { return render`<><${c} /></>` }
+  expect(render`<${frag_c} />`).toEqual({
+    type: '',
+    props: {},
+    children: [{
+      type: 'div',
+      props: { style: 'color: undefined;' },
+      children: ['txt'],
+      $type: Symbol.for('nano_spa.component')
+    }],
+    $type: Symbol.for('nano_spa.fragment')
   })
 })

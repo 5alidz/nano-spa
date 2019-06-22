@@ -9,7 +9,7 @@ export const bind_initial = () => {
       if(window.location.pathname === href) {return}
       _global.methods.on_route_unmount(
         window.location.pathname,
-        _global.root.children[0]
+        _global.root.children
       )
       window.history.pushState({}, '', href)
       render_route()
