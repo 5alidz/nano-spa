@@ -1,6 +1,6 @@
 {
   "name": "nano_spa",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "main": "index.js",
   "author": "5alidz <kzack-dev@hotmail.com>",
   "license": "MIT",
@@ -18,8 +18,5 @@
     "@babel/preset-env": "^7.4.5",
     "babel-jest": "^24.8.0",
     "jest": "^24.8.0"
-  },
-  "dependencies": {
-    "marked": "^0.6.2"
   }
 }
