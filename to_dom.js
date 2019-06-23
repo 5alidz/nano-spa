@@ -33,7 +33,7 @@ function to_dom_child(child) {
   if (is_primitive(child)) {
     return document.createTextNode(child)
   } else if (is_fragment(child) || is_component(child)) {
-    return to_dom(child)
+    return to_dom.call(this, child)
   } else {return}
 }
 
@@ -45,12 +45,15 @@ function to_dom_component(node) {
   return element
 }
 
+
 function to_dom(node) {
   const handlers = Object.keys(_global.handlers)
   if(is_invalid(node)) {return}
 
   if(is_component(node)) {
-    if(handlers.includes(node.type)) { return  _global.handlers[node.type](node)}
+    if(handlers.includes(node.type) && this !== undefined) {
+      return  _global.handlers[node.type](node, to_dom.bind(_global.handlers))
+    }
     return to_dom_component.call(this, node)
   }
 
