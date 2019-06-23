@@ -6,8 +6,9 @@
   "license": "MIT",
   "description": "route based statless components library",
   "scripts": {
-    "test": "jest --watchAll",
-    "circle": "madge --circular index.js",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "test:circle": "madge --circular index.js",
     "test:coverage": "jest --coverage"
   },
   "repository": {
