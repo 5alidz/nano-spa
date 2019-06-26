@@ -3,6 +3,11 @@ const render_ = require('../render.js')
 const render = render_.default
 const to_dom = to_dom_.default
 
+test('expecting children but the child is undefined', () => {
+  const c = ({ child }) => render`<div>${child}</div>`
+  const div = document.createElement('div')
+  expect(to_dom(render`<${c} />`)).toEqual(div)
+})
 test('renders basic component', () => {
   const c = ({ color }) => render`<div style=${`color: ${color};`}>hello</div>`
 

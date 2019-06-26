@@ -8,6 +8,7 @@ const is_primitive = node => typeof node == 'string' || typeof node == 'number'
 function handle_props(props, element) {
   if(!props) { return }
   Object.entries(props).forEach(([key, value]) => {
+    if(typeof value == 'undefined') { return }
     if (key.startsWith('on') && window.hasOwnProperty(key)) {
       element[key] = value
     } else {
@@ -19,6 +20,7 @@ function handle_props(props, element) {
 function handle_children(children, element) {
   if(!children) { return }
   children.forEach(child => {
+    if(typeof child == 'undefined') { return }
     if(is_fragment(child)) {
       child.children.map(c => element.appendChild(to_dom_child.call(this, c)))
     } else if(Array.isArray(child)) {
