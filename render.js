@@ -1,6 +1,7 @@
 import htm from './lib.htm.min.js'
 
 const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('')
+const flatten = (arr) => [].concat.apply([], arr)
 
 function handle_custom_element(_node) {
   const rendered = _node.type.call(_node, _node.props)
@@ -24,7 +25,7 @@ function render(type, props, ...children) {
   const node = {
     type,
     props: props || {},
-    children: children || [],
+    children: flatten(children),
     $type: Symbol.for('nano_spa.component')
   }
   if(node.props.style) node.props.style = minify_style(node.props.style)

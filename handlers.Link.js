@@ -28,7 +28,11 @@ export default function LINK(vNode) {
   const target = vNode.children[0]
   const element = to_dom(target)
   const href = vNode.props.href
-  'href' in element && (element.href = href)
+  if('href' in element) {
+    element.href = href
+  } else {
+    element.tabIndex = '0'
+  }
   const matched = match(href, _global.routes)
   element.onclick = e => {
     e.preventDefault()

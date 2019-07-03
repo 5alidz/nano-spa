@@ -9,7 +9,7 @@ function handle_props(props, element) {
   if(!props) { return }
   Object.entries(props).forEach(([key, value]) => {
     if(typeof value == 'undefined') { return }
-    if (key.startsWith('on') && window.hasOwnProperty(key)) {
+    if (key.startsWith('on') && key in element) {
       element[key] = value
     } else {
       element.setAttribute(key, value)

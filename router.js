@@ -1,5 +1,6 @@
 import _global from './internal.global.js'
 import render_route from './internal.render_route.js'
+
 import { bind_initial } from './internal.bind_initial.js'
 import { mount_first_head } from './internal.head.js'
 

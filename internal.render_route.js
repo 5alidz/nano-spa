@@ -1,10 +1,11 @@
 import _global from './internal.global.js'
-import match from './internal.match.js'
 import mount_component from './mount_component.js'
+import to_dom from './to_dom.js'
+
 import { set } from './internal.head.js'
+import {match} from './internal.utils.js'
 
 import _404 from './default.404.js'
-import to_dom from './to_dom.js'
 
 const finalize = (route, dom) => {
   set(route)

@@ -1,4 +1,18 @@
-export default (route, routes) => {
+export function is_noop(_new, state) {
+  const state_keys = Object.keys(_new)
+  let [noop, length] = [true, state_keys.length]
+  for(let i = 0; i < length; i++) {
+    const n = state[state_keys[i]]
+    const o = _new[state_keys[i]]
+    if(n !== o) {
+      noop = false
+      break
+    }
+  }
+  return noop
+}
+
+export function match(route, routes) {
   let matched = undefined
   if(routes[route]) {
     return matched
