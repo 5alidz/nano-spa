@@ -1,13 +1,12 @@
 export default function init_diff(to_dom) {
   const str_or_num = val => typeof val == 'string' || typeof val == 'number'
+  const create_loop = (n1, n2, cb) => [...new Array(Math.max(n1, n2)).keys()].forEach(cb)
 
   function diff_children(vNode, dNode) {
-    const v_children = vNode.children
-    const d_children = dNode.childNodes
-    const loop = [...new Array(Math.max(v_children.length, d_children.length)).keys()]
-    loop.forEach(idx => {
-      const v_child = v_children[idx]
-      const d_child = d_children[idx]
+    const [v_children, d_children] = [vNode.children, dNode.childNodes]
+
+    create_loop(v_children.length, d_children.length, idx => {
+      const [v_child, d_child] = [v_children[idx], d_children[idx]]
       // diff each child.
       if(!d_child && typeof v_child == 'object' && v_child.$type) {
         dNode.appendChild(to_dom(v_child))
@@ -22,13 +21,11 @@ export default function init_diff(to_dom) {
   }
 
   function diff_props(vNode, dNode) {
-    const vProps = vNode.props
-    const dProps = dNode.attributes
+    const [vProps, dProps] = [vNode.props, dNode.attributes]
     const vKeys = Object.keys(vProps).filter(key => typeof vProps[key] != 'function')
-    const loop = [...new Array(Math.max(vKeys.length, dProps.length)).keys()]
-    loop.forEach(idx => {
-      const vProp = vProps[vKeys[idx]]
-      const dProp = dProps[idx]
+
+    create_loop(vKeys.length, dProps.length, idx => {
+      const [vProp, dProp] = [vProps[vKeys[idx]], dProps[idx]]
       const dom_attr = dProp.value
       // diff each attribute.
       if(vProp.toString() != dom_attr.toString()) {

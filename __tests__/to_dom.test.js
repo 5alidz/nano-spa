@@ -8,6 +8,7 @@ test('expecting children but the child is undefined', () => {
   const div = document.createElement('div')
   expect(to_dom(render`<${c} />`)).toEqual(div)
 })
+
 test('renders basic component', () => {
   const c = ({ color }) => render`<div style=${`color: ${color};`}>hello</div>`
 

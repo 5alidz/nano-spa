@@ -14,7 +14,6 @@ export default function stateful_handler(component, to_dom) {
     state = _new
     diff(render(state, setState), dom_node)
   }
-
   dom_node = to_dom(render(state, setState))
   return dom_node
 }
