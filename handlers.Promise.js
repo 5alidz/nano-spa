@@ -1,24 +1,23 @@
-import default_spinner from './default.spinner.js'
-import to_dom from './to_dom.js'
-
-export default (vNode) => {
+export default (vNode, to_dom) => {
   const { props } = vNode
-  let placeholder
-  if(typeof props.placeholder == 'undefined') {
-    placeholder = default_spinner()
-  } else if(typeof props.placeholder == 'function') {
-    placeholder = props.placeholder()
-  } else {
-    placeholder = props.placeholder
-  }
-  const element = to_dom(placeholder)
+  const {  placeholder, delay } = props
+  let element = document.createElement('div')
+
+  let timer_id = setTimeout(() => {
+    const _new = to_dom(placeholder())
+    element.replaceWith(_new)
+    element = _new
+  }, delay || 0)
+
   props
     .promise()
     .then(data => {
-      if(typeof props.component !== 'function')  {
-        return console.warn('handler `<Promise />` requires property `component` to be a function')
+      window.clearTimeout(timer_id)
+      if(typeof props.render !== 'function')  {
+        return console
+          .warn('handler `<Promise />` requires property `render` to be a function')
       } else {
-        element.replaceWith(to_dom(props.component(data)))
+        element.replaceWith(to_dom(props.render(data)))
       }
     })
   return element

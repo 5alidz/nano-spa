@@ -1,8 +1,8 @@
-import _global from './internal.global.js'
+import _global from './global.js'
 import mount_component from './mount_component.js'
-import to_dom from './to_dom.js'
+import to_dom from '../to_dom.js'
 
-import {match} from './internal.utils.js'
+import {match} from './utils.js'
 
 let prev_head = []
 const head = document.head

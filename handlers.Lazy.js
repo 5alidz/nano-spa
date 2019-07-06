@@ -1,6 +1,4 @@
-import to_dom from './to_dom.js'
-
-export default function(vNode) {
+export default function(vNode, to_dom) {
   const dom_node = document.createElement('div')
 
   if(!vNode.props.template) {
@@ -19,7 +17,7 @@ export default function(vNode) {
       dom_node.appendChild(dom_child)
       window.requestIdleCallback(() => vNode.props.lazy_load(dom_child))
     })
-  }, 1000)
+  })
 
   return dom_node
 }

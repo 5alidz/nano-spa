@@ -1,5 +1,5 @@
-import _global from './internal.global.js'
-import render_route from './internal.render_route.js'
+import _global from './global.js'
+import render_route from './render_route.js'
 
 export const bind_initial = () => {
   document.querySelectorAll('.LINK').forEach(link => {

@@ -1,5 +1,5 @@
-import { is_noop } from './internal.utils.js'
-import init_diff from './internal.init_diff.js'
+import { is_noop } from './src/internal/utils.js'
+import init_diff from './src/internal/init_diff.js'
 
 export default function reducer(vNode, to_dom) {
   const diff = init_diff(to_dom)

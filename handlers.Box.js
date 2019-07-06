@@ -1,6 +1,4 @@
-import to_dom from './to_dom.js'
-
-export default (vNode) => {
+export default (vNode, to_dom) => {
   const exclude = ['type']
   if(!vNode.props.type) {
     vNode.type = 'div'
