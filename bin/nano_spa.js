@@ -9,7 +9,7 @@ const context = {}
 
 const actions = {
   start(args) {
-    console.log(path.resolve(__dirname, '..'))
+    console.log(path.resolve(__dirname, '../../'))
   },
   build(args) {},
   deploy(args) {},
