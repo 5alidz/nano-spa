@@ -1,9 +1,9 @@
-import _global from './internal/global.js'
-
 const is_fragment = node => node.$type == Symbol.for('nano_spa.fragment')
 const is_component = node => node.$type == Symbol.for('nano_spa.component')
 const is_invalid = node => !node || typeof node != 'object'
 const is_primitive = node => typeof node == 'string' || typeof node == 'number'
+
+const handlers = {}
 
 function handle_props(props, element) {
   if(!props) { return }
@@ -49,19 +49,17 @@ function to_dom_component(node) {
 
 
 function to_dom(node) {
-  const handlers = Object.keys(_global.handlers)
+  const handlers = Object.keys(handlers)
   if(is_invalid(node)) {return}
-
   if(is_component(node)) {
     if(handlers.includes(node.type) && this !== undefined) {
-      return  _global.handlers[node.type](node, to_dom.bind(_global.handlers))
+      return handlers[node.type](node, to_dom.bind(handlers))
     }
     return to_dom_component.call(this, node)
   }
-
   if(is_fragment(node)) {
     return node.children.map(child => to_dom_child.call(this, child))
   }
 }
 
-export default to_dom.bind(_global.handlers)
+export default to_dom.bind(handlers)
