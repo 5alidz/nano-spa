@@ -1,5 +1,4 @@
-import init_diff from './src/internal/init_diff.js'
-import {is_noop} from './src/internal/utils.js'
+import { init_diff, is_noop } from './shared/init_diff.js'
 
 export default function stateful_handler(component, to_dom) {
   let state = component.props.state

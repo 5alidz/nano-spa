@@ -24,6 +24,7 @@
     "madge": "^3.4.4"
   },
   "dependencies": {
-    "@babel/runtime": "^7.5.0"
+    "@babel/runtime": "^7.5.0",
+    "htm": "^2.1.1"
   }
 }

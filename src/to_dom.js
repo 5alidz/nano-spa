@@ -2,8 +2,9 @@ const is_fragment = node => node.$type == Symbol.for('nano_spa.fragment')
 const is_component = node => node.$type == Symbol.for('nano_spa.component')
 const is_invalid = node => !node || typeof node != 'object'
 const is_primitive = node => typeof node == 'string' || typeof node == 'number'
+const is_upper_case = c => c.charCodeAt(0) < 97
 
-const handlers = {}
+const get_handler = (key) => import(`../handlers/${key}.js`)
 
 function handle_props(props, element) {
   if(!props) { return }
@@ -22,44 +23,60 @@ function handle_children(children, element) {
   children.forEach(child => {
     if(typeof child == 'undefined') { return }
     if(is_fragment(child)) {
-      child.children.map(c => element.appendChild(to_dom_child.call(this, c)))
+      child.children.forEach(c => {element.appendChild(to_dom(c))})
     } else if(Array.isArray(child)) {
-      child.map(c => element.appendChild(to_dom_child.call(this, c)))
+      child.map(c => element.appendChild(to_dom_child(c)))
     } else {
-      element.appendChild(to_dom_child.call(this, child))
+      element.appendChild(to_dom_child(child))
     }
   })
 }
 
 function to_dom_child(child) {
-  if (is_primitive(child)) {
+  if(is_primitive(child)) {
     return document.createTextNode(child)
-  } else if (is_fragment(child) || is_component(child)) {
-    return to_dom.call(this, child)
-  } else {return}
+  } else {
+    return to_dom(child)
+  }
 }
 
 function to_dom_component(node) {
   let {type, props, children} = node
   const element = document.createElement(type)
-  handle_props.call(this, props, element)
-  handle_children.call(this, children, element)
+  handle_props(props, element)
+  handle_children(children, element)
   return element
 }
 
+function to_dom_handler(node) {
+  const placeholder = document.createElement('div')
+  get_handler(node.type)
+    .then(_m => {
+      const result = _m.default(node, to_dom)
+      if(typeof result == 'undefined') {
+        placeholder.parentNode.removeChild(placeholder)
+      } else {
+        placeholder.replaceWith(_m.default(node, to_dom))
+      }
+    })
+    .catch(err => {
+      placeholder.innerHTML = `${node.type}: ${err}`
+    })
+  return placeholder
+}
 
 function to_dom(node) {
-  const handlers = Object.keys(handlers)
   if(is_invalid(node)) {return}
-  if(is_component(node)) {
-    if(handlers.includes(node.type) && this !== undefined) {
-      return handlers[node.type](node, to_dom.bind(handlers))
-    }
-    return to_dom_component.call(this, node)
-  }
   if(is_fragment(node)) {
-    return node.children.map(child => to_dom_child.call(this, child))
+    return node.children.map(child => to_dom_child(child))
+  }
+  if(is_component(node)) {
+    if(is_upper_case(node.type[0])) {
+      return to_dom_handler(node)
+    } else {
+      return to_dom_component(node)
+    }
   }
 }
 
-export default to_dom.bind(handlers)
+export default to_dom
