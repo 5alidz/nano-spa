@@ -1,4 +1,4 @@
-import match from './src/internal/match.js'
+import { match } from './src/internal/utils.js'
 import _global from './src/internal/global.js'
 import { set } from './src/internal/head.js'
 
