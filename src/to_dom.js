@@ -56,7 +56,7 @@ function to_dom_handler(node) {
       if(typeof result == 'undefined') {
         placeholder.parentNode.removeChild(placeholder)
       } else {
-        placeholder.replaceWith(_m.default(node, to_dom))
+        placeholder.replaceWith(result)
       }
     })
     .catch(err => {
