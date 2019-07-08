@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "test:circle": "madge --circular index.js",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "pub": "npm version patch && npm publish"
   },
   "repository": {
     "type": "git",
