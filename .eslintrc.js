@@ -7,7 +7,6 @@ module.exports = {
       "node": true
     },
     "extends": "eslint:recommended",
-    "parser": 'babel-eslint',
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"

@@ -16,5 +16,6 @@ export default (vNode, to_dom) => {
   const final_style_string = Object.keys(vNode.props).reduce(reducer, '')
   if(vNode.props.type) {vNode.type = vNode.props.type || 'div'}
   if(final_style_string) {vNode.props = { style: final_style_string.trim() }}
-  return to_dom(vNode)
+  const dom_node = to_dom(vNode)
+  return dom_node
 }

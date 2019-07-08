@@ -49,10 +49,16 @@ function to_dom_component(node) {
 }
 
 function to_dom_handler(node) {
-  const placeholder = document.createElement('div')
-  get_handler(node.type)
+  let placeholder = document.createElement('div')
+
+  const resolve_name = name => {
+    let _name = name.replace(/::/g, '@')
+    return _name
+  }
+
+  get_handler(resolve_name(node.type))
     .then(_m => {
-      const result = _m.default(node, to_dom)
+      const result = _m.default(node, to_dom, placeholder)
       if(typeof result == 'undefined') {
         placeholder.parentNode.removeChild(placeholder)
       } else {
@@ -62,6 +68,7 @@ function to_dom_handler(node) {
     .catch(err => {
       placeholder.innerHTML = `${node.type}: ${err}`
     })
+
   return placeholder
 }
 

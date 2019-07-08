@@ -1,9 +1,14 @@
+import default_404 from './default_404.js'
+
 export const g = {
   routes: {},
   render: () => {},
   root: undefined
 }
-export const clear_root = (r, c) => {r.innerHTML = '';r.appendChild(c)}
+export const clear_root = (r, c) => {
+  r.innerHTML = ''
+  r.appendChild(c)
+}
 
 export const resolve_name = name => {
   if(name == '/') {
@@ -23,6 +28,7 @@ export const init_render_page = (props, to_dom, root) => {
           const c = to_dom(_module.default())
           g.routes[route] = c
           clear_root(root, c)
+          requestIdleCallback(() => g.routes[route] = g.root.children[0])
         })
         .catch(err => {
           props.dir('404')

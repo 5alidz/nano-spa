@@ -6,6 +6,7 @@ export default function router_link_handler(vNode, to_dom) {
   if('href' in action_node) {
     action_node.href = href || '/'
   }
+  action_node.tabIndex = '0'
   action_node.onclick = (e) => {
     e.preventDefault()
     window.history.pushState({}, '', href)
