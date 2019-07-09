@@ -22,21 +22,33 @@ const babel_rules = {
   }
 }
 
+const plugins_common = [
+  new CleanWebpackPlugin(),
+  new HTMLwebpackPlugin({template: './src/index.html', inject: false}),
+  new CopyPlugin([{ from: './src/static', to: 'static' }]),
+]
+
+const plugins_dev = [
+  ...plugins_common,
+  new webpack.HotModuleReplacementPlugin()
+]
+
+const plugins_prod = [...plugins_common]
+
 module.exports = (env) => ({
-  entry: './src/main.js',
+  entry: env.mode ==  'production'
+    ? './src/main.js'
+    : [
+      'webpack-hot-middleware/client?reload=true',
+      './src/main.js'
+    ]
+  ,
   output: {
     path: path.resolve('.', 'dist'),
     filename: 'main.js',
     publicPath: '/',
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-    new HTMLwebpackPlugin({template: './src/index.html', inject: false}),
-    new CopyPlugin([{ from: './src/static', to: 'static' }]),
-    new webpack.HotModuleReplacementPlugin()
-  ],
-  module: {
-    rules: [babel_rules]
-  },
+  plugins: env.mode == 'production' ? plugins_prod : plugins_dev,
+  module: {rules: [babel_rules]},
   mode: env.mode,
 })
