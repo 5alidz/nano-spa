@@ -1,8 +1,13 @@
 #!/usr/bin/env node
+const [,, command, ...args] = process.argv
+/*
+const project_dir = path.resolve('.')
+const handlers_path = path.join(project_dir, 'src/handlers')
+*/
 
-const [,, ...args] = process.argv
-const path = require('path')
-
-if(args[0] == 'start') {
-  console.log(path.resolve('.'))
+if(command == 'start') {
+  require('../cli/start.js')(args)
+} else if(command == 'build') {
+  require('../cli/build.js')(args)
 }
+
