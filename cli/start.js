@@ -5,7 +5,7 @@ const mw = require('webpack-dev-middleware')
 const hot_mw = require('webpack-hot-middleware')
 const history = require('connect-history-api-fallback')
 
-module.exports = (args) => {
+module.exports = (_args) => {
   const app = express()
   const conf = webpack_conf({ mode: 'development' })
   const compiler = webpack(conf)
@@ -16,5 +16,5 @@ module.exports = (args) => {
     publicPath: conf.output.publicPath,
   }))
   app.use(hot_mw(compiler, {log: false}))
-  app.listen(3000, () => console.log('app running on port 3000'))
+  app.listen(_args.port || 3000, () => console.log('app running on port 3000'))
 }

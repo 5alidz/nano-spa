@@ -8,13 +8,19 @@ const stock_handlers = [
   'Box',
   'Promise',
   'Reducer',
-  'State',
   'Router',
   'Router::link',
+  'State',
 ]
 
-const get_handler = (key) => import(`../handlers/${key}.js`)
-const get_custom_handler = (key) => import(`../../../handlers/${key}.js`)
+const get_handler = (key) => import(
+  /* webpackChunkName: "[request]" */
+  `./handlers/${key}.js`
+)
+const get_custom_handler = (key) => import(
+  /* webpackChunkName: "[request]" */
+  `../../handlers/${key}.js`
+)
 
 function handle_props(props, element) {
   if(!props) { return }
@@ -60,12 +66,15 @@ function to_dom_component(node) {
 
 function to_dom_handler(node) {
   let placeholder = document.createElement('div')
-  const resolve_name = name => {
-    let _name = name.replace(/::/g, '@')
-    return _name
+  const resolve_name = name => name.replace(/::/g, '@')
+  const handle_err = err => {
+    const error_style = 'background-color: pink; color: darkRed;font-family: "Lucida Console", Monaco, "Consolas", Monospace; padding: .3rem;'
+    placeholder.style = error_style
+    placeholder.innerText = `<${node.type} /> ${err}`
   }
-  const render_module = _m => {
-    const result = _m.default(node, to_dom, placeholder)
+
+  const render_module = _module => {
+    const result = _module.default(node, to_dom)
     if(typeof result == 'undefined') {
       placeholder.parentNode.removeChild(placeholder)
     } else {
@@ -73,18 +82,12 @@ function to_dom_handler(node) {
     }
   }
 
-  const handle_err = err => {
-    placeholder.innerHTML = `${node.type}: ${err}`
-  }
-
   if(stock_handlers.includes(node.type)) {
     get_handler(resolve_name(node.type))
-      .then(render_module)
-      .catch(handle_err)
+      .then(render_module).catch(handle_err)
   } else {
     get_custom_handler(resolve_name(node.type))
-      .then(render_module)
-      .catch(handle_err)
+      .then(render_module).catch(handle_err)
   }
 
   return placeholder

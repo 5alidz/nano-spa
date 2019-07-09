@@ -2,7 +2,7 @@
   "name": "nano_spa",
   "version": "2.5.13",
   "bin": "bin/nano_spa.js",
-  "main": "index.js",
+  "main": "bin/nano_spa.js",
   "author": "5alidz <kzack-dev@hotmail.com>",
   "license": "MIT",
   "description": "route based statless components library",
@@ -10,8 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "test:circle": "madge --circular index.js",
-    "test:coverage": "jest --coverage",
-    "pub": "npm version patch && npm publish"
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -36,6 +35,7 @@
     "clean-webpack-plugin": "^3.0.0",
     "connect-history-api-fallback": "^1.6.0",
     "copy-webpack-plugin": "^5.0.3",
+    "eslint": "^6.0.1",
     "express": "^4.17.1",
     "htm": "^2.1.1",
     "html-webpack-plugin": "^3.2.0",

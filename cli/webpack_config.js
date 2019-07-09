@@ -33,8 +33,6 @@ const plugins_dev = [
   new webpack.HotModuleReplacementPlugin()
 ]
 
-const plugins_prod = [...plugins_common]
-
 module.exports = (env) => ({
   entry: env.mode ==  'production'
     ? './src/main.js'
@@ -47,8 +45,9 @@ module.exports = (env) => ({
     path: path.resolve('.', 'dist'),
     filename: 'main.js',
     publicPath: '/',
+    chunkFilename: '[name].main.js'
   },
-  plugins: env.mode == 'production' ? plugins_prod : plugins_dev,
+  plugins: env.mode == 'production' ? plugins_common : plugins_dev,
   module: {rules: [babel_rules]},
   mode: env.mode,
 })
