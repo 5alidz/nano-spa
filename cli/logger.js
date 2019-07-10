@@ -3,6 +3,7 @@ const cli_spinners = require('cli-spinners')
 const ora = require('ora')
 const fs = require('fs')
 const path = require('path')
+const clear = require('clear')
 
 const c = m => `[ ${m} ]`
 const create_title = color => title => c(chalk[color].bold(title.toUpperCase()))
@@ -21,9 +22,13 @@ const create_spinner = (msg) => {
   return spinner
 }
 
-exports.utils = {red, green, yellow, white, normal_blue: tx => chalk.blue.bold(tx)}
+exports.utils = {
+  red, green, yellow, white,
+  normal_blue: tx => chalk.blue.bold(tx)
+}
 
 exports.log = (err, stats) => {
+  clear()
   const _log = console.log
   const s = create_spinner('building...')
   s.start()
