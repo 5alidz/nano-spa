@@ -7,7 +7,7 @@ const history = require('connect-history-api-fallback')
 const fs = require('fs')
 const path = require('path')
 const int_ip = require('internal-ip')
-const { green, red } = require('./logger.js').utils
+const { green, red, normal_blue } = require('./logger.js').utils
 
 const _log = console.log
 
@@ -19,19 +19,18 @@ module.exports = (_args) => {
 
   const listen_cb = async () => {
     const internal_ip = await int_ip.v4()
-    const msg = `app is ready on port ${PORT} & on local network ${internal_ip}`
+    const msg = `app is ready on port \`${normal_blue(PORT)}\` & on local network \`${normal_blue(internal_ip)}\``
     _log(green('done'), msg)
   }
 
   if(!fs.existsSync(path.resolve('.', 'handlers'))) {
-    _log(red('error'), 'handlers directory is required.')
-    return
+    return _log(red('error'), 'handlers directory is required.')
   }
 
   app.use(history())
 
   app.use(mw(compiler, {
-    logLevel: 'silent',
+    logLevel: 'error',
     publicPath: conf.output.publicPath,
   }))
 

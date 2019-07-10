@@ -21,7 +21,7 @@ const create_spinner = (msg) => {
   return spinner
 }
 
-exports.utils = {red, green, yellow, white}
+exports.utils = {red, green, yellow, white, normal_blue: tx => chalk.blue.bold(tx)}
 
 exports.log = (err, stats) => {
   const _log = console.log
