@@ -50,7 +50,4 @@ module.exports = (env) => ({
   plugins: env.mode == 'production' ? plugins_common : plugins_dev,
   module: {rules: [babel_rules]},
   mode: env.mode,
-  optimization: {
-    runtimeChunk: {name: entry => `runtime~${entry.name}`}
-  }
 })
