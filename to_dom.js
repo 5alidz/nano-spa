@@ -10,6 +10,7 @@ const stock_handlers = [
   'Reducer',
   'Router',
   'Router::link',
+  'Router::head',
   'State',
 ]
 

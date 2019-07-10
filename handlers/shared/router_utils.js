@@ -3,8 +3,13 @@ import default_404 from './default_404.js'
 export const g = {
   routes: {},
   render: () => {},
-  root: undefined
+  heads: {},
+  root: undefined,
+  CURRENT: undefined,
+  PREVIOUS: undefined,
+  doc_head: document.getElementsByTagName('head')[0]
 }
+
 export const clear_root = (r, c) => {
   r.innerHTML = ''
   r.appendChild(c)

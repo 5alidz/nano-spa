@@ -10,7 +10,13 @@ export default function router_link_handler(vNode, to_dom) {
   action_node.onclick = (e) => {
     e.preventDefault()
     window.history.pushState({}, '', href)
-    g.render(href)
+    g.PREVIOUS = g.CURRENT
+    g.CURRENT = window.location.pathname
+    g.render(g.CURRENT)
+    g.heads[g.PREVIOUS].map(_ => g.doc_head.removeChild(_))
+    if(g.heads[g.CURRENT]) {
+      g.heads[g.CURRENT].map(_ => g.doc_head.appendChild(_))
+    }
   }
   return action_node
 }
