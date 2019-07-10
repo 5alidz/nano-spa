@@ -1,6 +1,6 @@
 {
   "name": "nano_spa",
-  "version": "2.5.18",
+  "version": "2.5.19",
   "bin": "bin/nano_spa.js",
   "main": "bin/nano_spa.js",
   "author": "5alidz <kzack-dev@hotmail.com>",
