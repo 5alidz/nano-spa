@@ -33,6 +33,7 @@ exports.log = (err, stats) => {
     }
     return
   } else {
+    // compilation succeded but might have errors, warning.
     const info = stats.toJson()
     if(stats.hasErrors()) {
       _log(red('error'), ...info.errors)
@@ -40,7 +41,8 @@ exports.log = (err, stats) => {
     if(stats.hasWarnings()) {
       _log(yellow('warning'), ...info.warnings)
     }
-    _log(green('done'), `build completed in ${info.time}ms`)
-    return
+    // work is done.
+    _log(green('done'), `build completed in ${(info.time/1000).toFixed(2)}s`)
+
   }
 }
