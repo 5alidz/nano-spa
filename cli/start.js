@@ -21,7 +21,7 @@ module.exports = (_args) => {
 
   const listen_cb = async () => {
     const internal_ip = await int_ip.v4()
-    const msg = `app is ready on localhost:\`${normal_blue(PORT)}\` & on local network \`${normal_blue(internal_ip)}\`:${normal_blue(PORT)}`
+    const msg = `app is ready on \`${normal_blue('localhost:' + PORT)}\` & on local network \`${normal_blue(internal_ip + ':' + PORT)}\``
     _log(green('done'), msg)
   }
 
