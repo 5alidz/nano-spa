@@ -21,6 +21,7 @@ const create_spinner = (msg) => {
   return spinner
 }
 
+exports.utils = {red, green, yellow, white}
 
 exports.log = (err, stats) => {
   const _log = console.log
