@@ -1,3 +1,5 @@
+const __DEV__ = process.env.NODE_ENV != 'production'
+
 export default (vNode, to_dom) => {
   const exclude = ['type']
   if(!vNode.props.type) {
@@ -10,7 +12,7 @@ export default (vNode, to_dom) => {
     if(exclude.includes(current_prop)) {
       return style_string
     } else {
-      return style_string += `${current_prop}: ${vNode.props[current_prop]}; `
+      return style_string += `${current_prop}: ${vNode.props[current_prop]};`
     }
   }
   const final_style_string = Object.keys(vNode.props).reduce(reducer, '')
