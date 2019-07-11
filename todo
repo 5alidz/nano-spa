@@ -1,9 +1,3 @@
-
-- better cli logging with chalk                   [ ]
-- testing handlers and core                       [ ]
-- arguments to customize builds                   [ ]
-- add readme and doc site                         [ ]
-- revise router/router@link                       [ ]
-- implement router@head                           [ ]
-- add process.env dev error logging for debugging [ ]
-
+- webpack-dev-middleware logger.
+- process.env.NODE_ENV error handling.
+- actually test this shit.

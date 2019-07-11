@@ -13,6 +13,11 @@ function handle_custom_element(_node) {
     new_node.$type = Symbol.for('nano_spa.fragment')
     return new_node
   } else {
+    if(process.env.NODE_ENV != 'production') {
+      if(!new_node.children){
+        console.warn('you probably forgot a closing tag')
+      }
+    }
     return render(
       new_node.type,
       new_node.props,

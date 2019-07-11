@@ -25,7 +25,7 @@ const babel_rules = {
 const plugins_common = [
   new CleanWebpackPlugin(),
   new HTMLwebpackPlugin({template: './src/index.html', inject: false}),
-  new CopyPlugin([{ from: './src/static', to: 'static' }]),
+  new CopyPlugin([{ from: './src/static', to: 'static' }], { logLevel: 'silent' }),
 ]
 
 const plugins_dev = [
@@ -49,5 +49,5 @@ module.exports = (env) => ({
   },
   plugins: env.mode == 'production' ? plugins_common : plugins_dev,
   module: {rules: [babel_rules]},
-  mode: env.mode
+  mode: env.mode,
 })

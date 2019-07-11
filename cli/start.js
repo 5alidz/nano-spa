@@ -4,36 +4,28 @@ const express = require('express')
 const mw = require('webpack-dev-middleware')
 const hot_mw = require('webpack-hot-middleware')
 const history = require('connect-history-api-fallback')
-const fs = require('fs')
-const path = require('path')
+const Logger = require('./logger.js')
 const int_ip = require('internal-ip')
-const { green, red, normal_blue } = require('./logger.js').utils
 const clear = require('clear')
-
-const _log = console.log
 
 module.exports = (_args) => {
   const app = express()
   const conf = webpack_conf({ mode: 'development' })
   const compiler = webpack(conf)
   const PORT = _args.port || 3000
-  clear()
+  const { _log, green, normal_blue } = Logger.utils
 
   const listen_cb = async () => {
+    clear()
     const internal_ip = await int_ip.v4()
-    const msg = `app is ready on \`${normal_blue('localhost:' + PORT)}\` & on local network \`${normal_blue(internal_ip + ':' + PORT)}\``
-    _log(green('done'), msg)
+    _log(green('ready'), `Server is ready on \`${normal_blue('localhost:' + PORT)}\` and on your local network \`${normal_blue(internal_ip + ':' + PORT)}\``)
   }
-
-  if(!fs.existsSync(path.resolve('.', 'handlers'))) {
-    return _log(red('error'), 'handlers directory is required.')
-  }
-
   app.use(history())
 
   app.use(mw(compiler, {
     logLevel: 'error',
     publicPath: conf.output.publicPath,
+    logger: Logger.logger(_args)
   }))
 
   app.use(hot_mw(compiler, {log: false}))
