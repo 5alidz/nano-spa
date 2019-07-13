@@ -1,4 +1,4 @@
-module.export = {
+module.exports = {
   initial: {
     required: true,
     type: ['object']

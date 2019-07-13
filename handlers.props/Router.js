@@ -1,4 +1,4 @@
-module.export = {
+module.exports = {
   dir: {
     type: ['function'],
     required: true

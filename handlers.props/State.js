@@ -1,4 +1,4 @@
-module.export = {
+module.exports = {
   state: {
     required: true,
     type: ['object']
