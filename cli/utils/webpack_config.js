@@ -22,32 +22,32 @@ const babel_rules = {
   }
 }
 
-const plugins_common = [
+const plugins_common = (env) => [
   new CleanWebpackPlugin(),
-  new HTMLwebpackPlugin({template: './src/index.html', inject: false}),
-  new CopyPlugin([{ from: './src/static', to: 'static' }], { logLevel: 'silent' }),
+  new HTMLwebpackPlugin({template: `./${env.root}/index.html`, inject: false}),
+  new CopyPlugin([{ from: `./${env.root}/static`, to: 'static' }], { logLevel: 'silent' }),
 ]
 
-const plugins_dev = [
-  ...plugins_common,
-  new webpack.HotModuleReplacementPlugin()
+const plugins_dev = (env) => [
+  ...plugins_common(env),
+  new webpack.HotModuleReplacementPlugin(),
 ]
 
 module.exports = (env) => ({
   entry: env.mode ==  'production'
-    ? './src/main.js'
+    ? `./${env.root}/main.js`
     : [
       'webpack-hot-middleware/client?reload=true',
-      './src/main.js'
+      `./${env.root}/main.js`
     ]
   ,
   output: {
-    path: path.resolve('.', 'dist'),
+    path: path.resolve('.', `dist.${env.root}`),
     filename: 'main.js',
     publicPath: '/',
     chunkFilename: '[name].main.js'
   },
-  plugins: env.mode == 'production' ? plugins_common : plugins_dev,
+  plugins: env.mode == 'production' ? plugins_common(env) : plugins_dev(env),
   module: {rules: [babel_rules]},
   mode: env.mode,
 })

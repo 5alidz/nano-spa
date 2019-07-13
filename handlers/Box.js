@@ -1,23 +1,42 @@
-const __DEV__ = process.env.NODE_ENV != 'production'
-
-export default (vNode, to_dom) => {
-  const exclude = ['type']
-  if(!vNode.props.type) {
-    vNode.type = 'div'
+const style_reducer = props => Object.keys(props).reduce((acc, curr) => {
+  const bools = ['grid', 'flex']
+  const excludes = ['type']
+  if(excludes.includes(curr)) {
+    return acc
+  } else if(typeof props[curr] == 'undefined') {
+    return acc
+  } if(bools.includes(props[curr])) {
+    return acc
+  } else if(typeof props[curr] == 'boolean') {
+    const display_val = bools.filter(b => b == curr)[0]
+    acc += `display: ${display_val};`
+    return acc
+  } else if(typeof props[curr] == 'string') {
+    acc += `${curr}: ${props[curr]};`
+    return acc
   } else {
-    vNode.type = vNode.props.type
-    delete vNode.props.type
+    return acc
   }
-  const reducer = (style_string, current_prop) => {
-    if(exclude.includes(current_prop)) {
-      return style_string
-    } else {
-      return style_string += `${current_prop}: ${vNode.props[current_prop]};`
-    }
+}, '')
+
+export default (vNode, { to_dom }) => {
+  if(process.env.NODE_ENV !== 'production') {
+    (async () => {
+      try{
+        const [prop_types, validate_props] = await Promise.all([
+          import('../handlers.props/Box.js'),
+          import('../validate_props.js')
+        ])
+        validate_props.default(prop_types.default, vNode)
+      } catch(err) {console.log(err)}
+    })()
   }
-  const final_style_string = Object.keys(vNode.props).reduce(reducer, '')
-  if(vNode.props.type) {vNode.type = vNode.props.type || 'div'}
-  if(final_style_string) {vNode.props = { style: final_style_string.trim() }}
-  const dom_node = to_dom(vNode)
-  return dom_node
+  const style_str = style_reducer(vNode.props)
+  const new_node = {
+    type: vNode.props.type || 'div',
+    props: style_str ? {style: style_reducer(vNode.props)} : {},
+    children: vNode.children,
+    $type: vNode.$type
+  }
+  return to_dom(new_node)
 }

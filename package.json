@@ -17,11 +17,11 @@
     "url": "https://github.com/5alidz/nano_spa.git"
   },
   "devDependencies": {
-    "jest": "^24.8.0",
-    "madge": "^3.4.4",
-    "eslint": "^6.0.1",
     "babel-eslint": "^10.0.2",
-    "babel-jest": "^24.8.0"
+    "babel-jest": "^24.8.0",
+    "eslint": "^6.0.1",
+    "jest": "^24.8.0",
+    "madge": "^3.4.4"
   },
   "dependencies": {
     "@babel/core": "^7.4.5",

@@ -4,6 +4,9 @@ const is_invalid = node => !node || typeof node != 'object'
 const is_primitive = node => typeof node == 'string' || typeof node == 'number'
 const is_upper_case = c => c.charCodeAt(0) < 97
 
+const typeOf = object => Object.prototype.toString.call(object)
+  .replace(/[[\]]/g, '').split(' ')[1].toLowerCase()
+
 const stock_handlers = [
   'Box',
   'Promise',
@@ -68,14 +71,15 @@ function to_dom_component(node) {
 function to_dom_handler(node) {
   let placeholder = document.createElement('div')
   const resolve_name = name => name.replace(/::/g, '@')
-  const handle_err = err => {
+
+  const handle_err = (err, mem_type) => {
     const error_style = 'background-color: pink; color: darkRed;font-family: "Lucida Console", Monaco, "Consolas", Monospace; padding: .3rem;'
     placeholder.style = error_style
-    placeholder.innerText = `<${node.type} /> ${err}`
+    placeholder.innerText = `<${mem_type} /> ${err}`
   }
 
   const render_module = _module => {
-    const result = _module.default(node, to_dom)
+    const result = _module.default(node, {to_dom, typeOf})
     if(typeof result == 'undefined') {
       placeholder.parentNode.removeChild(placeholder)
     } else {
@@ -84,8 +88,9 @@ function to_dom_handler(node) {
   }
 
   if(stock_handlers.includes(node.type)) {
+    const mem_type = node.type
     get_handler(resolve_name(node.type))
-      .then(render_module).catch(handle_err)
+      .then(render_module).catch(err => handle_err(err, mem_type))
   } else {
     get_custom_handler(resolve_name(node.type))
       .then(render_module).catch(handle_err)

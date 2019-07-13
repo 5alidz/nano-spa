@@ -1,6 +1,17 @@
 import { g, init_render_page } from './shared/router_utils.js'
 
-export default function router_handler(vNode, to_dom) {
+export default function router_handler(vNode, { to_dom }) {
+  if(process.env.NODE_ENV !== 'production') {
+    (async () => {
+      try{
+        const [prop_types, validate_props] = await Promise.all([
+          import('../handlers.props/Router.js'),
+          import('../validate_props.js')
+        ])
+        validate_props.default(prop_types.default, vNode)
+      } catch(err) {console.log(err)}
+    })()
+  }
   const root = document.createElement('div')
   const { props } = vNode
   const render = init_render_page(props, to_dom, root)

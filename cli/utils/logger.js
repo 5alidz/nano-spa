@@ -54,17 +54,17 @@ exports.logger = (/*_args*/) => ({
   debug: () => {},
   warn: () => {},
   info: (payload) => {
-    if(!fs.existsSync(path.resolve('./src/index.html'))) {
-      _log(red('warning'), './src/index.html', 'is missing')
+    if(!fs.existsSync(path.resolve('./app/index.html'))) {
+      _log(red('warning'), './app/index.html', 'is missing')
     }
-    if(!fs.existsSync(path.resolve('./src/main.js'))) {
-      _log(red('warning'), './src/main.js', 'is missing')
+    if(!fs.existsSync(path.resolve('./app/main.js'))) {
+      _log(red('warning'), './app/main.js', 'is missing')
     }
     if(!fs.existsSync(path.resolve('./handlers'))) {
       _log(red('error'), './handlers', 'is missing')
     }
-    if(!fs.existsSync(path.resolve('./src/static'))) {
-      _log(yellow('warning'), './src/static', 'is missing')
+    if(!fs.existsSync(path.resolve('./app/static'))) {
+      _log(yellow('warning'), './app/static', 'is missing')
     }
     if(payload.split('\n').length < 2) {
       _log(blue('building'), payload)

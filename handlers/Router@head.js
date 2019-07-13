@@ -1,6 +1,17 @@
 import { g } from './shared/router_utils.js'
 
-export default (vNode, to_dom) => {
+export default (vNode, { to_dom }) => {
+  if(process.env.NODE_ENV !== 'production') {
+    (async () => {
+      try{
+        const [prop_types, validate_props] = await Promise.all([
+          import('../handlers.props/Router@head.js'),
+          import('../validate_props.js')
+        ])
+        validate_props.default(prop_types.default, vNode)
+      } catch(err) {console.log(err)}
+    })()
+  }
   const current_route = window.location.pathname
   const head_array = vNode.children.map(child => to_dom(child))
   g.heads[current_route] = head_array
