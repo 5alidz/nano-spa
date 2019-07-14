@@ -74,12 +74,13 @@ export default ({ name, link }) => {
     max-width: 740px;
     overflow-x: auto;
   `
+  const router_mapping = name => name.replace(/@/g, '::')
   return render`
     <div style='padding: 1rem; display: grid; grid-gap: 1rem;'>
       <Router::head>
-        <title>${name}</title>
+        <title>${router_mapping(name)}</title>
       <//>
-      <h1>${name}</h1>
+      <h1>${router_mapping(name)}</h1>
       <h2 style='padding: 10px;'>Props</h2>
       <div style=${table_container}>
         <Promise
