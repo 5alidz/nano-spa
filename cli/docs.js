@@ -33,9 +33,7 @@ const generate_pages = (pages) => {
     const name = page.split('.')[0]
     fs.writeFile(
       `./docs/pages/${transform(name).toLowerCase()}.js`,
-      [
-        `
-import render from 'nano_spa/render'
+      [`import render from 'nano_spa/render'
 
 const fetch_data = async () => {
   const promise = await fetch('/static/${name}.json')
@@ -67,9 +65,7 @@ export default () => {
       />
     </div>
   \`
-}
-        `
-      ].join(''),
+}`].join(''),
       (err) => err ? log(err) : log(`writing page ${transform(pages[index]).toLowerCase()} complete`)
     )
   })
@@ -84,19 +80,19 @@ module.exports = (/*args*/) => {
   // copy index.html and main.js if it does not exist.
   if(!fs.existsSync('./docs/index.html')) {
     cp_file(
-      './fake_node_modules/nano_spa/cli/utils/docs_temp/index.html',
+      './node_modules/nano_spa/cli/utils/docs_temp/index.html',
       './docs/index.html'
     )
   }
   if(!fs.existsSync('./docs/main.js')) {
     cp_file(
-      './fake_node_modules/nano_spa/cli/utils/docs_temp/main.js',
+      './node_modules/nano_spa/cli/utils/docs_temp/main.js',
       './docs/main.js'
     )
   }
   if(!fs.existsSync('./docs/pages/index.js')) {
     cp_file(
-      './fake_node_modules/nano_spa/cli/utils/docs_temp/index-page.js',
+      './node_modules/nano_spa/cli/utils/docs_temp/index-page.js',
       './docs/pages/index.js'
     )
   }
@@ -115,6 +111,6 @@ module.exports = (/*args*/) => {
   })
   // generate all required json files.
   generate_json('./handlers.props', generate_pages)
-  generate_json('./fake_node_modules/nano_spa/handlers.props', generate_pages)
+  generate_json('./node_modules/nano_spa/handlers.props', generate_pages)
   // generate all pages.
 }
