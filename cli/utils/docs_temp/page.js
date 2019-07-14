@@ -20,7 +20,7 @@ const component = (data) => {
   const styles = {
     required: val => `color: ${val == 'true' ? '#ff4766' : '#aaa'};`,
     default: val => `color: ${val == 'none' ? '#aaa' : '#478eff'};`,
-    description: val => `color: ${val == 'none' ? '#aaa' : 'black'};`,
+    description: val => `color: ${val == 'none' ? '#aaa' : '#225c44'};font-size: .9rem; line-height: 1.5rem;`,
   }
   const line = ({ name, type, def, description, required }) => render`
     <tr>
