@@ -12,6 +12,7 @@ module.exports = {
     type: ['function']
   },
   delay: {
-    type: ['number']
+    type: ['number'],
+    default: 300
   }
 }

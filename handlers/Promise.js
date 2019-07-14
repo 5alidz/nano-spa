@@ -18,7 +18,7 @@ export default (vNode, { to_dom }) => {
     const _new = to_dom(placeholder())
     element.replaceWith(_new)
     element = _new
-  }, delay || 0)
+  }, delay || 300)
 
   props
     .promise()

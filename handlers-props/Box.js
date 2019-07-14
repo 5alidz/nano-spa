@@ -1,6 +1,7 @@
 module.exports = {
   type: {
-    type: ['string']
+    type: ['string'],
+    default: 'div'
   },
   grid: {
     type: ['boolean']
