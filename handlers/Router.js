@@ -24,7 +24,6 @@ const init_render_page = (props, to_dom, root) => {
           const c = to_dom(_module.default())
           g.routes[route] = c
           clear_root(root, c)
-          requestIdleCallback(() => g.routes[route] = g.root.children[0])
         })
         .catch(_ => {
           props.dir('404')
@@ -40,7 +39,8 @@ const init_render_page = (props, to_dom, root) => {
     }
   }
 }
-export default function router_handler(vNode, { to_dom }) {
+
+export default function router_handler(vNode, { to_dom, placeholder }) {
   if(process.env.NODE_ENV !== 'production') {
     (async () => {
       try{
@@ -55,7 +55,7 @@ export default function router_handler(vNode, { to_dom }) {
 
   const root = document.createElement('div')
   const { props } = vNode
-  const render = init_render_page(props, to_dom, root)
+  const render = init_render_page(props, to_dom, root, placeholder)
 
   g.root = root
   g.render = render

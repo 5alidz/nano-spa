@@ -83,19 +83,18 @@ function to_dom_handler(node) {
     if(typeof result == 'undefined') {
       placeholder.parentNode.removeChild(placeholder)
     } else {
-      placeholder.replaceWith(result)
+      placeholder.parentNode.replaceChild(result, placeholder)
     }
   }
 
+  const mem_type = node.type
   if(stock_handlers.includes(node.type)) {
-    const mem_type = node.type
-    get_handler(resolve_name(node.type))
-      .then(render_module).catch(err => handle_err(err, mem_type))
+    get_handler(resolve_name(node.type)).then(render_module)
+      .catch(err => handle_err(err, mem_type))
   } else {
-    get_custom_handler(resolve_name(node.type))
-      .then(render_module).catch(handle_err)
+    get_custom_handler(resolve_name(node.type)).then(render_module)
+      .catch(err => handle_err(err, mem_type))
   }
-
   return placeholder
 }
 
