@@ -42,7 +42,7 @@ module.exports = (env) => ({
     ]
   ,
   output: {
-    path: path.resolve('.', `dist.${env.root}`),
+    path: path.resolve('.', `dist-${env.root}`),
     filename: 'main.js',
     publicPath: '/',
     chunkFilename: '[name].main.js'

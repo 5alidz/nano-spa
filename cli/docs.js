@@ -75,7 +75,7 @@ module.exports = (/*args*/) => {
   mkdir('./docs')
   mkdir('./docs/pages')
   mkdir('./docs/static')
-  mkdir('./handlers.props')
+  mkdir('./handlers-props')
 
   // copy index.html and main.js if it does not exist.
   if(!fs.existsSync('./docs/index.html')) {
@@ -96,13 +96,13 @@ module.exports = (/*args*/) => {
       './docs/pages/index.js'
     )
   }
-  // make sure all handlers have handlers.props prop type.
+  // make sure all handlers have handlers-props prop type.
   fs.readdir('./handlers', {}, (err, files) => {
     if(err) log(err)
     files.forEach(file => {
       const name = file.split('.')[0]
-      if(!fs.existsSync(`./handlers.props/${file}`)) {
-        fs.writeFileSync(`./handlers.props/${file}`, 'module.exports = {}', err => {
+      if(!fs.existsSync(`./handlers-props/${file}`)) {
+        fs.writeFileSync(`./handlers-props/${file}`, 'module.exports = {}', err => {
           if(err) log(err)
           log(`write empty prop types for ${name}.`)
         })
@@ -110,7 +110,7 @@ module.exports = (/*args*/) => {
     })
   })
   // generate all required json files.
-  generate_json('./handlers.props', generate_pages)
-  generate_json('./node_modules/nano_spa/handlers.props', generate_pages)
+  generate_json('./handlers-props', generate_pages)
+  generate_json('./node_modules/nano_spa/handlers-props', generate_pages)
   // generate all pages.
 }

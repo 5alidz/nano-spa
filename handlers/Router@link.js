@@ -1,11 +1,11 @@
-import { g } from './shared/router_utils.js'
+import g from './shared/router.js'
 
 export default function router_link_handler(vNode, { to_dom }) {
   if(process.env.NODE_ENV !== 'production') {
     (async () => {
       try{
         const [prop_types, validate_props] = await Promise.all([
-          import('../handlers.props/Router@link.js'),
+          import('../handlers-props/Router@link.js'),
           import('../validate_props.js')
         ])
         validate_props.default(prop_types.default, vNode)

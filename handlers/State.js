@@ -5,7 +5,7 @@ export default function stateful_handler(component, { to_dom }) {
     (async () => {
       try{
         const [prop_types, validate_props] = await Promise.all([
-          import('../handlers.props/State.js'),
+          import('../handlers-props/State.js'),
           import('../validate_props.js')
         ])
         validate_props.default(prop_types.default, component)

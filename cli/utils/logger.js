@@ -48,30 +48,34 @@ exports.log = (err, stats) => {
 
   }
 }
+
 // used by nano_spa start
-exports.logger = (/*_args*/) => ({
-  trace: () => {},
-  debug: () => {},
-  warn: () => {},
-  info: (payload) => {
-    if(!fs.existsSync(path.resolve('./app/index.html'))) {
-      _log(red('warning'), './app/index.html', 'is missing')
+exports.logger = (_args) => {
+  const name = _args.src || 'app'
+  return {
+    trace: () => {},
+    debug: () => {},
+    warn: () => {},
+    info: (payload) => {
+      if(!fs.existsSync(path.resolve(`./${name}/index.html`))) {
+        _log(red('warning'), `./${name}/index.html`, 'is missing')
+      }
+      if(!fs.existsSync(path.resolve(`./${name}/main.js`))) {
+        _log(red('warning'), `./${name}/main.js`, 'is missing')
+      }
+      if(!fs.existsSync(path.resolve('./handlers'))) {
+        _log(red('error'), './handlers', 'is missing')
+      }
+      if(!fs.existsSync(path.resolve(`./${name}/static`))) {
+        _log(yellow('warning'), `./${name}/static`, 'is missing')
+      }
+      if(payload.split('\n').length < 2) {
+        _log(blue('building'), payload)
+      }
+    },
+    error: (payload) => {
+      const _payload = strip_ansi(payload).split('\n').filter(m => m.startsWith('ERROR'))
+      _payload.forEach(m => _log(red('error'), m))
     }
-    if(!fs.existsSync(path.resolve('./app/main.js'))) {
-      _log(red('warning'), './app/main.js', 'is missing')
-    }
-    if(!fs.existsSync(path.resolve('./handlers'))) {
-      _log(red('error'), './handlers', 'is missing')
-    }
-    if(!fs.existsSync(path.resolve('./app/static'))) {
-      _log(yellow('warning'), './app/static', 'is missing')
-    }
-    if(payload.split('\n').length < 2) {
-      _log(blue('building'), payload)
-    }
-  },
-  error: (payload) => {
-    const _payload = strip_ansi(payload).split('\n').filter(m => m.startsWith('ERROR'))
-    _payload.forEach(m => _log(red('error'), m))
   }
-})
+}

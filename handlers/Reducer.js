@@ -5,7 +5,7 @@ export default function reducer(vNode, { to_dom }) {
     (async () => {
       try{
         const [prop_types, validate_props] = await Promise.all([
-          import('../handlers.props/Reducer.js'),
+          import('../handlers-props/Reducer.js'),
           import('../validate_props.js')
         ])
         validate_props.default(prop_types.default, vNode)
