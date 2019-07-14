@@ -1,6 +1,31 @@
 import render from 'nano_spa/render'
+import to_dom from 'nano_spa/to_dom'
 
 export default () => {
+  const cache = {}
+
+  const get_handler = (e) => {
+    const target = document.getElementById('handler')
+    const handler_from_input = e.target.value
+    if(cache[handler_from_input]) {
+      target.innerHTML = ''
+      target.appendChild(cache[handler_from_input])
+    } else {
+      import(`./${e.target.value}.js`)
+        .then(_module => {
+          target.innerHTML = ''
+          const dom_node = to_dom(_module.default())
+          target.appendChild(dom_node)
+          cache[handler_from_input] = dom_node
+          target.blur()
+        })
+        .catch(_ => {
+          target.innerHTML = ''
+          target.innerHTML = `<pre style='color: red; padding: 0 3rem;'>Error handler \`${handler_from_input}\` not found</pre>`
+        })
+    }
+    e.target.value = ''
+  }
   return render`
     <main>
       <Box
@@ -15,7 +40,18 @@ export default () => {
           and replace '@' with '-'<br />
           Example: <Router::link href='/router-link'><a>/router-link</a><//>
         </p>
+        <div>
+          <label style='margin-right: 1rem;'>Search</label>
+          <input
+            type="text"
+            onchange=${get_handler}
+            placeholder='enter handler name'
+            style='justify-self: start;'
+            autofocus
+          />
+        </div>
       <//>
+      <div id='handler'></div>
     </main>
   `
 }
