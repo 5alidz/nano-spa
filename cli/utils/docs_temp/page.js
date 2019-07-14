@@ -7,7 +7,7 @@ const fetch_data = link => async () => {
     acc.push({
       name: curr,
       type: json[curr].type,
-      def: json[curr].def || 'none',
+      def: json[curr].default || 'none',
       description: json[curr].description || 'none',
       required: json[curr].required ? 'true' : 'false'
     })
@@ -17,13 +17,30 @@ const fetch_data = link => async () => {
 }
 
 const component = (data) => {
+  const styles = {
+    required: val => `color: ${val == 'true' ? 'green' : '#aaa'};`,
+    default: val => `color: ${val == 'none' ? '#aaa' : 'orange'};`,
+    description: val => `color: ${val == 'none' ? '#aaa' : 'black'};`,
+  }
   const line = ({ name, type, def, description, required }) => render`
     <tr>
       <td>${name}</td>
       <td>${type.map(t => render`<p style='margin-top: .3rem;'>${t}</p>`)}</td>
-      <td>${required}</td>
-      <td>${def}</td>
-      <td>${description}</td>
+      <td>
+        <p style=${styles.required(required)}>
+          ${required}
+        </p>
+      </td>
+      <td>
+        <p style=${styles.default(def)}>
+          ${def}
+        </p>
+      </td>
+      <td>
+        <p style=${styles.description(description)}>
+          ${description}
+        </p>
+      </td>
     </tr>
   `
   return render`
