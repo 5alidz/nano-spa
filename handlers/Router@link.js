@@ -24,7 +24,7 @@ export default function router_link_handler(vNode, { to_dom }) {
     g.PREVIOUS = g.CURRENT
     g.CURRENT = window.location.pathname
     g.render(g.CURRENT)
-    g.heads[g.PREVIOUS].map(_ => g.doc_head.removeChild(_))
+    if(g.heads[g.PREVIOUS]) g.heads[g.PREVIOUS].map(_ => g.doc_head.removeChild(_))
     if(g.heads[g.CURRENT]) {
       g.heads[g.CURRENT].map(_ => g.doc_head.appendChild(_))
     }

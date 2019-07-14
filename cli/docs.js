@@ -56,6 +56,9 @@ const placeholder = () => render\`
 export default () => {
   return render\`
     <div style='padding: 1rem;'>
+      <Router::head>
+        <title>${name}</title>
+      <//>
       <h1 style='margin-bottom: 1rem;'>${name}</h1>
       <Promise
         placeholder=\${placeholder}
