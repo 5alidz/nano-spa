@@ -1,7 +1,7 @@
 module.exports = {
   promise: {
     required: true,
-    type: ['promise']
+    type: ['promise', 'asyncfunction']
   },
   render: {
     required: true,

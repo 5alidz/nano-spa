@@ -3,87 +3,115 @@ const path = require('path')
 const mkdir = require('mkdirp')
 const cp_file = require('cp-file')
 
-const gen_json = (prop_types_path, to_path) => {
-  const _JSON_ = {}
+const log = console.log
 
-  const append_json = files => files.forEach(file => {
-    const name = file.split('.')[0]
-    const _module = require(path.join(prop_types_path, file))
-    _JSON_[name] = _module
+const generate_json = (prop_types_path, on_complete) => {
+  fs.readdir(prop_types_path, {}, (err, files) => {
+    if(err) log(err)
+    files.forEach((file, index) => {
+      const name = file.split('.')[0]
+      const prop_types = require(path.resolve(`${prop_types_path}/${file}`))
+      fs.writeFile(
+        `./docs/static/${name}.json`,
+        JSON.stringify(prop_types, null, 2),
+        err => {
+          if(err) log(err)
+          log('write', name + '.json', 'complete')
+          if(index == files.length - 1) {
+            log('[ COMPLETE ] writing custom handlers props JSON')
+            if(typeof on_complete == 'function') on_complete(files)
+          }
+        }
+      )
+    })
   })
+}
 
-  const write_json = () => fs.writeFile(
-    path.resolve(to_path),
-    JSON.stringify(_JSON_, null, 2),
-    (_err) => {
-      if(_err) console.log(_err)
-      console.log(`created JSON file. at ${to_path}`)
-    }
-  )
+const generate_pages = (pages) => {
+  const transform = name => name.replace(/@/g, '-')
+  pages.forEach((page, index) => {
+    const name = page.split('.')[0]
+    fs.writeFile(
+      `./docs/pages/${transform(name).toLowerCase()}.js`,
+      [
+        `
+import render from 'nano_spa/render'
 
-  fs.readdir(prop_types_path, (err, files) => {
-    if(err) console.log(err)
-    append_json(files)
-    write_json()
+const fetch_data = async () => {
+  const promise = await fetch('/static/${name}.json')
+  const json = await promise.json()
+  return json
+}
+
+const component = (json) => {
+  return render\`
+    <pre>\${JSON.stringify(json, null, 2)}</pre>
+  \`
+}
+
+const placeholder = () => render\`
+  <p>...</p>
+\`
+
+export default () => {
+  return render\`
+    <div style='padding: 1rem;'>
+      <h1 style='margin-bottom: 1rem;'>${name}</h1>
+      <Promise
+        placeholder=\${placeholder}
+        promise=\${fetch_data}
+        render=\${component}
+      />
+    </div>
+  \`
+}
+        `
+      ].join(''),
+      (err) => err ? log(err) : log(`writing page ${transform(pages[index]).toLowerCase()} complete`)
+    )
   })
 }
 
 module.exports = (/*args*/) => {
-  const prop_types_path = path.resolve('./node_modules/nano_spa/handlers.props')
-  const custom_prop_types_path = path.resolve('./handlers.props')
+  mkdir('./docs')
+  mkdir('./docs/pages')
+  mkdir('./docs/static')
+  mkdir('./handlers.props')
 
-  mkdir(path.resolve('./docs'))
-  mkdir(path.resolve('./docs/static'))
-  mkdir(custom_prop_types_path)
-
-  (async () => {
-    await cp_file(
-      './node_modules/nano_spa/cli/utils/docs_temp/index.html',
+  // copy index.html and main.js if it does not exist.
+  if(!fs.existsSync('./docs/index.html')) {
+    cp_file(
+      './fake_node_modules/nano_spa/cli/utils/docs_temp/index.html',
       './docs/index.html'
     )
-    await cp_file(
-      './node_modules/nano_spa/cli/utils/docs_temp/main.js',
+  }
+  if(!fs.existsSync('./docs/main.js')) {
+    cp_file(
+      './fake_node_modules/nano_spa/cli/utils/docs_temp/main.js',
       './docs/main.js'
     )
-  })()
-
-  const handlers_path = path.resolve('./handlers')
-  const on_complete = () => {
-    gen_json(custom_prop_types_path, './docs/custom_handlers.json')
-    gen_json(prop_types_path, './docs/handlers.json')
   }
-
-  fs.readdir(handlers_path, (err, files) => {
-    const without_dirs = files.filter(file => {
-      return fs.lstatSync(path.join(handlers_path, file)).isFile()
-    })
-
-    without_dirs.forEach((file, i) => {
-      if(!fs.existsSync(path.join(custom_prop_types_path, file))) {
-        fs.writeFile(
-          path.join(custom_prop_types_path, file),
-          'module.exports = {}',
-          (err) => {
-            if(err) return console.log(err)
-            console.log(`[ INFO ] could not find prop types for ${file}`)
-            console.log(`created empty prop types in './handlers.props' for ${file}`)
-            if(i === without_dirs.length - 1) {
-              console.log('writing empty prop types complete')
-              on_complete()
-            }
-          }
-        )
+  if(!fs.existsSync('./docs/pages/index.js')) {
+    cp_file(
+      './fake_node_modules/nano_spa/cli/utils/docs_temp/index-page.js',
+      './docs/pages/index.js'
+    )
+  }
+  // make sure all handlers have handlers.props prop type.
+  fs.readdir('./handlers', {}, (err, files) => {
+    if(err) log(err)
+    files.forEach(file => {
+      const name = file.split('.')[0]
+      if(!fs.existsSync(`./handlers.props/${file}`)) {
+        fs.writeFileSync(`./handlers.props/${file}`, 'module.exports = {}', err => {
+          if(err) log(err)
+          log(`write empty prop types for ${name}.`)
+        })
       }
     })
   })
+  // generate all required json files.
+  generate_json('./handlers.props', generate_pages)
+  generate_json('./fake_node_modules/nano_spa/handlers.props', generate_pages)
+  // generate all pages.
 }
-
-
-
-
-
-
-
-
-
-
