@@ -34,38 +34,10 @@ const generate_pages = (pages) => {
     fs.writeFile(
       `./docs/pages/${transform(name).toLowerCase()}.js`,
       [`import render from 'nano_spa/render'
-
-const fetch_data = async () => {
-  const promise = await fetch('/static/${name}.json')
-  const json = await promise.json()
-  return json
-}
-
-const component = (json) => {
-  return render\`
-    <pre>\${JSON.stringify(json, null, 2)}</pre>
-  \`
-}
-
-const placeholder = () => render\`
-  <p>...</p>
-\`
-
-export default () => {
-  return render\`
-    <div style='padding: 1rem;'>
-      <Router::head>
-        <title>${name}</title>
-      <//>
-      <h1 style='margin-bottom: 1rem;'>${name}</h1>
-      <Promise
-        placeholder=\${placeholder}
-        promise=\${fetch_data}
-        render=\${component}
-      />
-    </div>
-  \`
-}`].join(''),
+import page from '../page.js'
+export default () => render\`
+  <\${page} link='/static/${name}.json' name='${name}'/>
+\``].join(''),
       (err) => err ? log(err) : log(`writing page ${transform(pages[index]).toLowerCase()} complete`)
     )
   })
@@ -94,6 +66,12 @@ module.exports = (/*args*/) => {
     cp_file(
       './node_modules/nano_spa/cli/utils/docs_temp/index-page.js',
       './docs/pages/index.js'
+    )
+  }
+  if(!fs.existsSync('./docs/page.js')) {
+    cp_file(
+      './node_modules/nano_spa/cli/utils/docs_temp/page.js',
+      './docs/page.js'
     )
   }
   // make sure all handlers have handlers-props prop type.
