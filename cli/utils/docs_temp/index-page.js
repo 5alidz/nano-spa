@@ -3,7 +3,6 @@ import to_dom from 'nano_spa/to_dom'
 
 export default () => {
   const cache = {}
-
   const get_handler = (e) => {
     const target = document.getElementById('handler')
     const handler_from_input = e.target.value
