@@ -18,8 +18,8 @@ const fetch_data = link => async () => {
 
 const component = (data) => {
   const styles = {
-    required: val => `color: ${val == 'true' ? 'green' : '#aaa'};`,
-    default: val => `color: ${val == 'none' ? '#aaa' : 'orange'};`,
+    required: val => `color: ${val == 'true' ? '#ff4766' : '#aaa'};`,
+    default: val => `color: ${val == 'none' ? '#aaa' : '#478eff'};`,
     description: val => `color: ${val == 'none' ? '#aaa' : 'black'};`,
   }
   const line = ({ name, type, def, description, required }) => render`

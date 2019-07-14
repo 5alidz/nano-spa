@@ -1,18 +1,22 @@
 module.exports = {
   promise: {
     required: true,
-    type: ['promise', 'asyncfunction']
+    type: ['promise', 'asyncfunction'],
+    description: 'must resolve (or return in asyncfunction case) any value'
   },
   render: {
     required: true,
-    type: ['function']
+    type: ['function'],
+    description: 'takes data from `promise` and return a componenet'
   },
   placeholder: {
     required: true,
-    type: ['function']
+    type: ['function'],
+    description: 'placeholder component until async operation finish'
   },
   delay: {
     type: ['number'],
-    default: 300
+    default: 300,
+    description: 'delay in milliseconds before showing the placeholder'
   }
 }

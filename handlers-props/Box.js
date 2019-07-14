@@ -1,16 +1,20 @@
 module.exports = {
   type: {
     type: ['string'],
-    default: 'div'
+    default: 'div',
+    description: 'the DOM node type E.g. div, main, pre'
   },
   grid: {
-    type: ['boolean']
+    type: ['boolean'],
+    description: 'sets the display to grid'
   },
   flex: {
-    type: ['boolean']
+    type: ['boolean'],
+    description: 'sets the display to flex'
   },
   '*': {
-    type: ['string']
+    type: ['string'],
+    description: 'adds prop as a css style attribute E.g. padding="1rem"'
   }
 }
 
