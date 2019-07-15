@@ -43,7 +43,7 @@ function handle_children(children, element) {
   children.forEach(child => {
     if(typeof child == 'undefined') { return }
     if(is_fragment(child)) {
-      child.children.forEach(c => {element.appendChild(to_dom(c))})
+      to_dom(child).forEach(c => element.appendChild(c))
     } else if(Array.isArray(child)) {
       child.map(c => element.appendChild(to_dom_child(c)))
     } else {
