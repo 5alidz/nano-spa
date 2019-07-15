@@ -7,6 +7,13 @@ const is_upper_case = c => c.charCodeAt(0) < 97
 const typeOf = object => Object.prototype.toString.call(object)
   .replace(/[[\]]/g, '').split(' ')[1].toLowerCase()
 
+const error_style = `
+  font-family: "Lucida Console", Monaco, "Consolas", Monospace;
+  padding: .3rem;
+  background-color: pink;
+  color: darkRed;
+`.split('\n').join('')
+
 const stock_handlers = [
   'Box',
   'Promise',
@@ -71,9 +78,9 @@ function to_dom_component(node) {
 function to_dom_handler(node) {
   let placeholder = document.createElement('div')
   const resolve_name = name => name.replace(/::/g, '@')
+  const mem_type = node.type
 
   const handle_err = (err, mem_type) => {
-    const error_style = 'background-color: pink; color: darkRed;font-family: "Lucida Console", Monaco, "Consolas", Monospace; padding: .3rem;'
     placeholder.style = error_style
     placeholder.innerText = `<${mem_type} /> ${err}`
   }
@@ -83,11 +90,10 @@ function to_dom_handler(node) {
     if(typeof result == 'undefined') {
       placeholder.parentNode.removeChild(placeholder)
     } else {
-      placeholder.parentNode.replaceChild(result, placeholder)
+      placeholder.replaceWith(result)
     }
   }
 
-  const mem_type = node.type
   if(stock_handlers.includes(node.type)) {
     get_handler(resolve_name(node.type)).then(render_module)
       .catch(err => handle_err(err, mem_type))
@@ -95,6 +101,7 @@ function to_dom_handler(node) {
     get_custom_handler(resolve_name(node.type)).then(render_module)
       .catch(err => handle_err(err, mem_type))
   }
+
   return placeholder
 }
 
