@@ -1,34 +1,11 @@
 import {
   is_type,
   typeOf,
-  stock_handlers,
-  error_style,
   is_invalid,
   is_primitive,
+  __placeholder,
+  create_handler,
 } from './utils/utils.js'
-
-const get_handler = (key) => import(
-  /* webpackChunkName: "[request]" */
-  `./handlers/${key}.js`
-)
-const get_custom_handler = (key) => import(
-  /* webpackChunkName: "[request]" */
-  `../../handlers/${key}.js`
-)
-
-const events = (() => {
-  const listeners = new Map()
-  return {
-    send: (event, payload) => {
-      if(listeners.has(event)){
-        listeners.get(event)(payload)
-      }
-    },
-    on: (event, callback) => {
-      listeners.set(event, callback)
-    }
-  }
-})()
 
 function handle_props(props, element) {
   if(!props) { return }
@@ -45,7 +22,6 @@ function handle_props(props, element) {
 
 function handle_children(children, element) {
   if(!children) return
-
   children.forEach(child => {
     if(typeof child == 'undefined') {
       return
@@ -75,42 +51,34 @@ function to_dom_component(node) {
   return element
 }
 
-function __placeholder() {
-  const _ = document.createElement('div')
-  return {
-    node: _,
-    err: (err, mem_type) => {
-      _.style = error_style
-      _.innerText = `<${mem_type} /> ${err}`
-    }
-  }
-}
-
 function to_dom_handler(node) {
-  let placeholder = document.createElement('div')
-  const resolve_name = name => name.replace(/::/g, '@')
-  const mem_type = node.type
-  const handle_err = (err, mem_type) => {
-    placeholder.style = error_style
-    placeholder.innerText = `<${mem_type} /> ${err}`
-  }
-  const render_module = _module => {
-    const result = _module.default(node, {to_dom, typeOf, on: events.on})
-    events.send(node, result)
-    if(typeof result == 'undefined') {
-      placeholder.parentNode.removeChild(placeholder)
-    } else {
-      placeholder.replaceWith(result)
-    }
-  }
+  const placeholder = __placeholder(node.type)
+  const stock_handlers = [
+    'Box',
+    'Promise',
+    'Reducer',
+    'Router',
+    'Router::link',
+    'Router::head',
+    'State'
+  ]
+  const module_utils = { to_dom, placeholder, node }
+
+  const get_handler = (key) => import(
+    /* webpackChunkName: "[request]" */
+    `./handlers/${key}.js`
+  )
+  const get_custom_handler = (key) => import(
+    /* webpackChunkName: "[request]" */
+    `../../handlers/${key}.js`
+  )
+
   if(stock_handlers.includes(node.type)) {
-    get_handler(resolve_name(node.type)).then(render_module)
-      .catch(err => handle_err(err, mem_type))
+    create_handler(get_handler, module_utils)
   } else {
-    get_custom_handler(resolve_name(node.type)).then(render_module)
-      .catch(err => handle_err(err, mem_type))
+    create_handler(get_custom_handler, module_utils)
   }
-  return placeholder
+  return placeholder.node
 }
 
 function to_dom(node) {

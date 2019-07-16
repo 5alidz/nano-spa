@@ -16,7 +16,7 @@ const white = create_title('white')
 const blue = create_title('cyan')
 const normal_blue = tx => chalk.blue.bold(tx)
 
-exports.utils = {green, normal_blue, _log}
+exports.utils = {red, green, yellow, normal_blue, _log}
 
 // used by nano_spa build
 exports.log = (err, stats) => {

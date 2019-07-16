@@ -2,12 +2,11 @@ const fs = require('fs')
 const path = require('path')
 const mkdir = require('mkdirp')
 const cp_file = require('cp-file')
-
-const log = console.log
+const { green, yellow, red, normal_blue, _log } = require('./utils/logger.js').utils
 
 const generate_json = (prop_types_path, on_complete) => {
   fs.readdir(prop_types_path, {}, (err, files) => {
-    if(err) log(err)
+    if(err) _log(err)
     files.forEach((file, index) => {
       const name = file.split('.')[0]
       const prop_types = require(path.resolve(`${prop_types_path}/${file}`))
@@ -15,10 +14,10 @@ const generate_json = (prop_types_path, on_complete) => {
         `./docs/static/${name}.json`,
         JSON.stringify(prop_types, null, 2),
         err => {
-          if(err) log(err)
-          log('write', name + '.json', 'complete')
+          if(err) _log(err)
+          _log(normal_blue('complete'), 'write', name + '.json')
           if(index == files.length - 1) {
-            log('[ COMPLETE ] writing custom handlers props JSON')
+            _log(green('done'), 'writing handlers json files.')
             if(typeof on_complete == 'function') on_complete(files)
           }
         }
@@ -38,7 +37,7 @@ import page from '../page.js'
 export default () => render\`
   <\${page} link='/static/${name}.json' name='${name}'/>
 \``].join(''),
-      (err) => err ? log(err) : log(`writing page ${transform(pages[index]).toLowerCase()} complete`)
+      (err) => err ? _log(err) : _log(`writing page ${transform(pages[index]).toLowerCase()} complete`)
     )
   })
 }
@@ -76,13 +75,13 @@ module.exports = (/*args*/) => {
   }
   // make sure all handlers have handlers-props prop type.
   fs.readdir('./handlers', {}, (err, files) => {
-    if(err) log(err)
+    if(err) _log(red('error'), err)
     files.forEach(file => {
       const name = file.split('.')[0]
       if(!fs.existsSync(`./handlers-props/${file}`)) {
         fs.writeFileSync(`./handlers-props/${file}`, 'module.exports = {}', err => {
-          if(err) log(err)
-          log(`write empty prop types for ${name}.`)
+          if(err) _log(red('error'), err)
+          _log(yellow('warning'), `write empty prop types for ${name}.`)
         })
       }
     })
