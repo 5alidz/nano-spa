@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const mkdir = require('mkdirp')
 const cp_file = require('cp-file')
-const { green, yellow, red, normal_blue, _log } = require('./utils/logger.js').utils
+const { green, yellow, red, blue, _log } = require('./utils/logger.js').utils
 
 const generate_json = (prop_types_path, on_complete) => {
   fs.readdir(prop_types_path, {}, (err, files) => {
@@ -15,7 +15,7 @@ const generate_json = (prop_types_path, on_complete) => {
         JSON.stringify(prop_types, null, 2),
         err => {
           if(err) _log(err)
-          _log(normal_blue('complete'), 'write', name + '.json')
+          _log(blue('complete'), 'write', name + '.json')
           if(index == files.length - 1) {
             _log(green('done'), 'writing handlers json files.')
             if(typeof on_complete == 'function') on_complete(files)
@@ -37,7 +37,9 @@ import page from '../page.js'
 export default () => render\`
   <\${page} link='/static/${name}.json' name='${name}'/>
 \``].join(''),
-      (err) => err ? _log(err) : _log(`writing page ${transform(pages[index]).toLowerCase()} complete`)
+      (err) => err
+        ? _log(red('error'), err)
+        : _log(blue('complete'), `write page ${transform(pages[index]).toLowerCase()}`)
     )
   })
 }
