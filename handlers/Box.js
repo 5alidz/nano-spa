@@ -1,5 +1,4 @@
 import render from '../../../fake_node_modules/nano_spa/render'
-import { send } from '../events.js'
 
 const style_reducer = props => Object.keys(props).reduce((acc, curr) => {
   const bools = ['grid', 'flex']
@@ -40,6 +39,5 @@ export default (vNode, { to_dom }) => {
       ${vNode.children}
     </div>
   `)
-  send(vNode, dom_node)
   return dom_node
 }

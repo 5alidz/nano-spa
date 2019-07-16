@@ -1,6 +1,5 @@
 import g from './shared/router.js'
 import default_404 from './shared/default_404.js'
-import { on } from '../events.js'
 
 const clear_root = (r, c) => {
   r.innerHTML = ''
@@ -15,7 +14,7 @@ const resolve_name = name => {
   }
 }
 
-const init_render_page = (props, to_dom, root) => {
+const init_render_page = (props, to_dom, root, on) => {
   return (route) => {
     if(g.routes[route]) {
       return clear_root(root, g.routes[route])
@@ -45,7 +44,7 @@ const init_render_page = (props, to_dom, root) => {
   }
 }
 
-export default function router_handler(vNode, { to_dom, placeholder }) {
+export default function router_handler(vNode, { to_dom, on}) {
   if(process.env.NODE_ENV !== 'production') {
     (async () => {
       try{
@@ -60,7 +59,7 @@ export default function router_handler(vNode, { to_dom, placeholder }) {
 
   const root = document.createElement('div')
   const { props } = vNode
-  const render = init_render_page(props, to_dom, root, placeholder)
+  const render = init_render_page(props, to_dom, root, on)
 
   g.root = root
   g.render = render

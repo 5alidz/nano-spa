@@ -1,5 +1,4 @@
 import g from './shared/router.js'
-import { send } from '../events.js'
 
 export default function router_link_handler(vNode, { to_dom }) {
   /* validate props.*/
@@ -33,6 +32,5 @@ export default function router_link_handler(vNode, { to_dom }) {
       g.heads[g.CURRENT].map(_ => g.doc_head.appendChild(_))
     }
   }
-  send(vNode, action_node)
   return action_node
 }

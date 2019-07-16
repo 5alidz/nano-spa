@@ -4,7 +4,7 @@ import {
   stock_handlers,
   error_style,
   is_invalid,
-  is_primitive
+  is_primitive,
 } from './utils/utils.js'
 
 const get_handler = (key) => import(
@@ -15,6 +15,20 @@ const get_custom_handler = (key) => import(
   /* webpackChunkName: "[request]" */
   `../../handlers/${key}.js`
 )
+
+const events = (() => {
+  const listeners = new Map()
+  return {
+    send: (event, payload) => {
+      if(listeners.has(event)){
+        listeners.get(event)(payload)
+      }
+    },
+    on: (event, callback) => {
+      listeners.set(event, callback)
+    }
+  }
+})()
 
 function handle_props(props, element) {
   if(!props) { return }
@@ -61,6 +75,17 @@ function to_dom_component(node) {
   return element
 }
 
+function __placeholder() {
+  const _ = document.createElement('div')
+  return {
+    node: _,
+    err: (err, mem_type) => {
+      _.style = error_style
+      _.innerText = `<${mem_type} /> ${err}`
+    }
+  }
+}
+
 function to_dom_handler(node) {
   let placeholder = document.createElement('div')
   const resolve_name = name => name.replace(/::/g, '@')
@@ -70,7 +95,8 @@ function to_dom_handler(node) {
     placeholder.innerText = `<${mem_type} /> ${err}`
   }
   const render_module = _module => {
-    const result = _module.default(node, {to_dom, typeOf})
+    const result = _module.default(node, {to_dom, typeOf, on: events.on})
+    events.send(node, result)
     if(typeof result == 'undefined') {
       placeholder.parentNode.removeChild(placeholder)
     } else {
@@ -99,6 +125,8 @@ function to_dom(node) {
     return to_dom_component(node)
   } else if(is_type('HANDLER')(node)) {
     return to_dom_handler(node)
+  } else {
+    return undefined
   }
 }
 
