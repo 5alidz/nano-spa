@@ -1,5 +1,6 @@
 import g from './shared/router.js'
 import default_404 from './shared/default_404.js'
+import { on } from '../events.js'
 
 const clear_root = (r, c) => {
   r.innerHTML = ''
@@ -21,9 +22,13 @@ const init_render_page = (props, to_dom, root) => {
     } else {
       props.dir(resolve_name(route))
         .then(_module => {
-          const c = to_dom(_module.default())
+          const node = _module.default()
+          const c = to_dom(node)
           g.routes[route] = c
           clear_root(root, c)
+          on(node, (resolved_node) => {
+            g.routes[route] = resolved_node
+          })
         })
         .catch(_ => {
           props.dir('404')

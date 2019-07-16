@@ -1,7 +1,9 @@
 import htm from 'htm'
-
-const minify_style = s => s.trim().split('\n').map(s => s.trim()).join('')
-const flatten = (arr) => [].concat.apply([], arr)
+import {
+  minify_style,
+  flatten,
+  id
+} from './utils/utils.js'
 
 function handle_custom_element(_node) {
   const rendered = _node.type.call(_node, _node.props)
@@ -31,9 +33,7 @@ function render(type, props, ...children) {
     type,
     props: props || {},
     children: flatten(children),
-    $type: type === ''
-      ? Symbol.for('nano_spa.fragment')
-      : Symbol.for('nano_spa.component')
+    $type: id(type)
   }
   if(node.props.style) node.props.style = minify_style(node.props.style)
   return typeof type === 'function' ? handle_custom_element(node) : node

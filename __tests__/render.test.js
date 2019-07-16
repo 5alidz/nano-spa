@@ -1,5 +1,4 @@
-const render_module = require('../render.js')
-const render = render_module.default
+const render = require('../render.js').default
 
 test('returns undefined when expression evaluates to undefined', () => {
   function noop() {}

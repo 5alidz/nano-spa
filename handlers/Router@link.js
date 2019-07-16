@@ -1,6 +1,8 @@
 import g from './shared/router.js'
+import { send } from '../events.js'
 
 export default function router_link_handler(vNode, { to_dom }) {
+  /* validate props.*/
   if(process.env.NODE_ENV !== 'production') {
     (async () => {
       try{
@@ -12,6 +14,7 @@ export default function router_link_handler(vNode, { to_dom }) {
       } catch(err) {console.log(err)}
     })()
   }
+  /*******************************/
   const href = vNode.props.href
   const action_node = to_dom(vNode.children[0])
   if('href' in action_node) {
@@ -20,6 +23,7 @@ export default function router_link_handler(vNode, { to_dom }) {
   action_node.tabIndex = '0'
   action_node.onclick = (e) => {
     e.preventDefault()
+    if(href == g.CURRENT) { return }
     window.history.pushState({}, '', href)
     g.PREVIOUS = g.CURRENT
     g.CURRENT = window.location.pathname
@@ -29,5 +33,6 @@ export default function router_link_handler(vNode, { to_dom }) {
       g.heads[g.CURRENT].map(_ => g.doc_head.appendChild(_))
     }
   }
+  send(vNode, action_node)
   return action_node
 }

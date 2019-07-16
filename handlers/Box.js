@@ -1,3 +1,6 @@
+import render from '../../../fake_node_modules/nano_spa/render'
+import { send } from '../events.js'
+
 const style_reducer = props => Object.keys(props).reduce((acc, curr) => {
   const bools = ['grid', 'flex']
   const excludes = ['type']
@@ -31,12 +34,12 @@ export default (vNode, { to_dom }) => {
       } catch(err) {console.log(err)}
     })()
   }
-  const style_str = style_reducer(vNode.props)
-  const new_node = {
-    type: vNode.props.type || 'div',
-    props: style_str ? {style: style_reducer(vNode.props)} : {},
-    children: vNode.children,
-    $type: vNode.$type
-  }
-  return to_dom(new_node)
+  const new_type = vNode.props.type || 'div'
+  const dom_node = to_dom(render`
+    <${new_type} style=${style_reducer(vNode.props)}>
+      ${vNode.children}
+    </div>
+  `)
+  send(vNode, dom_node)
+  return dom_node
 }

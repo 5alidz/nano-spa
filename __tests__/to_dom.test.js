@@ -1,7 +1,5 @@
-const to_dom_ = require('../to_dom.js')
-const render_ = require('../render.js')
-const render = render_.default
-const to_dom = to_dom_.default
+const to_dom = require('../to_dom.js').default
+const render = require('../render.js').default
 
 test('expecting children but the child is undefined', () => {
   const c = ({ child }) => render`<div>${child}</div>`
