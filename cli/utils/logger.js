@@ -49,26 +49,14 @@ exports.log = (err, stats) => {
   }
 }
 
+
 // used by nano_spa start
-exports.logger = (_args) => {
-  const name = _args.src || 'app'
+exports.logger = () => {
   return {
     trace: () => {},
     debug: () => {},
     warn: () => {},
     info: (payload) => {
-      if(!fs.existsSync(path.resolve('./handlers'))) {
-        _log(red('error'), './handlers', 'is missing')
-      }
-      if(!fs.existsSync(path.resolve(`./${name}/index.html`))) {
-        _log(yellow('warning'), `./${name}/index.html`, 'is missing')
-      }
-      if(!fs.existsSync(path.resolve(`./${name}/main.js`))) {
-        _log(yellow('warning'), `./${name}/main.js`, 'is missing')
-      }
-      if(!fs.existsSync(path.resolve(`./${name}/static`))) {
-        _log(yellow('warning'), `./${name}/static`, 'is missing')
-      }
       if(payload.split('\n').length < 2) {
         _log(blue('building'), payload)
       }

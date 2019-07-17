@@ -9,6 +9,7 @@ const fs = require('fs')
 const path = require('path')
 const webpack_conf = require('./utils/webpack_config.js')
 const Logger = require('./utils/logger.js')
+const mkdirp = require('mkdirp')
 
 module.exports = (_args) => {
   const app = express()
@@ -16,7 +17,7 @@ module.exports = (_args) => {
   const compiler = webpack(conf)
   const PORT = _args.port || 3000
   const ROOT = _args.src || 'app'
-  const { _log, green, normal_blue } = Logger.utils
+  const { _log, green, yellow, red, normal_blue } = Logger.utils
 
   // for cloud function still experimental. index.js
   app.get('/api', (req, res) => {
@@ -42,14 +43,52 @@ module.exports = (_args) => {
 
   // webpack middlewares.
   app.use(history()) // for index.html fallback.
-
-  app.use(mw(compiler, {
+  const wdmw_instance = mw(compiler, {
     logLevel: 'error',
     publicPath: conf.output.publicPath,
     logger: Logger.logger(_args)
-  }))
+  })
+
+  app.use(wdmw_instance)
 
   app.use(hot_mw(compiler, {log: false}))
+
+  const main_js_file = `
+import render from 'nano_spa/render'
+import to_dom from 'nano_spa/to_dom'
+
+function app() {
+  return render\`
+    <div>Hello, world</div>
+  \`
+}
+
+document
+  .getElementById('root')
+  .appendChild(to_dom(render\`<\${app} />\`))
+`.trim()
+  const html_file = `
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=7">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <meta charset="UTF-8">
+    <style>*{padding: 0; margin: 0; position: relative; box-sizing: border-box;}</style>
+  </head>
+  <body dir="ltr"><div id='root'></div><script src='/main.js'></script></body>
+</html>
+`.trim()
+
+  const required = [
+    './handlers',
+    `./${ROOT}`,
+    `./${ROOT}/static`,
+    `./${ROOT}/index.html`,
+    `./${ROOT}/main.js`
+  ]
 
   app.listen(PORT, async () => {
     clear()
@@ -59,5 +98,29 @@ module.exports = (_args) => {
       \t - ${normal_blue('localhost:' + PORT)}\t- ${normal_blue(`localhost:${PORT}/api`)}
       \t - ${normal_blue(internal_ip + ':' + PORT)}\t- ${normal_blue(`${internal_ip}:${PORT}/api`)}
     `)
+    required.forEach((path_to_check, index) => {
+      if(!fs.existsSync(path_to_check)) {
+        if(/\.\w+/.test(path_to_check)) {
+          if(path_to_check.endsWith('js')) {
+            fs.writeFile(path_to_check, main_js_file, (err) => {
+              if(err) _log(red('error'), 'error while writing', path_to_check)
+              _log(yellow('warning'), `created missing file ${path_to_check}`)
+              index.length == required.length - 1 && wdmw_instance.invalidate()
+            })
+          } else {
+            fs.writeFile(path_to_check, html_file, (err) => {
+              if(err) _log(red('error'), 'error while writing', path_to_check)
+              _log(yellow('warning'), `created missing file ${path_to_check}`)
+              index.length == required.length - 1 && wdmw_instance.invalidate()
+            })
+          }
+        } else {
+          // it's a directory
+          mkdirp(path_to_check)
+          _log(yellow('warning'), `created missing directory ${path_to_check}`)
+          index.length == required.length - 1 && wdmw_instance.invalidate()
+        }
+      }
+    })
   })
 }
