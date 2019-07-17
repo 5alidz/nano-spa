@@ -16,32 +16,41 @@ const resolve_name = name => {
 
 const init_render_page = (props, to_dom, root, on) => {
   return (route) => {
-    if(g.routes[route]) {
-      return clear_root(root, g.routes[route])
-    } else {
-      props.dir(resolve_name(route))
-        .then(_module => {
-          const node = _module.default()
-          const c = to_dom(node)
-          g.routes[route] = c
-          clear_root(root, c)
-          on(node, (resolved_node) => {
-            g.routes[route] = resolved_node
-            g.on_mount(resolved_node, route)
-          })
-        })
-        .catch(_ => {
-          props.dir('404')
-            .then(_m => {
-              const c = to_dom(_m.default())
-              g.routes[route] = c
-              clear_root(root, c)
-            })
-            .catch(_ => {
-              clear_root(root, default_404())
-            })
-        })
+    function handle_err() {
+      props.dir('404').then(_module => {
+        const v_node = _module.default()
+        const dom_node = to_dom(v_node)
+        g.routes[route] = dom_node
+        clear_root(root, g.routes[route])
+      }).catch(() => {
+        clear_root(root, default_404(window.location.pathname))
+      })
     }
+    function render_module(_module) {
+      const node = _module.default()
+      const c = to_dom(node)
+      g.routes[route] = c
+      clear_root(root, c)
+      if(node.$type !== Symbol.for('nano_spa.handler')) {
+        if(g.routes[g.CURRENT]) {g.on_mount(g.routes[g.CURRENT], g.CURRENT)}
+      } else {
+        on(node, (resolved_node) => {
+          g.routes[route] = resolved_node
+          if(g.routes[g.CURRENT]) {g.on_mount(g.routes[g.CURRENT], g.CURRENT)}
+        })
+      }
+    }
+    function render_route() {
+      if(g.routes[route]) {
+        clear_root(root, g.routes[route])
+        if(g.routes[g.CURRENT]) {g.on_mount(g.routes[g.CURRENT], g.CURRENT)}
+        return
+      } else {
+        props.dir(resolve_name(route)).then(render_module).catch(handle_err)
+      }
+    }
+    // render with on_mount called.
+    render_route()
   }
 }
 
@@ -72,15 +81,10 @@ export default function router_handler(vNode, { to_dom, on}) {
   g.render(g.CURRENT)
 
   window.onpopstate = () => {
+    if(g.routes[g.CURRENT]) {g.on_unmount(g.routes[g.CURRENT], g.CURRENT)}
     g.PREVIOUS = g.CURRENT
     g.CURRENT = window.location.pathname
-    if(g.routes[g.PREVIOUS]) {
-      g.on_unmount(g.routes[g.PREVIOUS])
-    }
     g.render(g.CURRENT)
-    if(g.routes[g.CURRENT]) {
-      g.on_mount(g.routes[g.CURRENT], g.CURRENT)
-    }
     if(g.heads[g.PREVIOUS]) g.heads[g.PREVIOUS].map(el => g.doc_head.removeChild(el))
     if(g.heads[g.CURRENT]) g.heads[g.CURRENT].map(el => g.doc_head.appendChild(el))
   }
