@@ -54,7 +54,7 @@ module.exports = (_args) => {
   app.listen(PORT, async () => {
     clear()
     const internal_ip = await int_ip.v4()
-    _log(green('ready'), `Server is ready,
+    _log(green('ready'), `Server started.
     ${ROOT} is running on:
       \t - ${normal_blue('localhost:' + PORT)}\t- ${normal_blue(`localhost:${PORT}/api`)}
       \t - ${normal_blue(internal_ip + ':' + PORT)}\t- ${normal_blue(`${internal_ip}:${PORT}/api`)}

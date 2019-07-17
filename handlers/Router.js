@@ -27,14 +27,14 @@ const init_render_page = (props, to_dom, root, on) => {
       })
     }
     function render_module(_module) {
-      const node = _module.default()
-      const c = to_dom(node)
-      g.routes[route] = c
-      clear_root(root, c)
-      if(node.$type !== Symbol.for('nano_spa.handler')) {
+      const v_node = _module.default()
+      const dom_node = to_dom(v_node)
+      g.routes[route] = dom_node
+      clear_root(root, dom_node)
+      if(v_node.$type !== Symbol.for('nano_spa.handler')) {
         if(g.routes[g.CURRENT]) {g.on_mount(g.routes[g.CURRENT], g.CURRENT)}
       } else {
-        on(node, (resolved_node) => {
+        on(v_node, (resolved_node) => {
           g.routes[route] = resolved_node
           if(g.routes[g.CURRENT]) {g.on_mount(g.routes[g.CURRENT], g.CURRENT)}
         })
@@ -54,7 +54,7 @@ const init_render_page = (props, to_dom, root, on) => {
   }
 }
 
-export default function router_handler(vNode, { to_dom, on}) {
+export default function router_handler(vNode, {to_dom, on}) {
   if(process.env.NODE_ENV !== 'production') {
     (async () => {
       try{
