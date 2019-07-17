@@ -1,11 +1,11 @@
+import { is_type, typeOf } from './utils/index.js'
+
 import {
-  is_type,
-  typeOf,
   is_invalid,
   is_primitive,
-  __placeholder,
   create_handler,
-} from './utils/utils.js'
+  __placeholder
+} from './utils/to_dom_utils.js'
 
 function handle_props(props, element) {
   if(!props) { return }

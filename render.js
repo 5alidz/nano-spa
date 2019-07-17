@@ -1,9 +1,10 @@
 import htm from 'htm'
+
 import {
   minify_style,
   flatten,
   id
-} from './utils/utils.js'
+} from './utils/render_utils.js'
 
 function handle_custom_element(_node) {
   const rendered = _node.type.call(_node, _node.props)

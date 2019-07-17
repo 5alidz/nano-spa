@@ -17,16 +17,29 @@ const resolve_name = name => {
 const init_render_page = (props, to_dom, root, on) => {
   return (route) => {
     if(g.routes[route]) {
-      return clear_root(root, g.routes[route])
+      if(g.routes[g.PREVIOUS]) {
+        g.on_unmout(g.routes[g.PREVIOUS])
+      }
+
+      clear_root(root, g.routes[route])
+
+      if(g.routes[g.CURRENT]) {
+        g.on_mount(g.routes[route], route)
+      }
+      return
     } else {
       props.dir(resolve_name(route))
         .then(_module => {
           const node = _module.default()
           const c = to_dom(node)
           g.routes[route] = c
+          if(g.routes[g.PREVIOUS]) {
+            g.on_unmout(g.routes[g.PREVIOUS])
+          }
           clear_root(root, c)
           on(node, (resolved_node) => {
             g.routes[route] = resolved_node
+            g.on_mount(resolved_node, route)
           })
         })
         .catch(_ => {
@@ -58,11 +71,14 @@ export default function router_handler(vNode, { to_dom, on}) {
   }
 
   const root = document.createElement('div')
+  root.id = '__ROUTER_ROOT__'
   const { props } = vNode
   const render = init_render_page(props, to_dom, root, on)
 
   g.root = root
   g.render = render
+  g.on_mount = vNode.props.on_mount || g.on_mount
+  g.on_unmount = vNode.props.on_unmount || g.on_unmount
 
   g.CURRENT = window.location.pathname
   g.render(g.CURRENT)
