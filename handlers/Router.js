@@ -17,25 +17,13 @@ const resolve_name = name => {
 const init_render_page = (props, to_dom, root, on) => {
   return (route) => {
     if(g.routes[route]) {
-      if(g.routes[g.PREVIOUS]) {
-        g.on_unmout(g.routes[g.PREVIOUS])
-      }
-
-      clear_root(root, g.routes[route])
-
-      if(g.routes[g.CURRENT]) {
-        g.on_mount(g.routes[route], route)
-      }
-      return
+      return clear_root(root, g.routes[route])
     } else {
       props.dir(resolve_name(route))
         .then(_module => {
           const node = _module.default()
           const c = to_dom(node)
           g.routes[route] = c
-          if(g.routes[g.PREVIOUS]) {
-            g.on_unmout(g.routes[g.PREVIOUS])
-          }
           clear_root(root, c)
           on(node, (resolved_node) => {
             g.routes[route] = resolved_node
@@ -86,7 +74,13 @@ export default function router_handler(vNode, { to_dom, on}) {
   window.onpopstate = () => {
     g.PREVIOUS = g.CURRENT
     g.CURRENT = window.location.pathname
+    if(g.routes[g.PREVIOUS]) {
+      g.on_unmount(g.routes[g.PREVIOUS])
+    }
     g.render(g.CURRENT)
+    if(g.routes[g.CURRENT]) {
+      g.on_mount(g.routes[g.CURRENT], g.CURRENT)
+    }
     if(g.heads[g.PREVIOUS]) g.heads[g.PREVIOUS].map(el => g.doc_head.removeChild(el))
     if(g.heads[g.CURRENT]) g.heads[g.CURRENT].map(el => g.doc_head.appendChild(el))
   }
