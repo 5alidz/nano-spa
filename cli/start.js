@@ -68,7 +68,6 @@ document
   .appendChild(to_dom(render\`<\${app} />\`))
 `.trim()
   const html_file = `
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -101,6 +100,7 @@ document
     required.forEach((path_to_check, index) => {
       if(!fs.existsSync(path_to_check)) {
         if(/\.\w+/.test(path_to_check)) {
+          // it's a file
           if(path_to_check.endsWith('js')) {
             fs.writeFile(path_to_check, main_js_file, (err) => {
               if(err) _log(red('error'), 'error while writing', path_to_check)

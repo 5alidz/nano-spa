@@ -1,6 +1,7 @@
 import { typeOf } from './index.js'
 
 const resolve_name_to_dir = name => name.replace(/::/g, '@')
+
 const events = (() => {
   const listeners = new Map()
   return {

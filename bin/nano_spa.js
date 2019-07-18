@@ -25,8 +25,6 @@ if(command == 'start') {
 } else if(command == 'docs') {
   require('../cli/docs.js')(args_obj)
 } else {
-  console.log(`
-    command ${command} is not recognized by nano_spa
-  `)
+  console.log(`command ${command} is not recognized by nano_spa`)
 }
 

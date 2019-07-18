@@ -1,5 +1,4 @@
 import { is_type, typeOf } from './utils/index.js'
-
 import {
   is_invalid,
   is_primitive,

@@ -1,9 +1,7 @@
 const style_reducer = props => Object.keys(props).reduce((acc, curr) => {
   const bools = ['grid', 'flex']
   const excludes = ['type']
-  if(excludes.includes(curr)) {
-    return acc
-  } else if(typeof props[curr] == 'undefined') {
+  if(excludes.includes(curr) || typeof props[curr] == 'undefined') {
     return acc
   } else if(typeof props[curr] == 'boolean') {
     const display_val = bools.filter(b => b == curr)[0]

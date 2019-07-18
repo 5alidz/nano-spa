@@ -29,51 +29,34 @@ const generate_pages = (pages) => {
   const transform = name => name.replace(/@/g, '-')
   pages.forEach((page, index) => {
     const name = page.split('.')[0]
-    fs.writeFile(
-      `./docs/pages/${transform(name).toLowerCase()}.js`,
-      [`import render from 'nano_spa/render'
+    const page_path = `./docs/pages/${transform(name).toLowerCase()}.js`
+    const file_content = `import render from 'nano_spa/render'
 import page from '../page.js'
 export default () => render\`
   <\${page} link='/static/${name}.json' name='${name}'/>
-\``].join(''),
-      (err) => err
-        ? _log(red('error'), err)
-        : _log(blue('complete'), `write page ${transform(pages[index]).toLowerCase()}`)
-    )
+\``.trim()
+    if(!fs.existsSync(page_path)) {
+      fs.writeFile(page_path, file_content, (err) => {
+        return err
+          ? _log(red('error'), err)
+          : _log(blue('complete'), `write page ${transform(pages[index]).toLowerCase()}`)
+      })
+    }
   })
 }
 
 module.exports = (/*args*/) => {
-  mkdir('./docs')
-  mkdir('./docs/pages')
-  mkdir('./docs/static')
-  mkdir('./handlers-props')
+  const dirs = ['./docs', './docs/pages', './docs/static', './handlers-props']
+  dirs.forEach(dir => mkdir(dir))
 
-  // copy index.html and main.js if it does not exist.
-  if(!fs.existsSync('./docs/index.html')) {
-    cp_file(
-      './node_modules/nano_spa/cli/utils/docs_temp/index.html',
-      './docs/index.html'
-    )
-  }
-  if(!fs.existsSync('./docs/main.js')) {
-    cp_file(
-      './node_modules/nano_spa/cli/utils/docs_temp/main.js',
-      './docs/main.js'
-    )
-  }
-  if(!fs.existsSync('./docs/pages/index.js')) {
-    cp_file(
-      './node_modules/nano_spa/cli/utils/docs_temp/index-page.js',
-      './docs/pages/index.js'
-    )
-  }
-  if(!fs.existsSync('./docs/page.js')) {
-    cp_file(
-      './node_modules/nano_spa/cli/utils/docs_temp/page.js',
-      './docs/page.js'
-    )
-  }
+  const temps_path = './node_modules/nano_spa/cli/utils/docs_temp/'
+  Object.entries({
+    [`${temps_path}index.html`]: './docs/index.html',
+    [`${temps_path}main.js`]: './docs/main.js',
+    [`${temps_path}index-page.js`]: './docs/pages/index.js',
+    [`${temps_path}page.js`]: './docs/page.js',
+  }).forEach(([src, dest]) => !fs.existsSync(dest) && cp_file(src, dest))
+
   // make sure all handlers have handlers-props prop type.
   fs.readdir('./handlers', {}, (err, files) => {
     if(err) _log(red('error'), err)
@@ -87,8 +70,7 @@ module.exports = (/*args*/) => {
       }
     })
   })
-  // generate all required json files.
+
   generate_json('./handlers-props', generate_pages)
   generate_json('./node_modules/nano_spa/handlers-props', generate_pages)
-  // generate all pages.
 }
