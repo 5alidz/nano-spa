@@ -20,7 +20,11 @@ test('render box as expected', () => {
     $type: Symbol.for('nano_spa.handler')
   }, {to_dom})
 
-  const main = document.createElement('main')
-  main.style = 'padding: 1rem;display: grid;'
-  expect(dom_node.getAttribute('style')).toBe(main.getAttribute('style'))
+  const main = to_dom({
+    type: 'main',
+    props: {style: 'padding: 1rem;display: grid;'},
+    children: [],
+    $type: Symbol.for('nano_spa.component')
+  })
+  expect(dom_node).toEqual(main)
 })
