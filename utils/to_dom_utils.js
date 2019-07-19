@@ -1,7 +1,5 @@
 import { typeOf } from './index.js'
 
-const resolve_name_to_dir = name => name.replace(/::/g, '@')
-
 const events = (() => {
   const listeners = new Map()
   return {
@@ -51,9 +49,8 @@ export const is_invalid = node => !node || typeof node != 'object'
 export const is_primitive = node => typeof node == 'string' || typeof node == 'number'
 
 export const create_handler = (handler_dir, {to_dom, placeholder, node}) => {
+  const resolve_name_to_dir = name => name.replace(/::/g, '@')
   return handler_dir(resolve_name_to_dir(node.type))
     .then(render_module(node, {to_dom, placeholder}))
     .catch(placeholder.err)
 }
-
-  
