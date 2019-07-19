@@ -22,14 +22,14 @@ $ `npm init -y && npm i nano_spa`
 - add start script in `package.json`
 ```json
 {
-	"name": "my-app",
-	"version": "1.0.0",
-	"scripts": {
-		"start": "nano_spa start",
-		"build": "nano_spa build",
-		"docs": "nano_spa docs"
-	 }
- }
+  "name": "my-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "nano_spa start",
+    "build": "nano_spa build",
+    "docs": "nano_spa docs"
+  }
+}
 ```
 ## CLI usage
 #### start
@@ -42,7 +42,7 @@ Example:
 the following starts the development server on `another-app` directory on port 5000.
 ```json
 "scripts": {
-	"start:another-app": "nano_spa start -s another-app -p 5000"
+  "start:another-app": "nano_spa start -s another-app -p 5000"
 }
 ```
 $ `npm run start:another-app`
@@ -63,9 +63,9 @@ Example:
 the following builds `another-app` to `dist-another-app`
 ```json
 {
-	"scripts": {
-		"build:another-app": "nano_spa build -s another-app"
-	}
+  "scripts": {
+    "build:another-app": "nano_spa build -s another-app"
+  }
 }
 ```
 $ `npm build:another-app`
@@ -82,7 +82,7 @@ render under the hood uses [htm](https://github.com/developit/htm), this means t
 import render from 'nano_spa/render'
 
 function app() {
-	return render`<div>Hello, world!</div>`
+  return render`<div>Hello, world!</div>`
 }
 ```
 #### with components
@@ -91,27 +91,27 @@ import render from 'nano_spa/render'
 
 // simple component.
 function myComponent({msg}) {
-	return render`<div>${msg}</div>`
+  return render`<div>${msg}</div>`
 }
 
 // also supports fragments.
 function myFragment() {
-	return render`
-		<>
-			<li>1</li>
-			<li>2</li>
-			<li>3</li>
-		</>
-	`
+  return render`
+    <>
+      <li>1</li>
+      <li>2</li>
+      <li>3</li>
+    </>
+  `
 }
 
 function app() {
-	return render`
-		<div>
-			<${myComponent} msg='hello, world!' />
-			<${myFragment} />
-		</div>
-	`
+  return render`
+    <div>
+      <${myComponent} msg='hello, world!' />
+      <${myFragment} />
+    </div>
+  `
 }
 ```
 
@@ -124,7 +124,7 @@ import render from 'nano_spa/render'
 import to_dom from 'nano_spa/to_dom'
 
 function app() {
-	return render`<div>Hello, world!</div>`
+  return render`<div>Hello, world!</div>`
 }
 
 document.getElementById('root').appendChild(render`<${app} />`)
@@ -134,12 +134,12 @@ in the case of `app` returning a fragment, to_dom will return an array of DOM no
 
 ```js
 function app() {
-	return render`
-		<>
-			<li>1</li>
-			<li>2</li>
-		</>
-	`
+  return render`
+    <>
+      <li>1</li>
+      <li>2</li>
+    </>
+  `
 }
 
 const appRoot = document.getElementById('root')
@@ -174,24 +174,26 @@ Box is a very simple handler that transforms props to style elements.
 import render from 'nano_spa/render'
 
 function app() {
-	return render`
-		<Box
-			type='main'
-			padding='1rem'
-			background-color='blue'
-			display='grid'
-		>
-			Hello, world
-		</Box>
-	`
+  return render`
+    <Box
+      type='main'
+      padding='1rem'
+      background-color='blue'
+      display='grid'
+    >
+      Hello, world
+    </Box>
+  `
 }
-/*
-	*** note that we didn't import Box from 'somewhere' ***
-	this is the same as:
-	<main style='padding: 1rem; background-color: blue; display: grid;'>
-		Hello, world
-	</main>
-*/
+
+  /*
+  *** note that we didn't import Box from 'somewhere' ***
+  this is the same as:
+  <main style='padding: 1rem; background-color: blue; display: grid;'>
+  Hello, world
+  </main>
+  */
+
 ```
 ### State
 |prop|type|required|default|description|
@@ -205,25 +207,25 @@ import render from 'nano_spa/render'
 
 // simple counter example.
 const counter = (state, setState) => {
-	/* 
-	   setState only accepts function as argument and expected to
-	   return an object.
-	 */
-	const increment = () => setState(oldState => ({
-		count: oldState.count + 1
-	}))
-	return render`
-		<div>
-			<button onclick=${increment}>
-				increment
-			</button>
-			${state.count}
-		</div>
-	`
+  /* 
+  setState only accepts function as argument and expected to
+  return an object.
+  */
+  const increment = () => setState(oldState => ({
+    count: oldState.count + 1
+  }))
+  return render`
+    <div>
+      <button onclick=${increment}>
+        increment
+      </button>
+      ${state.count}
+    </div>
+  `
 }
 function myComponent() {
-	const state = { count: 0 }	
-	return render`<State state=${state} render=${counter} />`
+  const state = { count: 0 }
+  return render`<State state=${state} render=${counter} />`
 }
 ```
 
@@ -239,33 +241,33 @@ function myComponent() {
 import render from 'nano_spa/render'
 
 const reducer = (state, action) => {
-	if(action.type == 'INCREMENT') {
-		return {...state, count: state.count + 1}
-	} else if(action.type == 'DECREMENT') {
-		return {...state, count: state.count - 1}
-	} else {
-		return state
-	}
+  if(action.type == 'INCREMENT') {
+    return {...state, count: state.count + 1}
+  } else if(action.type == 'DECREMENT') {
+    return {...state, count: state.count - 1}
+  } else {
+    return state
+  }
 }
 const counter = (state, dispatch) => {
-	const increment = () => dispatch({type: 'INCREMENT'})
-	const decrement = () => dispatch({type: 'DECREMENT'})
-	return render`
-		<div>
-			<button onclick=${increment}>increment</button>
-			<button onclick=${decrement}>increment</button>
-			${state.count}
-		</div>
-	`
+  const increment = () => dispatch({type: 'INCREMENT'})
+  const decrement = () => dispatch({type: 'DECREMENT'})
+  return render`
+    <div>
+      <button onclick=${increment}>increment</button>
+      <button onclick=${decrement}>increment</button>
+      ${state.count}
+    </div>
+  `
 }
 function myComponent() {
-	return render`
-		<Reducer 
-			initial=${{ count: 0}}
-			reducer=${reducer}
-			render=${counter}
-		/>
-	`
+  return render`
+    <Reducer
+      initial=${{ count: 0}}
+      reducer=${reducer}
+      render=${counter}
+    />
+  `
 }
 ```
 
@@ -282,16 +284,16 @@ function myComponent() {
 import render from 'nano_spa/render'
 
 function app() {
-	return render`
-		<div>
-			<h1>I will exist on every route!</h1>
-			<Router
-				dir=${page => import(`./pages/${page}.js`)}
-				on_mount=${console.log}
-				on_unmount=${console.log}
-			/>
-		</div>
-	`
+  return render`
+    <div>
+      <h1>I will exist on every route!</h1>
+      <Router
+        dir=${page => import(`./pages/${page}.js`)}
+        on_mount=${console.log}
+        on_unmount=${console.log}
+      />
+    </div>
+  `
 }
 /*
  * now you have to create a directory `pages`
@@ -322,9 +324,9 @@ export default () => render`<div>hello, world</div>`
  * it's very important that you don not set href on the anchor tag here.
 */
 // ...
-	`<Router::link href='/'>
-		<a>Home</a>
-	<//>`
+  `<Router::link href='/'>
+    <a>Home</a>
+  <//>`
 // ...
 ```
 
