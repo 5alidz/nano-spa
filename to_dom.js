@@ -1,4 +1,5 @@
 import { is_type, typeOf } from './utils/index.js'
+
 import {
   is_invalid,
   is_primitive,
@@ -74,8 +75,30 @@ function to_dom_handler(node) {
 
   if(stock_handlers.includes(node.type)) {
     create_handler(get_handler, module_utils)
+    if(process.env.NODE_ENV !== 'production') {
+      (async () => {
+        try{
+          const [prop_types, validate_props] = await Promise.all([
+            import(`./handlers-props/${node.type.replace(/::/g, '@')}.js`),
+            import('./validate_props.js')
+          ])
+          validate_props.default(prop_types.default, node)
+        } catch(err) {console.log(err)}
+      })()
+    }
   } else {
     create_handler(get_custom_handler, module_utils)
+    if(process.env.NODE_ENV !== 'production') {
+      (async () => {
+        try{
+          const [prop_types, validate_props] = await Promise.all([
+            import(`../../handlers-props/${node.type.replace(/::/g, '@')}.js`),
+            import('./validate_props.js')
+          ])
+          validate_props.default(prop_types.default, node)
+        } catch(err) {console.log(err)}
+      })()
+    }
   }
   return placeholder.node
 }

@@ -16,17 +16,6 @@ const style_reducer = props => Object.keys(props).reduce((acc, curr) => {
 }, '')
 
 export default (vNode, { to_dom }) => {
-  if(process.env.NODE_ENV !== 'production') {
-    (async () => {
-      try{
-        const [prop_types, validate_props] = await Promise.all([
-          import('../handlers-props/Box.js'),
-          import('../validate_props.js')
-        ])
-        validate_props.default(prop_types.default, vNode)
-      } catch(err) {console.log(err)}
-    })()
-  }
   const new_type = vNode.props.type || 'div'
   const new_style = style_reducer(vNode.props)
   const dom_node = to_dom({

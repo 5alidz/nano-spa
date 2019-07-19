@@ -55,18 +55,6 @@ const init_render_page = (props, to_dom, root, on) => {
 }
 
 export default function router_handler(vNode, {to_dom, on}) {
-  if(process.env.NODE_ENV !== 'production') {
-    (async () => {
-      try{
-        const [prop_types, validate_props] = await Promise.all([
-          import('../handlers-props/Router.js'),
-          import('../validate_props.js')
-        ])
-        validate_props.default(prop_types.default, vNode)
-      } catch(err) {console.log(err)}
-    })()
-  }
-
   const root = document.createElement('div')
   root.id = '__ROUTER_ROOT__'
   const { props } = vNode
