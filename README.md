@@ -1,5 +1,8 @@
 ﻿# nano_spa
 nano_spa is a way to write single page applications with lazy loading "features" aka "handlers" by default and auto generates docs for you.
+
+NOTE: although most of the api will never (render, to_dom) change, `nano_spa` is still very experimental and changes might happend to the default `handlers` `Box, State, etc...`.
+
 - [Get Started](#get-started)
 - [CLI Usage](#cli-usage)
 - [render](#render)
@@ -9,8 +12,8 @@ nano_spa is a way to write single page applications with lazy loading "features"
 	- [State](#state)
 	- [Reducer](#reducer)
 	- [Router](#router)
-	- [Router::link](#router::link)
-	- [Router::head](#router::head)
+	- [Router::link](#router@ink)
+	- [Router::head](#router@head)
 - [Create Your Own Handlers](#create-your-own-handlers)
 - [Generate Docs](#generate-docs)
 - [Deploy](#deploy)
@@ -311,7 +314,7 @@ import render from 'nano_spa/render'
 export default () => render`<div>hello, world</div>`
 ```
 
-### Router::link
+### Router@link
 |prop|type|required|default|description|
 |--|--|--|--|--|
 |href|string|true|none|none|
@@ -330,7 +333,7 @@ export default () => render`<div>hello, world</div>`
 // ...
 ```
 
-### Router::head
+### Router@head
 does not take any props just one or more children, and works on route level.
 
 #### usage
@@ -342,3 +345,66 @@ does not take any props just one or more children, and works on route level.
   <//>`
 // ...
 ```
+
+## Create Your Own Handlers
+
+handlers let you use your favorite data structures and the full capability of the web platform.
+this means the possiblities are endless, you could make a `react` handler if you want.
+
+handlers accepts virtual `node` (jsx object), `utils`, and if it returns a DOM node then it will be appended to the rest of the jsx tree it does not return anything, then it will just execute whatever is inside of your handler, treating it as a side effect if you will.
+
+`utils` contains {to_dom, on}
+in the root of your project create `Hello.js` inside `./handlers`
+
+```js
+// inside ./handlers/Hello.js
+export default helloHandler(vNode) {
+  const Hello = document.createElement('div')
+  Hello.innerText = 'hello, ' + vNode.props.name || ''
+  return Hello
+}
+```
+
+#### usage
+
+```js
+// inside ./app/main.js
+import render from 'nano_spa/render'
+import to_dom from 'nano_spa/to_dom'
+
+function app() {
+  return render`
+    <Hello name='world'/>
+  `
+}
+
+document.getElementById('root').appendChild(to_dom(render`<${app} />`))
+```
+
+## Generate Docs
+
+To generate docs for your project `nano_spa` looks for `./handlers-props/MyHandler.js`
+this will allow for development warnings + auto generated docs.
+
+given the previous example `Hello.js` to include it and the docs and have development environment warnings and errors you must create `./handlers-props/Hello.js` and populate it as follows.
+
+```js
+// inside ./handlers-props/Hello.js
+module.exports = {
+  name: {
+    type: ['string'],
+    required: false
+  }
+}
+```
+
+NOTE: when you use the command `nano_spa docs` inside `scripts` in your `package.json`
+`nano_spa` will look at your handlers directory and generate empty prop-types for the handlers it found.
+
+## Deploy
+
+the only thing to keep in mind when deploying is you serve `index.html` at every route.
+great deployment services like `zeit/now` or `netlify` provide a very easy way to do this.
+
+that's it. examples coming soon!
+
