@@ -190,7 +190,7 @@ function app() {
   *** note that we didn't import Box from 'somewhere' ***
   this is the same as:
   <main style='padding: 1rem; background-color: blue; display: grid;'>
-  Hello, world
+    Hello, world
   </main>
   */
 
@@ -207,9 +207,9 @@ import render from 'nano_spa/render'
 
 // simple counter example.
 const counter = (state, setState) => {
-  /* 
-  setState only accepts function as argument and expected to
-  return an object.
+  /*
+    setState only accepts function as argument and expected to
+    return an object.
   */
   const increment = () => setState(oldState => ({
     count: oldState.count + 1
@@ -330,4 +330,20 @@ export default () => render`<div>hello, world</div>`
 // ...
 ```
 
+### Router::head
+does not take any props just one or more children, and works on route level.
 
+#### usage
+```js
+/*
+ * Router::link supports any element that accepts an `onclick` method.
+ * a, button, img, ...etc. and will set `tabIndex` to 0. for a11y
+ * it's very important that you don not set href on the anchor tag here.
+*/
+// ...
+  `<Router::head>
+    <title>my-app | Home</title>
+    <meta name='description' content='this is our home page.'/>
+  <//>`
+// ...
+```
