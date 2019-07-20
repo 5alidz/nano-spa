@@ -335,11 +335,6 @@ does not take any props just one or more children, and works on route level.
 
 #### usage
 ```js
-/*
- * Router::link supports any element that accepts an `onclick` method.
- * a, button, img, ...etc. and will set `tabIndex` to 0. for a11y
- * it's very important that you don not set href on the anchor tag here.
-*/
 // ...
   `<Router::head>
     <title>my-app | Home</title>
