@@ -10,10 +10,14 @@ const path = require('path')
 const webpack_conf = require('./utils/webpack_config.js')
 const Logger = require('./utils/logger.js')
 const mkdirp = require('mkdirp')
+const merge = require('webpack-merge')
 
 module.exports = (_args) => {
   const app = express()
-  const conf = webpack_conf({ mode: 'development', root: _args.src || 'app' })
+  let conf = webpack_conf({ mode: 'development', root: _args.src || 'app' })
+  if(fs.existsSync(path.resolve('.', 'webpack.dev.js'))) {
+    conf = merge(require(path.resolve('.', 'webpack.dev.js')), conf)
+  }
   const compiler = webpack(conf)
   const PORT = _args.port || 3000
   const ROOT = _args.src || 'app'
