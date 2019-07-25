@@ -1,7 +1,7 @@
 ﻿# nano_spa
 nano_spa is a way to write single page applications with lazy loading "features" aka "handlers" by default and auto generates docs for you.
 
-NOTE: although most of the api will never (render, to_dom) change, `nano_spa` is still very experimental and changes might happend to the default `handlers` `Box, State, etc...`.
+NOTE: although most of the api is stable (render, to_dom), `nano_spa` is still very experimental and changes might happend to the default `handlers` `Box, State, etc...`.
 
 - [Get Started](#get-started)
 - [CLI Usage](#cli-usage)
