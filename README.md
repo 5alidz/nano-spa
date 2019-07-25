@@ -130,7 +130,7 @@ function app() {
   return render`<div>Hello, world!</div>`
 }
 
-document.getElementById('root').appendChild(render`<${app} />`)
+document.getElementById('root').appendChild(to_dom(render`<${app} />`))
 ```
 
 in the case of `app` returning a fragment, to_dom will return an array of DOM nodes.
