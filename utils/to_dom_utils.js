@@ -31,6 +31,7 @@ const error_style = `
   padding: .3rem;
   background-color: pink;
   color: darkRed;
+  font-size: .8rem;
 `.split('\n').join('')
 
 export const __placeholder = (type) => {

@@ -1,5 +1,10 @@
 #!/usr/bin/env node
+
 const [,, command, ...args] = process.argv
+
+const START = require('../cli/start.js')
+const DOCS = require('../cli/docs.js')
+const BUILD = require('../cli/build.js')
 
 const args_obj = (() => {
   const aliases = {
@@ -19,11 +24,16 @@ const args_obj = (() => {
 })()
 
 if(command == 'start') {
-  require('../cli/start.js')(args_obj)
+  if(args[0] == 'docs') {
+    DOCS()
+    START({ src: 'docs' })
+  } else {
+    START(args_obj)
+  }
 } else if(command == 'build') {
-  require('../cli/build.js')(args_obj)
+  BUILD(args_obj)
 } else if(command == 'docs') {
-  require('../cli/docs.js')(args_obj)
+  DOCS()
 } else {
   console.log(`command ${command} is not recognized by nano_spa`)
 }

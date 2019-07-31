@@ -83,7 +83,11 @@ function to_dom_handler(node) {
             import('./validate_props.js')
           ])
           validate_props.default(prop_types.default, node)
-        } catch(err) {console.log(err)}
+        } catch(err) {
+          console.warn(`
+            no validation exists for handler <${node.type} />
+          `)
+        }
       })()
     }
   } else {
@@ -96,7 +100,11 @@ function to_dom_handler(node) {
             import('./validate_props.js')
           ])
           validate_props.default(prop_types.default, node)
-        } catch(err) {console.log(err)}
+        } catch(err) {
+          console.warn(`
+            no validation exists for handler <${node.type} />
+          `)
+        }
       })()
     }
   }

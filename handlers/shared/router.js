@@ -7,5 +7,5 @@ export default {
   PREVIOUS: undefined,
   doc_head: document.getElementsByTagName('head')[0],
   on_mount: () => {},
-  on_unmout: () => {}
+  on_unmount: () => {}
 }

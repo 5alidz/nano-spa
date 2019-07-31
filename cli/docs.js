@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const mkdir = require('mkdirp')
 const cp_file = require('cp-file')
-const { yellow, red, blue, _log } = require('./utils/logger.js').utils
+const { yellow, red, blue, green, _log } = require('./utils/logger.js').utils
 
 const generate_json = (prop_types_path, on_complete) => {
   fs.readdir(prop_types_path, {}, (err, files) => {
@@ -15,7 +15,7 @@ const generate_json = (prop_types_path, on_complete) => {
         JSON.stringify(prop_types, null, 2),
         err => {
           if(err) _log(err)
-          _log(blue('complete'), 'write', name + '.json')
+          _log(green('+'), `created docs/static/${name}.json`)
           if(index == files.length - 1) {
             if(typeof on_complete == 'function') on_complete(files)
           }
@@ -39,7 +39,7 @@ export default () => render\`
       fs.writeFile(page_path, file_content, (err) => {
         return err
           ? _log(red('error'), err)
-          : _log(blue('complete'), `write page ${transform(pages[index]).toLowerCase()}`)
+          : _log(green('+'), `created docs/pages/${transform(pages[index]).toLowerCase()}`)
       })
     }
   })
@@ -63,9 +63,9 @@ module.exports = (/*args*/) => {
     files.forEach(file => {
       const name = file.split('.')[0]
       if(!fs.existsSync(`./handlers-props/${file}`)) {
-        fs.writeFileSync(`./handlers-props/${file}`, 'module.exports = {}', err => {
-          if(err) _log(red('error'), err)
-          _log(yellow('warning'), `write empty prop types for ${name}.`)
+        fs.writeFile(`./handlers-props/${file}`, 'module.exports = {}', err => {
+          if(err) {_log(red('error'), err)}
+          _log(yellow('+'), `created handlers-props/${name}.js`)
         })
       }
     })

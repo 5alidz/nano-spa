@@ -87,6 +87,7 @@ document
 
   const required = [
     './handlers',
+    './handlers-props',
     `./${ROOT}`,
     `./${ROOT}/static`,
     `./${ROOT}/index.html`,
@@ -108,20 +109,20 @@ document
           if(path_to_check.endsWith('js')) {
             fs.writeFile(path_to_check, main_js_file, (err) => {
               if(err) _log(red('error'), 'error while writing', path_to_check)
-              _log(yellow('warning'), `created missing file ${path_to_check}`)
+              _log(green('+'), `created ${ROOT}/main.js`)
               index.length == required.length - 1 && wdmw_instance.invalidate()
             })
           } else {
             fs.writeFile(path_to_check, html_file, (err) => {
               if(err) _log(red('error'), 'error while writing', path_to_check)
-              _log(yellow('warning'), `created missing file ${path_to_check}`)
+              _log(green('+'), `created ${ROOT}/index.html`)
               index.length == required.length - 1 && wdmw_instance.invalidate()
             })
           }
         } else {
           // it's a directory
           mkdirp(path_to_check)
-          _log(yellow('warning'), `created missing directory ${path_to_check}`)
+          _log(green('+'), `created ${path_to_check}`)
           index.length == required.length - 1 && wdmw_instance.invalidate()
         }
       }

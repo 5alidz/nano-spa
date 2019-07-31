@@ -10,7 +10,9 @@ export default function router_link_handler(vNode, { to_dom }) {
   action_node.onclick = (e) => {
     e.preventDefault()
     if(href == g.CURRENT) { return }
-    if(g.routes[g.CURRENT]) {g.on_unmount(g.routes[g.CURRENT], g.CURRENT)}
+    if(g.routes[g.CURRENT]) {
+      g.on_unmount(g.routes[g.CURRENT], g.CURRENT)
+    }
     window.history.pushState({}, '', href)
     g.PREVIOUS = g.CURRENT
     g.CURRENT = window.location.pathname
