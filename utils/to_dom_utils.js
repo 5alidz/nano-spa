@@ -29,18 +29,27 @@ const render_module = (node, {to_dom, placeholder}) => _module => {
 const error_style = `
   font-family: "Lucida Console", Monaco, "Consolas", Monospace;
   padding: .3rem;
-  background-color: pink;
-  color: darkRed;
-  font-size: .8rem;
+  background-color: rgb(255, 240, 240);
+  color: rgb(140, 0, 0);
+  font-size: .9rem;
+  overflow-x: auto;
+  margin: 1rem 0;
 `.split('\n').join('')
 
 export const __placeholder = (type) => {
-  const _ = document.createElement('div')
+  const _ = document.createElement('pre')
   return {
     node: _,
     err: (err) => {
+      const [head_stack, ...stack] = err.stack.split('\n')
       _.style = error_style
-      _.innerText = `<${type} /> ${err}`
+      _.innerText = `
+  <${type} />
+
+  ${head_stack}
+
+    ${stack.join('\n').trim()}
+      `
     }
   }
 }

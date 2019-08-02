@@ -14,6 +14,7 @@ const merge = require('webpack-merge')
 
 module.exports = (_args) => {
   const app = express()
+
   let conf = webpack_conf({ mode: 'development', root: _args.src || 'app' })
   if(fs.existsSync(path.resolve('.', 'webpack.dev.js'))) {
     conf = merge(require(path.resolve('.', 'webpack.dev.js')), conf)

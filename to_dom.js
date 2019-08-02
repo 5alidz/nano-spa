@@ -73,6 +73,7 @@ function to_dom_handler(node) {
     `../../handlers/${key}.js`
   )
 
+  const console_error = err => console.warn("Validation Not Found\n", err)
   if(stock_handlers.includes(node.type)) {
     create_handler(get_handler, module_utils)
     if(process.env.NODE_ENV !== 'production') {
@@ -84,9 +85,7 @@ function to_dom_handler(node) {
           ])
           validate_props.default(prop_types.default, node)
         } catch(err) {
-          console.warn(`
-            no validation exists for handler <${node.type} />
-          `)
+          console_error(err)
         }
       })()
     }
@@ -101,9 +100,7 @@ function to_dom_handler(node) {
           ])
           validate_props.default(prop_types.default, node)
         } catch(err) {
-          console.warn(`
-            no validation exists for handler <${node.type} />
-          `)
+          console_error(err)
         }
       })()
     }
