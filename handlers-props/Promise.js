@@ -1,7 +1,7 @@
 module.exports = {
   promise: {
     required: true,
-    type: ['promise', 'asyncfunction'],
+    type: ['function', 'asyncfunction'],
     description: 'must resolve (or return in asyncfunction case) any value'
   },
   render: {
