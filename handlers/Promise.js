@@ -1,4 +1,4 @@
-export default (vNode, { to_dom }) => {
+export default function promise_handler(vNode, { to_dom }) {
   const { props } = vNode
   const {  placeholder, delay } = props
   let element = document.createElement('div')

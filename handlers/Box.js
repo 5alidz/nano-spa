@@ -15,7 +15,7 @@ const style_reducer = props => Object.keys(props).reduce((acc, curr) => {
   }
 }, '')
 
-export default (vNode, { to_dom }) => {
+export default function box_handler(vNode, { to_dom }) {
   const new_type = vNode.props.type || 'div'
   const new_style = style_reducer(vNode.props)
   const dom_node = to_dom({

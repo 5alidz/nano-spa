@@ -1,6 +1,6 @@
 import g from './shared/router.js'
 
-export default (vNode, { to_dom }) => {
+export default function router_head_handler(vNode, { to_dom }) {
   const current_route = window.location.pathname
   const head_array = vNode.children.map(child => to_dom(child))
   g.heads[current_route] = head_array

@@ -1,6 +1,6 @@
 import { init_diff, is_noop } from './shared/init_diff.js'
 
-export default function stateful_handler(component, { to_dom }) {
+export default function state_handler(component, { to_dom }) {
   let state = component.props.state
   let dom_node = undefined
 

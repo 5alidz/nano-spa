@@ -1,6 +1,6 @@
 import { is_noop, init_diff } from './shared/init_diff.js'
 
-export default function reducer(vNode, { to_dom }) {
+export default function reducer_handler(vNode, { to_dom }) {
   const diff = init_diff(to_dom)
   let state = vNode.props.initial || {}
   const reducer = vNode.props.reducer
