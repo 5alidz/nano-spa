@@ -40,13 +40,18 @@ function from_props(prop_types, msgs) {
       const enums = validation.enum
       const types = validation.type
       // case no validation.
+      const payload = [typeOf(value), value]
       if(Object.keys(validation).length < 1) {
-        const warn = 'missing documation'
-        msgs.UNDOC.push(msg_info(msg_header(name, warn), typeOf(value), value))
+        msgs.UNDOC.push(msg_info(
+          msg_header(name, 'missing documation'),
+          ...payload
+        ))
       } else if(!is_arr(enums) && !is_arr(types)) {
         if(typeOf(types) == 'undefined') {
-          const warn = 'missing type information'
-          msgs.UNDOC.push(msg_info(msg_header(name, warn), typeOf(value), value))
+          msgs.UNDOC.push(msg_info(
+            msg_header(name, 'missing type information'),
+            ...payload
+          ))
         }
       }
     }
@@ -54,6 +59,11 @@ function from_props(prop_types, msgs) {
 }
 
 function from_prop_types(props, msgs, prop_types, children) {
+  if(!prop_types['*children'] && children.length > 0) {
+    msgs.UNDOC.push(
+      msg_header('*children', 'using undocumentd children')
+    )
+  }
   return ([name, value]) => {
     if(name == '*') {
       // wild card validation
@@ -63,12 +73,13 @@ function from_prop_types(props, msgs, prop_types, children) {
       } else {
         const props_to_validate = Object.keys(props).filter(p => !(p in prop_types))
         props_to_validate.forEach(p => {
+          const payload = `${typeOf(props[p])} (${props[p]})`
           if(Array.isArray(value.type)) {
             if(!value.type.includes(typeOf(props[p]))) {
               msgs.UNDOC.push(msg_expc(
                 msg_header(`${name}\t${p}`, 'wild card type error'),
                 value.type.join(' || '),
-                `${typeOf(props[p])} (${props[p]})`
+                payload
               ))
             }
           } else {
@@ -76,7 +87,7 @@ function from_prop_types(props, msgs, prop_types, children) {
               msgs.UNDOC.push(msg_expc(
                 msg_header(`${name}\t${p}`, 'wild card type error'),
                 value.type,
-                `${typeOf(props[p])} (${props[p]})`
+                payload
               ))
             }
           }
@@ -93,56 +104,51 @@ function from_prop_types(props, msgs, prop_types, children) {
       const has_types = Array.isArray(value.type)
       const has_type = typeOf(value.type) == 'string'
       if(has_enums && (has_types || has_type)) {
-        const warn = 'Too many type information'
-        msgs.UNDOC.push(msg_info(msg_header(name, warn), typeOf(prop_value), prop_value))
+        msgs.UNDOC.push(msg_info(
+          msg_header(name, 'Too many type information'),
+          typeOf(prop_value),
+          prop_value
+        ))
       } else if(has_enums) {
         const valid_enum = validate_enum(value.enum, prop_value)
         const res = valid_enum.some(v => Boolean(v))
+        const payload = [value.enum.join(' || '), prop_value]
         if(!res && is_required) {
-          const err_msg = 'required property type error'
           msgs.REQUI.push(msg_expc(
-            msg_header(name, err_msg),
-            value.enum.join(' || '),
-            prop_value
+            msg_header(name, 'required property type error'),
+            ...payload
           ))
-        } else if(!res) {
+        } else if(!res && !value.default) {
           const warn_msg = 'property type error'
           msgs.UNDOC.push(msg_expc(
             msg_header(name, warn_msg),
-            value.enum.join(' || '),
-            prop_value
+            ...payload
           ))
         }
       } else if(has_types && !value.type.includes(typeOf(prop_value))) {
+        const payload = [value.type.join(' || '), `${typeOf(prop_value)} (${prop_value})`]
         if(is_required) {
-          const err_msg = 'required property type error'
           msgs.REQUI.push(msg_expc(
-            msg_header(name, err_msg),
-            value.type.join(' || '),
-            `${typeOf(prop_value)} (${prop_value})`
+            msg_header(name, 'required property type error'),
+            ...payload
           ))
         } else if(!is_required && (name in props)) {
-          const warn_msg = 'property type error'
           msgs.UNDOC.push(msg_expc(
-            msg_header(name, warn_msg),
-            value.type.join(' || '),
-            `${typeOf(prop_value)} (${prop_value})`
+            msg_header(name, 'property type error'),
+            ...payload
           ))
         }
       } else if(has_type && value.type !== typeOf(prop_value)) {
+        const payload = [value.type, `${typeOf(prop_value)} (${prop_value})`]
         if(is_required) {
-          const err_msg = 'required property type error'
           msgs.REQUI.push(msg_expc(
-            msg_header(name, err_msg),
-            value.type,
-            `${typeOf(prop_value)} (${prop_value})`
+            msg_header(name, 'required property type error'),
+            ...payload
           ))
-        } else {
-          const warn_msg = 'property type error'
+        } else if(!is_required && typeOf(prop_value) !== 'undefined') {
           msgs.UNDOC.push(msg_expc(
-            msg_header(name, warn_msg),
-            value.type,
-            `${typeOf(prop_value)} (${prop_value})`
+            msg_header(name, 'property type error'),
+            ...payload
           ))
         }
       }
@@ -154,6 +160,28 @@ export default function validate_props(prop_types, v_node) {
   const props = v_node.props
   const msgs = { UNDOC: [], REQUI: [] }
 
+  const prop_types_array = Object.entries(prop_types)
+  const props_array = Object.entries(props)
+  const validation = {
+    required_not_found: prop_types_array.filter(([key, obj]) => {
+      return obj.required && typeof props[key] == 'undefined'
+    }),
+    required_mis_match: prop_types_array.filter(([key, obj]) => {
+      const does_match = (() => {
+        if(typeOf(obj.type) == 'array') {
+          return obj.type.includes(typeOf(props[key]))
+        } else if(typeOf(obj.type) == 'string') {
+          return obj.type === typeOf(props[key])
+        }
+      })()
+      return props[key] && !does_match
+    }),
+    type_mis_match: {},
+    enum_mis_match: {},
+    wild_card_mismatch: {},
+    undocumentd: {}
+  }
+
   // check for used props.
   Object.entries(props)
     .forEach(from_props(prop_types, msgs))
@@ -163,8 +191,7 @@ export default function validate_props(prop_types, v_node) {
     .forEach(from_prop_types(props, msgs, prop_types, v_node.children))
 
   // dispatch messages.
-  Object
-    .keys(errors)
+  Object.keys(errors)
     .forEach(err => msgs[err].length > 0
       && log({ errType: err, id: v_node.type, msgs: msgs[err] })
     )

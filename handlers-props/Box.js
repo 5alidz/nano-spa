@@ -15,7 +15,8 @@ module.exports = {
   '*': {
     type: ['string'],
     description: 'adds prop as a css style attribute E.g. padding="1rem"'
-  }
+  },
+  '*children': {}
 }
 
 

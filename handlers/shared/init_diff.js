@@ -39,11 +39,23 @@ export function init_diff(to_dom) {
     const vKeys = Object.keys(vProps).filter(key => typeof vProps[key] != 'function')
 
     create_loop(vKeys.length, dProps.length, idx => {
-      const [vProp, dProp] = [vProps[vKeys[idx]], dProps[idx]]
-      const dom_attr = dProp.value
-      // diff each attribute.
-      if(vProp.toString() != dom_attr.toString()) {
-        dNode.setAttribute(vKeys[idx], vProp)
+      const _prop = vKeys[idx]
+      const prop_value = vProps[_prop]
+      const attr_value = (() => {
+        if(_prop) {
+          return dNode.getAttribute(_prop)
+        } else if(dProps[idx]) {
+          return dProps[idx].value
+        } else {
+          return undefined
+        }
+      })()
+      if(!prop_value) {
+        if(attr_value) {
+          dNode.removeAttribute(_prop)
+        }
+      } else if(prop_value !== attr_value) {
+        dNode.setAttribute(_prop, prop_value)
       }
     })
   }
