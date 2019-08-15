@@ -5,6 +5,9 @@ const cp_file = require('cp-file')
 const { yellow, red, blue, green, _log } = require('./utils/logger.js').utils
 
 const generate_json = (prop_types_path, on_complete) => {
+  Object.defineProperty(RegExp.prototype, 'toJSON', {
+    value: RegExp.prototype.toString
+  })
   fs.readdir(prop_types_path, {}, (err, files) => {
     if(err) _log(err)
     files.forEach((file, index) => {

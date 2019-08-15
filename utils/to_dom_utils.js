@@ -41,15 +41,9 @@ export const __placeholder = (type) => {
   return {
     node: _,
     err: (err) => {
-      const [head_stack, ...stack] = err.stack.split('\n')
+      const [head_stack] = err.stack.split('\n')
       _.style = error_style
-      _.innerText = `
-  <${type} />
-
-  ${head_stack}
-
-    ${stack.join('\n').trim()}
-      `
+      _.innerText = `<${type} />\n\t${head_stack}`
     }
   }
 }
@@ -63,4 +57,18 @@ export const create_handler = (handler_dir, {to_dom, placeholder, node}) => {
   return handler_dir(resolve_name_to_dir(node.type))
     .then(render_module(node, {to_dom, placeholder}))
     .catch(placeholder.err)
+}
+
+export const create_handler_validator = (promise, node) => {
+  (async () => {
+    try{
+      const [prop_types, validate_props] = await Promise.all([
+        promise,
+        import('../validate_props.js')
+      ])
+      validate_props.default(prop_types.default, node)
+    } catch(err) {
+      console.warn(`<${node.type} /> No Validation Found\n${err}`)
+    }
+  })()
 }

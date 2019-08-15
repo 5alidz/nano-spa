@@ -1,6 +1,6 @@
 module.exports = {
   href: {
-    type: ['string'],
+    type: 'string',
     required: true,
   }
 }

@@ -4,6 +4,7 @@ import {
   is_invalid,
   is_primitive,
   create_handler,
+  create_handler_validator,
   __placeholder
 } from './utils/to_dom_utils.js'
 
@@ -73,38 +74,19 @@ function to_dom_handler(node) {
     `../../handlers/${key}.js`
   )
 
-
   if(stock_handlers.includes(node.type)) {
     create_handler(get_handler, module_utils)
-    // _____validate__________________________
+    // validatation
     if(process.env.NODE_ENV !== 'production') {
-      (async () => {
-        try{
-          const [prop_types, validate_props] = await Promise.all([
-            import(`./handlers-props/${node.type.replace(/::/g, '@')}.js`),
-            import('./validate_props.js')
-          ])
-          validate_props.default(prop_types.default, node)
-        } catch(err) {
-          console.warn(`<${node.type} /> No Validation Found`)
-        }
-      })()
+      const promise = import(`./handlers-props/${node.type.replace(/::/g, '@')}.js`)
+      create_handler_validator(promise, node)
     }
   } else {
     create_handler(get_custom_handler, module_utils)
-    // _____validate__________________________
+    // validatation
     if(process.env.NODE_ENV !== 'production') {
-      (async () => {
-        try{
-          const [prop_types, validate_props] = await Promise.all([
-            import(`../../handlers-props/${node.type.replace(/::/g, '@')}.js`),
-            import('./validate_props.js')
-          ])
-          validate_props.default(prop_types.default, node)
-        } catch(err) {
-          console.warn(`<${node.type} /> No Validation Found`)
-        }
-      })()
+      const promise = import(`../../handlers-props/${node.type.replace(/::/g, '@')}.js`)
+      create_handler_validator(promise, node)
     }
   }
   return placeholder.node

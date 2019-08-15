@@ -18,7 +18,8 @@ function handle_custom_element(_node) {
   } else {
     if(process.env.NODE_ENV != 'production') {
       if(!new_node.children){
-        console.warn('you probably forgot a closing tag')
+        const cause = `<${new_node[new_node.length - 1].type} />`
+        console.warn(cause, 'you probably forgot a closing tag')
       }
     }
     return render(
